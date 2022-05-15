@@ -1,0 +1,28 @@
+$max-width-layout: 1920px;
+$min-width-screen-xl: 1536px;
+$max-width-container: 1650px;
+$max-screen-lg: 1200px;
+$max-screen-md: 992px;
+
+// Color Variables
+$color-black: #000000;
+$color-sub-black: #6b7280;
+$color-body-black: #424242;
+$color-white: #ffffff;
+$color-success: #5cb85c;
+$color-error: #ff4d4f;
+
+// margin/padding
+$space-unit: 20px;
+$space-XXS: 0.5 * $space-unit;
+$space-XS: 1 * $space-unit;
+$space-S: 1.5 * $space-unit;
+$space-MS: 2 * $space-unit;
+$space-M: 2.5 * $space-unit;
+$space-ML: 3 * $space-unit;
+$space-L: 3.5 * $space-unit;
+$space-LL: 4 * $space-unit;
+$space-XL: 4.5 * $space-unit;
+$space-XXL: 5 * $space-unit;
+$space-XXXL: 6 * $space-unit;
+$space-XXXXL: 7 * $space-unit;
