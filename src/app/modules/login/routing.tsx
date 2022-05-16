@@ -5,7 +5,7 @@ import LoginPage from './pages/login-page.component.jsx';
 export default function LoginRoute() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<LoginPage />} />
     </Routes>
   );
 }

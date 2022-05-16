@@ -151,7 +151,7 @@ function ParticlesAuth({ children }) {
               <div className="text-center">
                 <p className="mb-0 text-muted">
                   &copy; {new Date().getFullYear()} Web MNP. Crafted with{' '}
-                  <i className="mdi mdi-heart text-danger" /> by Thang
+                  <i className="mdi mdi-heart text-danger" /> by
                 </p>
               </div>
             </div>
