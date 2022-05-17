@@ -1,9 +1,7 @@
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import { Stack, Typography } from '@mui/material';
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import { Avatar, Menu, MenuItem, Stack, Typography } from '@mui/material';
+import MuiAppBar from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
@@ -13,17 +11,23 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { CSSObject, styled, Theme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
+import avatar from 'app/assets/images/avatar-demo.png';
 import logo from 'app/assets/images/leeon-logo.png';
 import miniLogo from 'app/assets/images/mini-logo.png';
 import clsx from 'clsx';
-import * as React from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  DRAWER_WIDTH,
+  ICON,
+  MenuItemProps,
+  SETTING_ICON,
+  AppBarProps,
+} from '../../shared/mini-drawer.const';
 import './mini-drawer.style.scss';
 
-const drawerWidth = 250;
-
 const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
+  width: DRAWER_WIDTH,
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
@@ -43,10 +47,6 @@ const closedMixin = (theme: Theme): CSSObject => ({
   },
 });
 
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
-}
-
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })<AppBarProps>(({ theme, open }) => ({
@@ -62,8 +62,8 @@ const AppBar = styled(MuiAppBar, {
     },
   }),
   ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: DRAWER_WIDTH,
+    width: `calc(100% - ${DRAWER_WIDTH}px)`,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -74,7 +74,7 @@ const AppBar = styled(MuiAppBar, {
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== 'open',
 })(({ theme, open }) => ({
-  width: drawerWidth,
+  width: DRAWER_WIDTH,
   flexShrink: 0,
   whiteSpace: 'nowrap',
   boxSizing: 'border-box',
@@ -88,14 +88,10 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-interface MenuItem {
-  section: string;
-  menu: string[];
-}
-
 export default function MiniDrawer() {
-  const [open, setOpen] = React.useState(false);
-  const listItem = React.useRef<MenuItem[]>([
+  const [open, setOpen] = useState<boolean>(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuList = useRef<MenuItemProps[]>([
     {
       section: 'MANAGEMENT',
       menu: ['Trunk Management', 'Customer Management'],
@@ -105,8 +101,18 @@ export default function MiniDrawer() {
       menu: ['Hotline Routing', 'Virtual Routing'],
     },
   ]).current;
+  const SETTING_MENU = useRef<string[]>(['Profile', 'Logout']).current;
+
   const handleDrawer = () => {
     setOpen((previous) => !previous);
+  };
+
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -116,11 +122,56 @@ export default function MiniDrawer() {
           <IconButton
             aria-label="open drawer"
             onClick={handleDrawer}
-            edge="start"
+            disableRipple
             sx={{ marginLeft: 0 }}
           >
             {open ? <ArrowForwardIosIcon /> : <MenuIcon />}
           </IconButton>
+
+          <div className="setting">
+            <IconButton onClick={handleOpenMenu} disableRipple>
+              <Avatar
+                alt="Avatar"
+                src={avatar}
+                sx={{ width: 50, height: 50 }}
+              />
+            </IconButton>
+
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleCloseMenu}
+              sx={{ top: '-6px' }}
+            >
+              {SETTING_MENU.map((setting, index) => (
+                <MenuItem
+                  key={setting}
+                  onClick={handleCloseMenu}
+                  className="menu-item"
+                >
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={1.5}
+                    sx={{ width: 150 }}
+                  >
+                    {SETTING_ICON[index]}
+                    <Typography>{setting}</Typography>
+                  </Stack>
+                </MenuItem>
+              ))}
+            </Menu>
+          </div>
         </Toolbar>
       </AppBar>
 
@@ -142,15 +193,16 @@ export default function MiniDrawer() {
         </Stack>
 
         <List>
-          {listItem.map((item) => (
+          {menuList.map((item, itemIndex) => (
             <div key={item.section} className={clsx({ 'mt--XS': open })}>
               {open && (
                 <Typography className="section">{item.section}</Typography>
               )}
 
-              {item.menu.map((menu, index) => (
+              {item.menu.map((menu, menuIndex) => (
                 <ListItem key={menu} disablePadding className="item">
                   <ListItemButton
+                    disableRipple
                     sx={{
                       minHeight: 48,
                       justifyContent: open ? 'initial' : 'center',
@@ -164,11 +216,7 @@ export default function MiniDrawer() {
                         justifyContent: 'center',
                       }}
                     >
-                      {index % 2 === 0 ? (
-                        <InboxIcon fontSize="small" />
-                      ) : (
-                        <MailIcon fontSize="small" />
-                      )}
+                      {ICON[itemIndex][menuIndex]}
                     </ListItemIcon>
                     <ListItemText
                       primary={menu}

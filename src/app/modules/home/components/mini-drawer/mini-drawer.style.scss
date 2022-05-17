@@ -5,6 +5,11 @@
   .app-bar {
     background-color: $color-white !important;
     height: $space-L;
+
+    .setting {
+      margin-left: auto;
+      color: $color-sub-black1 !important;
+    }
   }
 
   .drawer-content {
