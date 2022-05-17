@@ -17,7 +17,12 @@ export interface AppBarProps extends MuiAppBarProps {
 
 export interface MenuItemProps {
   section: string;
-  menu: string[];
+  menu: MenuProps[];
+}
+
+interface MenuProps {
+  label: string;
+  href: string;
 }
 
 export const ICON = [
@@ -29,3 +34,5 @@ export const SETTING_ICON = [
   <AccountCircle fontSize="small" color="action" />,
   <Logout fontSize="small" color="action" />,
 ];
+
+export const HREF = [];

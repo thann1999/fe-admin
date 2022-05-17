@@ -1,10 +1,10 @@
+import { ThemeProvider } from '@emotion/react';
+import { createTheme } from '@mui/material';
 import React, { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import './translation/i18n';
-import './styles/index.scss';
 import AuthGuard from 'routes/auth-guard';
-import { createTheme } from '@mui/material';
-import { ThemeProvider } from '@emotion/react';
+import './styles/index.scss';
+import './translation/i18n';
 
 export const customTheme = createTheme({
   typography: {
@@ -14,18 +14,30 @@ export const customTheme = createTheme({
 
 const LoginRoute = React.lazy(() => import('app/modules/login/routing'));
 const HomeRoute = React.lazy(() => import('app/modules/home/routing'));
+const TrunkManagemenRoute = React.lazy(
+  () => import('app/modules/trunk-management/routing')
+);
 
 function App() {
   return (
     <ThemeProvider theme={customTheme}>
       <Suspense fallback={<div>...Loading</div>}>
         <Routes>
-          <Route path="/admin/login" element={<LoginRoute />} />
+          <Route path="/login/*" element={<LoginRoute />} />
           <Route
-            path="/admin/home"
+            path="/admin/home/*"
             element={
               <AuthGuard>
                 <HomeRoute />
+              </AuthGuard>
+            }
+          />
+
+          <Route
+            path="/admin/trunk-management/*"
+            element={
+              <AuthGuard>
+                <TrunkManagemenRoute />
               </AuthGuard>
             }
           />

@@ -1,0 +1,7 @@
+.admin-button {
+  @extend .font--15sb;
+
+  &.--no-transform {
+    text-transform: none !important;
+  }
+}

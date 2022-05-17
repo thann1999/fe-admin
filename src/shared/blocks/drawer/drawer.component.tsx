@@ -16,15 +16,15 @@ import logo from 'app/assets/images/leeon-logo.png';
 import miniLogo from 'app/assets/images/mini-logo.png';
 import clsx from 'clsx';
 import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   DRAWER_WIDTH,
   ICON,
   MenuItemProps,
   SETTING_ICON,
   AppBarProps,
-} from '../../shared/mini-drawer.const';
-import './mini-drawer.style.scss';
+} from 'shared/const/drawer.const';
+import './drawer.style.scss';
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: DRAWER_WIDTH,
@@ -89,16 +89,24 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function MiniDrawer() {
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
   const menuList = useRef<MenuItemProps[]>([
     {
       section: 'MANAGEMENT',
-      menu: ['Trunk Management', 'Customer Management'],
+      menu: [
+        { label: 'Trunk Management', href: '/admin/trunk-management' },
+        { label: 'Customer Management', href: '/admin/customer-management' },
+      ],
     },
     {
       section: 'ROUTING',
-      menu: ['Hotline Routing', 'Virtual Routing'],
+      menu: [
+        { label: 'Hotline Routing', href: '/admin/hotline-routing' },
+        { label: 'Virtual Routing', href: '/admin/virtual-routing' },
+      ],
     },
   ]).current;
   const SETTING_MENU = useRef<string[]>(['Profile', 'Logout']).current;
@@ -113,6 +121,10 @@ export default function MiniDrawer() {
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
+  };
+
+  const handleRedirect = (url: string) => {
+    navigate(url);
   };
 
   return (
@@ -200,9 +212,17 @@ export default function MiniDrawer() {
               )}
 
               {item.menu.map((menu, menuIndex) => (
-                <ListItem key={menu} disablePadding className="item">
+                <ListItem
+                  key={menu.href}
+                  disablePadding
+                  className={clsx(
+                    { 'item-selected': location.pathname === menu.href },
+                    'item'
+                  )}
+                >
                   <ListItemButton
                     disableRipple
+                    onClick={() => handleRedirect(menu.href)}
                     sx={{
                       minHeight: 48,
                       justifyContent: open ? 'initial' : 'center',
@@ -219,7 +239,7 @@ export default function MiniDrawer() {
                       {ICON[itemIndex][menuIndex]}
                     </ListItemIcon>
                     <ListItemText
-                      primary={menu}
+                      primary={menu.label}
                       sx={{ opacity: open ? 1 : 0 }}
                     />
                   </ListItemButton>
