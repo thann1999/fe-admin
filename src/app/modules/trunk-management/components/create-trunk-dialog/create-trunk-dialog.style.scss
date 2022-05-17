@@ -1,0 +1,23 @@
+@import 'styles/variables.scss';
+@import 'styles/font.scss';
+@import 'styles/mui/button.scss';
+
+.create-trunk-dialog {
+  .css-1t1j96h-MuiPaper-root-MuiDialog-paper {
+    padding: 3rem;
+    min-width: 35rem;
+  }
+
+  .form-paper {
+    .width-100 {
+      width: 100%;
+    }
+
+    .custom-button {
+      @extend .admin-button;
+      margin-top: $space-MS;
+      height: 3rem;
+      width: 100%;
+    }
+  }
+}

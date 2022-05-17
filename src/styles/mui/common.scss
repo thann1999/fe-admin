@@ -1,0 +1,13 @@
+.hint-text {
+  @extend .font--12-8;
+  font-size: 0.8rem;
+  color: $color-sub-black;
+}
+
+.require-field {
+  &::after {
+    content: '*';
+    margin-left: 1px;
+    color: $color-error;
+  }
+}

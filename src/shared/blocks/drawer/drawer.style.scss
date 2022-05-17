@@ -47,6 +47,18 @@
           }
         }
       }
+
+      .item-selected {
+        color: $color-white;
+
+        .css-wa5fuu-MuiListItemIcon-root {
+          color: $color-white;
+        }
+
+        .css-1ddsiuw-MuiListItemIcon-root {
+          color: $color-white;
+        }
+      }
     }
   }
 }
