@@ -1,11 +1,13 @@
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import logoLight from 'app/assets/images/logo-light.png';
+import logo from 'app/assets/images/leeon-logo.png';
+import { useAppDispatch } from 'app/services/redux/hooks';
+import { login } from 'app/services/redux/slices/user-slice';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -25,9 +27,10 @@ import ParticlesAuth from '../components/particles-auth.component.jsx';
 function Login() {
   const { t } = useTranslation();
   const [showPassword, handleShowPassword] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const formik = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
     initialValues: {
       username: '',
@@ -38,7 +41,18 @@ function Login() {
       password: Yup.string().required('Please Enter Your Password'),
     }),
     onSubmit: (values) => {
-      console.log(values);
+      dispatch(
+        login({
+          info: {
+            email: 'thang@gmail.com',
+            id: 1,
+            phoneNumber: '012345',
+            role: 'admin',
+            sex: 'male',
+          },
+        })
+      );
+      navigate('/admin/home');
     },
   });
 
@@ -59,8 +73,8 @@ function Login() {
               <Col lg={12}>
                 <div className="text-center mt-sm-5 mb-4 text-white-50">
                   <div>
-                    <Link to="/" className="d-inline-block auth-logo">
-                      <img src={logoLight} alt="" height="20" />
+                    <Link to="/admin/home" className="d-inline-block auth-logo">
+                      <img src={logo} alt="" width={150} height={75} />
                     </Link>
                   </div>
                 </div>
