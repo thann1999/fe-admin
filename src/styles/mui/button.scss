@@ -1,5 +1,6 @@
 .admin-button {
-  @extend .font--15sb;
+  border-radius: 0.25rem;
+  background-color: $color-blue-light1;
 
   &.--no-transform {
     text-transform: none !important;

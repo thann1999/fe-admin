@@ -2,7 +2,7 @@
 @import 'styles/font.scss';
 
 .trunk-management {
-  margin-top: 10rem;
+  margin-top: 8.5rem;
 
   .create-button {
     display: flex;
@@ -20,6 +20,10 @@
         margin-top: auto;
         margin-bottom: auto;
       }
+    }
+
+    .css-1s0hp0k-MuiDataGrid-columnHeadersInner {
+      background-color: $color-blue-light;
     }
   }
 }

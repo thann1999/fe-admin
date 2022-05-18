@@ -5,6 +5,7 @@
 }
 
 .require-field {
+  @extend .font--14sb;
   &::after {
     content: '*';
     margin-left: 1px;

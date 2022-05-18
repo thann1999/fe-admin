@@ -1,38 +1,51 @@
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet';
 import CreateTrunkDialogComponent from '../components/create-trunk-dialog/create-trunk-dialog.component';
 import './trunk-management.style.scss';
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'No', flex: 0.5 },
   { field: 'name', headerName: 'Name', flex: 1 },
-  { field: 'lastName', headerName: 'Telecom', flex: 1 },
+  { field: 'telecom', headerName: 'Telecom', flex: 1 },
   {
-    field: 'age',
+    field: 'ipPort',
     headerName: 'IP:PORT',
     flex: 1,
   },
   {
     field: 'action',
     headerName: 'Action',
-    valueGetter: (params: GridValueGetterParams) =>
-      `${params.row.firstName || ''} ${params.row.lastName || ''}`,
     flex: 1.5,
     sortable: false,
   },
 ];
 
 const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
+  {
+    id: 1,
+    name: 'Snow',
+    telecom: 'Viettel',
+    ipPort: '192.168.1.1:3006',
+    action: 35,
+  },
+  {
+    id: 2,
+    name: 'Lannister',
+    telecom: 'Vinaphone',
+    ipPort: '192.168.1.1:3006',
+    age: 42,
+  },
+  {
+    id: 3,
+    name: 'Lannister',
+    telecom: 'Mobiphone',
+    ipPort: '192.168.1.1:3006',
+    age: 45,
+  },
+  { id: 4, name: 'Stark', telecom: 'Fix', ipPort: '192.168.1.1:3006', age: 16 },
 ];
 
 function TrunkManagement() {
@@ -44,10 +57,16 @@ function TrunkManagement() {
 
   return (
     <Container maxWidth="xl" className="trunk-management">
+      <Helmet>
+        <title>Trunk Management Page</title>
+      </Helmet>
+
       <div className="create-button">
         <Button
           variant="contained"
-          color="success"
+          color="primary"
+          startIcon={<AddCircleIcon />}
+          className="admin-button --no-transform"
           onClick={() => handleCreateTrunk(true)}
         >
           Create
@@ -61,6 +80,7 @@ function TrunkManagement() {
           pageSize={10}
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
           disableColumnMenu
+          hideFooterSelectedRowCount
         />
       </div>
 

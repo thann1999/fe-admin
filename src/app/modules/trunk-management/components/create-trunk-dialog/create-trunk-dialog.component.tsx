@@ -1,11 +1,13 @@
-import React, { useRef } from 'react';
-import Dialog from '@mui/material/Dialog';
-
-import { Button, DialogActions, Grid, Stack, Typography } from '@mui/material';
-import * as yup from 'yup';
-import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { Button, Grid, Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import React, { useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
+import SelectController from 'shared/form/select/select-controller.component';
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
+import * as yup from 'yup';
+import { TELECOM_OPTIONS } from '../../shared/create-trunk-dialog.const';
 import './create-trunk-dialog.style.scss';
 
 interface CreateTrunkDialogProps {
@@ -16,31 +18,22 @@ interface CreateTrunkDialogProps {
 interface TypeForm {
   name: string;
   ipPort: string;
-  viettel: string;
-  vinaphone: string;
-  mobiphone: string;
-  fix: string;
+  telecom: string;
 }
 
 function CreateTrunkDialog({ handleClose, open }: CreateTrunkDialogProps) {
   const schema = useRef(
     yup.object().shape({
       name: yup.string().required('Name is required'),
-      ipPort: yup.string().required('IP:PORT is required'),
-      viettel: yup.string().required('Viettel is required'),
-      vinaphone: yup.string().required('Vina is required'),
-      mobiphone: yup.string().required('Mobi is required'),
-      fix: yup.string().required('Fix is required'),
+      ipPort: yup.string().required('IP:Port is required'),
+      telecom: yup.string().required('Telecom is required'),
     })
   ).current;
-  const { control, handleSubmit } = useForm<TypeForm>({
+  const { control, handleSubmit, reset } = useForm<TypeForm>({
     defaultValues: {
       name: '',
       ipPort: '',
-      fix: '',
-      mobiphone: '',
-      viettel: '',
-      vinaphone: '',
+      telecom: '',
     },
     resolver: yupResolver(schema),
   });
@@ -49,17 +42,24 @@ function CreateTrunkDialog({ handleClose, open }: CreateTrunkDialogProps) {
     // Do nothing
   };
 
+  const closeDialog = () => {
+    reset();
+    handleClose();
+  };
+
   return (
-    <Dialog open={open} className="create-trunk-dialog" onClose={handleClose}>
-      <Typography className="font--28b" textAlign="center">
-        Create New Trunk
-      </Typography>
+    <Dialog open={open} className="create-trunk-dialog" onClose={closeDialog}>
+      <CloseDialog onClose={closeDialog} id="title">
+        <Typography className="font--24b" textAlign="center">
+          Create New Trunk
+        </Typography>
+      </CloseDialog>
 
       <Grid>
         <form className="form-paper" onSubmit={handleSubmit(onSubmit)}>
           <div id="name">
             <Grid item xs={12}>
-              <Typography className="mt--XS mb--XS  require-field">
+              <Typography className="mt--XS mb--XS require-field">
                 Trunk name
               </Typography>
             </Grid>
@@ -74,10 +74,27 @@ function CreateTrunkDialog({ handleClose, open }: CreateTrunkDialogProps) {
             </Grid>
           </div>
 
+          <div id="telecom">
+            <Grid item xs={12}>
+              <Typography className="mt--XS mb--XS require-field">
+                Telecom
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12}>
+              <SelectController
+                name="telecom"
+                control={control}
+                className="admin-select width-100"
+                options={TELECOM_OPTIONS}
+              />
+            </Grid>
+          </div>
+
           <div id="ipPort">
             <Grid item xs={12}>
-              <Typography className="mt--XS mb--XS  require-field">
-                IP:PORT
+              <Typography className="mt--XS mb--XS require-field">
+                IP:Port
               </Typography>
             </Grid>
 
@@ -86,92 +103,18 @@ function CreateTrunkDialog({ handleClose, open }: CreateTrunkDialogProps) {
                 name="ipPort"
                 control={control}
                 className="admin-text-field width-100"
-                placeholder="Name"
+                placeholder="Ip:Port"
               />
             </Grid>
           </div>
 
-          <div id="viettel">
-            <Grid item xs={12}>
-              <Typography className="mt--XS mb--XS  require-field">
-                Viettel
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextFieldController
-                name="viettel"
-                control={control}
-                className="admin-text-field width-100"
-                placeholder="Name"
-              />
-            </Grid>
-          </div>
-
-          <div id="mobiphone">
-            <Grid item xs={12}>
-              <Typography className="mt--XS mb--XS  require-field">
-                Mobiphone
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextFieldController
-                name="mobiphone"
-                control={control}
-                className="admin-text-field width-100"
-                placeholder="Name"
-              />
-            </Grid>
-          </div>
-
-          <div id="vinaphone">
-            <Grid item xs={12}>
-              <Typography className="mt--XS mb--XS  require-field">
-                Vinaphone
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextFieldController
-                name="vinaphone"
-                control={control}
-                className="admin-text-field width-100"
-                placeholder="Name"
-              />
-            </Grid>
-          </div>
-
-          <div id="fix">
-            <Grid item xs={12}>
-              <Typography className="mt--XS mb--XS  require-field">
-                Fix
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextFieldController
-                name="fix"
-                control={control}
-                className="admin-text-field width-100"
-                placeholder="Name"
-              />
-            </Grid>
-          </div>
-
-          <DialogActions className="dialog-actions mt--MS">
-            <Button
-              variant="contained"
-              color="inherit"
-              type="button"
-              onClick={handleClose}
-            >
-              Cancel
-            </Button>
-            <Button variant="contained" type="submit">
-              Create
-            </Button>
-          </DialogActions>
+          <Button
+            variant="contained"
+            type="submit"
+            className="action-button --no-transform width-100 "
+          >
+            Create
+          </Button>
         </form>
       </Grid>
     </Dialog>

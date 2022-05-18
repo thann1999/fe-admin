@@ -24,7 +24,13 @@ function SelectController(props: SelectControllerProps) {
       control={control}
       render={({ field, fieldState }) => (
         <>
-          <Select MenuProps={DEFAULT_MENU} {...field} {...props} id={name}>
+          <Select
+            MenuProps={DEFAULT_MENU}
+            {...field}
+            {...props}
+            id={name}
+            error={!!fieldState.error}
+          >
             {options.map((item) => (
               <MenuItem value={item.value} key={item.value}>
                 {item.label}
@@ -32,7 +38,9 @@ function SelectController(props: SelectControllerProps) {
             ))}
           </Select>
           {fieldState.error && (
-            <FormHelperText>{fieldState.error.message}</FormHelperText>
+            <FormHelperText className="labelAsterisk">
+              {fieldState.error.message}
+            </FormHelperText>
           )}
         </>
       )}
