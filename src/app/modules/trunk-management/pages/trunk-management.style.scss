@@ -1,0 +1,29 @@
+@import 'styles/variables.scss';
+@import 'styles/font.scss';
+
+.trunk-management {
+  margin-top: 8.5rem;
+
+  .create-button {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .data-grid {
+    margin-top: $space-XS;
+    width: 100%;
+    height: 40rem;
+    background-color: $color-white;
+
+    .css-17jjc08-MuiDataGrid-footerContainer {
+      p {
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+    }
+
+    .css-1s0hp0k-MuiDataGrid-columnHeadersInner {
+      background-color: $color-blue-light;
+    }
+  }
+}

@@ -2,6 +2,16 @@
 @import './variables.scss';
 @import './margin.scss';
 
+//MUI custom css
+@import './mui/common.scss';
+@import './mui/button.scss';
+@import './mui/text-field.scss';
+@import './mui/select.scss';
+
+html {
+  font-size: 16px;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
@@ -22,4 +32,8 @@ code {
   padding: 0;
   top: 0;
   left: 0;
+}
+
+legend {
+  width: 0px !important;
 }
