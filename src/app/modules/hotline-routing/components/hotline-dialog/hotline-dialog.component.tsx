@@ -4,16 +4,19 @@ import Dialog from '@mui/material/Dialog';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
+import SelectController from 'shared/form/select/select-controller.component';
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
 import {
-  CustomerForm,
+  HotlineForm,
   DialogState,
   OpenDialogProps,
-} from '../../shared/customer-dialog.type';
-import './customer-dialog.style.scss';
+  STATUS_OPTIONS,
+  TRUNK_NAME_OPTIONS,
+} from '../../shared/hotline-dialog.type';
+import './hotline-dialog.style.scss';
 
-function useCustomerDialog() {
+function useHotlineDialog() {
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     title: '',
@@ -22,28 +25,38 @@ function useCustomerDialog() {
   });
   const schema = useRef(
     yup.object().shape({
-      name: yup.string().required('Vui lòng nhập Tên khách hàng'),
+      customerName: yup.string().required('Vui lòng nhập Tên khách hàng'),
       hotline: yup.string().required('Vui lòng nhập số Hotline'),
+      trunkName: yup.string().required('Vui lòng chọn Tên Trunk'),
+      ipPort: yup.string().required('Vui lòng nhập IP:Port'),
+      status: yup.string().required('Vui lòng chọn Trạng thái'),
     })
   ).current;
-  const { control, handleSubmit, reset, setValue } = useForm<CustomerForm>({
+  const { control, handleSubmit, reset, setValue } = useForm<HotlineForm>({
     defaultValues: {
-      name: '',
+      customerName: '',
       hotline: '',
+      ipPort: '',
+      trunkName: '',
+      status: '',
     },
     resolver: yupResolver(schema),
   });
 
-  const openCustomerDialog = ({
+  const openHotlineDialog = ({
     title,
     type,
     onSubmit,
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { name, hotline } = initialValues;
-      setValue('name', name);
+      const { customerName, hotline, ipPort, trunkName, status } =
+        initialValues;
+      setValue('customerName', customerName);
       setValue('hotline', hotline);
+      setValue('ipPort', ipPort);
+      setValue('trunkName', trunkName);
+      setValue('status', status);
     }
     setDialogState((prev) => ({
       ...prev,
@@ -54,19 +67,19 @@ function useCustomerDialog() {
     }));
   };
 
-  const closeCustomerDialog = () => {
+  const closeHotlineDialog = () => {
     reset();
     setDialogState((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const CustomerDialog = useCallback(() => {
+  const HotlineDialog = useCallback(() => {
     return (
       <Dialog
         open={dialogState.isOpen}
         className="customer-dialog"
-        onClose={closeCustomerDialog}
+        onClose={closeHotlineDialog}
       >
-        <CloseDialog onClose={closeCustomerDialog} id="title">
+        <CloseDialog onClose={closeHotlineDialog} id="title">
           <Typography className="font--24b" textAlign="center">
             {dialogState.title}
           </Typography>
@@ -77,7 +90,7 @@ function useCustomerDialog() {
             className="form-paper"
             onSubmit={handleSubmit(dialogState.onSubmit)}
           >
-            <div id="name">
+            <div id="customerName">
               <Grid item xs={12}>
                 <Typography className="mt--S mb--XXS require-field">
                   Tên khách hàng
@@ -86,10 +99,27 @@ function useCustomerDialog() {
 
               <Grid item xs={12}>
                 <TextFieldController
-                  name="name"
+                  name="customerName"
                   control={control}
                   className="admin-text-field width-100"
                   placeholder="Nhập tên Khách hàng"
+                />
+              </Grid>
+            </div>
+
+            <div id="trunkName">
+              <Grid item xs={12}>
+                <Typography className="mt--S mb--XXS require-field">
+                  Tên Trunk
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <SelectController
+                  name="trunkName"
+                  control={control}
+                  className="admin-select width-100"
+                  options={TRUNK_NAME_OPTIONS}
                 />
               </Grid>
             </div>
@@ -111,6 +141,40 @@ function useCustomerDialog() {
               </Grid>
             </div>
 
+            <div id="ipPort">
+              <Grid item xs={12}>
+                <Typography className="mt--S mb--XXS require-field">
+                  IP:PORT
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextFieldController
+                  name="ipPort"
+                  control={control}
+                  className="admin-text-field width-100"
+                  placeholder="Nhập thông tin IP:PORT"
+                />
+              </Grid>
+            </div>
+
+            <div id="status">
+              <Grid item xs={12}>
+                <Typography className="mt--S mb--XXS require-field">
+                  Trạng thái
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <SelectController
+                  name="status"
+                  control={control}
+                  className="admin-select width-100"
+                  options={STATUS_OPTIONS}
+                />
+              </Grid>
+            </div>
+
             <Button
               variant="contained"
               type="submit"
@@ -125,7 +189,7 @@ function useCustomerDialog() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogState]);
 
-  return { CustomerDialog, openCustomerDialog, closeCustomerDialog };
+  return { HotlineDialog, openHotlineDialog, closeHotlineDialog };
 }
 
-export default useCustomerDialog;
+export default useHotlineDialog;

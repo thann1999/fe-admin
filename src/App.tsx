@@ -18,7 +18,11 @@ const TrunkManagementRoute = React.lazy(
   () => import('app/modules/trunk-management/routing')
 );
 const CustomerManagementRoute = React.lazy(
-  () => import('app/modules/custom-management/routing')
+  () => import('app/modules/customer-management/routing')
+);
+
+const HotlineRoute = React.lazy(
+  () => import('app/modules/hotline-routing/routing')
 );
 
 function App() {
@@ -50,6 +54,15 @@ function App() {
             element={
               <AuthGuard>
                 <CustomerManagementRoute />
+              </AuthGuard>
+            }
+          />
+
+          <Route
+            path="/admin/hotline-routing/*"
+            element={
+              <AuthGuard>
+                <HotlineRoute />
               </AuthGuard>
             }
           />
