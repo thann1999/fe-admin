@@ -1,9 +1,11 @@
 import { IconButton, Stack } from '@mui/material';
 import React from 'react';
 import { Preview, Edit, DeleteForever } from '@mui/icons-material';
+import { COLOR_EDIT, COLOR_GREEN_LIGHT } from 'styles/variables';
 import useConfirmDialog, {
   OpenDialogProps,
 } from '../confirm-dialog/confirm-dialog.component';
+import './cell-action.style.scss';
 
 interface ActionCellProps {
   viewAble?: boolean;
@@ -39,22 +41,27 @@ function ActionCell(props: ActionCellProps) {
   };
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
+    <Stack
+      direction="row"
+      spacing={1}
+      alignItems="center"
+      className="cell-action"
+    >
       {viewAble && (
         <IconButton onClick={handleView}>
-          <Preview />
+          <Preview sx={{ color: COLOR_GREEN_LIGHT }} />
         </IconButton>
       )}
 
       {editAble && (
         <IconButton onClick={handleEdit}>
-          <Edit sx={{ color: '#FF9D22', fontSize: '30px' }} />
+          <Edit sx={{ color: COLOR_EDIT }} />
         </IconButton>
       )}
 
       {deleteAble && (
         <IconButton color="error" onClick={handleOpenDeleteConfirm}>
-          <DeleteForever sx={{ fontSize: '30px' }} />
+          <DeleteForever />
         </IconButton>
       )}
 

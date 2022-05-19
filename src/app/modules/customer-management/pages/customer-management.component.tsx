@@ -31,7 +31,7 @@ const rows = [
 ];
 
 function TrunkManagement() {
-  const { openCustomerDialog, TrunkDialog, closeCustomerDialog } =
+  const { openCustomerDialog, CustomerDialog, closeCustomerDialog } =
     useCustomerDialog();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
@@ -55,6 +55,13 @@ function TrunkManagement() {
                 id,
               })
             }
+            deleteDialogInfo={{
+              title: 'Xóa Khách hàng?',
+              type: 'error',
+              description:
+                'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
+              handleConfirm: () => onDelete({ name, hotline, id }),
+            }}
           />
         );
       },
@@ -68,6 +75,10 @@ function TrunkManagement() {
 
   const onUpdate = (data: CustomerForm) => {
     // TODO: Call api update
+    closeCustomerDialog();
+  };
+
+  const onDelete = (data: CustomerForm) => {
     closeCustomerDialog();
   };
 
@@ -117,7 +128,7 @@ function TrunkManagement() {
         />
       </div>
 
-      <TrunkDialog />
+      <CustomerDialog />
     </Container>
   );
 }
