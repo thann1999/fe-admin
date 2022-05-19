@@ -13,7 +13,7 @@ const rows = [
     id: 1,
     customerName: 'Snow',
     trunkName: 1,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -21,7 +21,7 @@ const rows = [
     id: 2,
     customerName: 'John',
     trunkName: 1,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556',
+    virtual: '11111111, 9744124556, 9744124556, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -29,7 +29,7 @@ const rows = [
     id: 3,
     customerName: 'Thang',
     trunkName: 1,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 1,
   },
@@ -37,7 +37,7 @@ const rows = [
     id: 4,
     customerName: 'Ngoc',
     trunkName: 2,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 1,
   },
@@ -45,7 +45,7 @@ const rows = [
     id: 5,
     customerName: 'Anh',
     trunkName: 2,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -53,7 +53,7 @@ const rows = [
     id: 6,
     customerName: 'Nguyen',
     trunkName: 3,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -63,7 +63,7 @@ export const PREVIEW_CONFIG: GridColDef[] = [
   { field: 'id', headerName: 'No', flex: 0.5 },
   { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
   { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
-  { field: 'hotline', headerName: 'Hotline', flex: 1 },
+  { field: 'virtual', headerName: 'Virtual', flex: 1 },
   { field: 'ipPort', headerName: 'IP:PORT', flex: 1 },
   {
     field: 'status',
@@ -74,9 +74,9 @@ export const PREVIEW_CONFIG: GridColDef[] = [
   },
 ];
 
-function HotlineRoutingPage() {
+function VirtualRouting() {
   const { RoutingDialog, closeRoutingDialog, openRoutingDialog } =
-    useRoutingDialog({ isHotlineDialog: true });
+    useRoutingDialog({ isHotlineDialog: false });
   const { PreviewDialog, openPreviewDialog } = usePreviewDialog({
     columnConfig: PREVIEW_CONFIG,
   });
@@ -85,7 +85,7 @@ function HotlineRoutingPage() {
     { field: 'id', headerName: 'No', flex: 0.5 },
     { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
     { field: 'trunkName', headerName: 'Tên Trunk', flex: 1.25 },
-    { field: 'hotline', headerName: 'Hotline', flex: 1.25 },
+    { field: 'virtual', headerName: 'Virtual', flex: 1.25 },
     {
       field: 'status',
       headerName: 'Trạng thái',
@@ -103,7 +103,7 @@ function HotlineRoutingPage() {
           <CellAction
             handleEdit={() => handleEdit(cellValues.row)}
             deleteDialogInfo={{
-              title: 'Xóa Hotline?',
+              title: 'Xóa Virtual?',
               type: 'error',
               description:
                 'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
@@ -133,24 +133,25 @@ function HotlineRoutingPage() {
 
   const handleViewInfo = (data: RoutingForm) => {
     openPreviewDialog({
-      title: 'Thông tin chi tiết Hotline',
+      title: 'Thông tin chi tiết Virtual',
       values: data,
     });
   };
 
   const handleEdit = (initialValues: RoutingForm) => {
+    console.log(initialValues);
     openRoutingDialog({
       initialValues,
       onSubmit: onUpdate,
-      title: 'Cập nhật Hotline',
+      title: 'Cập nhật Virtual',
       type: 'update',
     });
   };
 
-  const handleCreateHotline = () => {
+  const handleCreateVirtual = () => {
     openRoutingDialog({
       onSubmit: onCreate,
-      title: 'Tạo mới Hotline',
+      title: 'Tạo mới Virtual',
       type: 'create',
     });
   };
@@ -158,7 +159,7 @@ function HotlineRoutingPage() {
   return (
     <Container maxWidth="xl" className="table-page">
       <Helmet>
-        <title>Hotline Routing Page</title>
+        <title>Virtual Routing Page</title>
       </Helmet>
 
       <div className="create-button">
@@ -167,7 +168,7 @@ function HotlineRoutingPage() {
           color="primary"
           startIcon={<AddCircleIcon />}
           className="admin-button --no-transform"
-          onClick={handleCreateHotline}
+          onClick={handleCreateVirtual}
         >
           Tạo mới
         </Button>
@@ -190,4 +191,4 @@ function HotlineRoutingPage() {
   );
 }
 
-export default HotlineRoutingPage;
+export default VirtualRouting;

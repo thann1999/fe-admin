@@ -16,7 +16,6 @@ export interface TrunkForm {
 
 export interface OpenDialogProps {
   title: string;
-  nameButton: string;
   onSubmit: (data: TrunkForm) => void;
   type?: 'create' | 'update';
   initialValues?: TrunkForm;

@@ -1,6 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import clsx from 'clsx';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
@@ -114,7 +115,9 @@ function useCustomerDialog() {
             <Button
               variant="contained"
               type="submit"
-              className="action-button --no-transform width-100 "
+              className={clsx('action-button --no-transform width-100', {
+                '--update': dialogState.type === 'update',
+              })}
             >
               {dialogState.type === 'create' ? 'Tạo mới' : 'Cập nhật'}
             </Button>

@@ -91,7 +91,7 @@ function TrunkManagement() {
       initialValues,
       onSubmit: onUpdate,
       title: 'Update Trunk',
-      nameButton: 'Update',
+      type: 'update',
     });
   };
 
@@ -99,7 +99,6 @@ function TrunkManagement() {
     openTrunkDialog({
       onSubmit: onCreate,
       title: 'Create New Trunk',
-      nameButton: 'Create',
     });
   };
 
