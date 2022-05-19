@@ -1,6 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import clsx from 'clsx';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
@@ -18,7 +19,6 @@ import './trunk-dialog.style.scss';
 function useTrunkDialog() {
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
-    nameButton: '',
     title: '',
     type: 'create',
     onSubmit: () => {},
@@ -42,7 +42,6 @@ function useTrunkDialog() {
   const openTrunkDialog = ({
     title,
     type = 'create',
-    nameButton,
     onSubmit,
     initialValues,
   }: OpenDialogProps) => {
@@ -57,7 +56,6 @@ function useTrunkDialog() {
       isOpen: true,
       title,
       type,
-      nameButton,
       onSubmit,
     }));
   };
@@ -139,9 +137,11 @@ function useTrunkDialog() {
             <Button
               variant="contained"
               type="submit"
-              className="action-button --no-transform width-100 "
+              className={clsx('action-button --no-transform width-100', {
+                '--update': dialogState.type === 'update',
+              })}
             >
-              {dialogState.nameButton}
+              {dialogState.type === 'create' ? 'Tạo Trunk' : 'Cập nhật'}
             </Button>
           </form>
         </Grid>

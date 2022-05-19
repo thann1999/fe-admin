@@ -1,16 +1,25 @@
 import { Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import React, { useCallback, useState } from 'react';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
-import {
-  COLUMN_CONFIG,
-  DialogState,
-  OpenDialogProps,
-} from '../../shared/preview-dialog.const';
 import './preview-dialog.style.scss';
+import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
 
-function usePreviewDialog() {
+export interface OpenDialogProps {
+  title: string;
+  values: RoutingForm;
+}
+
+export interface DialogState extends OpenDialogProps {
+  isOpen: boolean;
+}
+
+interface PreviewDialogProps {
+  columnConfig: GridColDef[];
+}
+
+function usePreviewDialog({ columnConfig }: PreviewDialogProps) {
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     title: '',
@@ -21,6 +30,7 @@ function usePreviewDialog() {
       ipPort: '',
       status: '',
       trunkName: '',
+      virtual: '',
     },
   });
 
@@ -53,7 +63,7 @@ function usePreviewDialog() {
         <div className="data-grid">
           <DataGrid
             rows={[dialogState.values]}
-            columns={COLUMN_CONFIG}
+            columns={columnConfig}
             autoHeight
             disableColumnMenu
             hideFooter

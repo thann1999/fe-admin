@@ -25,6 +25,10 @@ const HotlineRoute = React.lazy(
   () => import('app/modules/hotline-routing/routing')
 );
 
+const VirtualRoute = React.lazy(
+  () => import('app/modules/virtual-routing/routing')
+);
+
 function App() {
   return (
     <ThemeProvider theme={customTheme}>
@@ -63,6 +67,15 @@ function App() {
             element={
               <AuthGuard>
                 <HotlineRoute />
+              </AuthGuard>
+            }
+          />
+
+          <Route
+            path="/admin/virtual-routing/*"
+            element={
+              <AuthGuard>
+                <VirtualRoute />
               </AuthGuard>
             }
           />

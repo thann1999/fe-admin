@@ -58,13 +58,14 @@ function useRoutingDialog({ isHotlineDialog }: RoutingDialogProps) {
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { customerName, hotline, ipPort, trunkName, status } =
+      const { customerName, hotline, ipPort, trunkName, status, virtual } =
         initialValues;
       setValue('customerName', customerName);
       setValue('hotline', hotline);
       setValue('ipPort', ipPort);
       setValue('trunkName', trunkName);
       setValue('status', status);
+      setValue('virtual', virtual);
     }
     setDialogState((prev) => ({
       ...prev,
