@@ -1,19 +1,24 @@
 import { SelectItem } from 'shared/form/select/select-controller.component';
 
-export interface HotlineForm {
+export interface RoutingDialogProps {
+  isHotlineDialog: boolean;
+}
+
+export interface RoutingForm {
   id?: number;
   customerName: string;
   trunkName: string;
-  hotline: string;
+  hotline?: string;
+  virtual?: string;
   ipPort: string;
   status: string;
 }
 
 export interface OpenDialogProps {
   title: string;
-  onSubmit: (data: HotlineForm) => void;
+  onSubmit: (data: RoutingForm) => void;
   type: 'create' | 'update';
-  initialValues?: HotlineForm;
+  initialValues?: RoutingForm;
 }
 
 export interface DialogState extends OpenDialogProps {

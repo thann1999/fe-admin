@@ -63,7 +63,11 @@ export default function useConfirmDialog() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeConfirmDialog} color="inherit">
+          <Button
+            onClick={closeConfirmDialog}
+            color="inherit"
+            variant="contained"
+          >
             Cancel
           </Button>
           <Button
