@@ -1,6 +1,5 @@
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { TextField } from '@mui/material';
 import logo from 'app/assets/images/leeon-logo.png';
 import { useAppDispatch } from 'app/services/redux/hooks';
 import { login } from 'app/services/redux/slices/user-slice';
@@ -197,8 +196,6 @@ function Login() {
                             Sign In
                           </Button>
                         </div>
-
-                        <TextField />
                       </Form>
                     </div>
                   </CardBody>

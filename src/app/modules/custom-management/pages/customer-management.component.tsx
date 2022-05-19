@@ -4,109 +4,94 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import React, { useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
-import useTrunkDialog from '../components/trunk-dialog/trunk-dialog.component';
-import { TrunkForm } from '../shared/trunk-dialog.const';
+import useCustomerDialog from '../components/customer-dialog/customer-dialog.component';
+import { CustomerForm } from '../shared/customer-dialog.type';
 
 const rows = [
   {
     id: 1,
     name: 'Snow',
-    telecom: 1,
-    ipPort: '192.168.1.1:3006',
+    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
   },
   {
     id: 2,
     name: 'Lannister',
-    telecom: 2,
-    ipPort: '192.168.1.1:3006',
+    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
   },
   {
     id: 3,
     name: 'Lannister',
-    telecom: 3,
-    ipPort: '192.168.1.1:3006',
+    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
   },
-  { id: 4, name: 'Stark', telecom: 4, ipPort: '192.168.1.1:3006' },
+  {
+    id: 4,
+    name: 'Stark',
+    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+  },
 ];
 
 function TrunkManagement() {
-  const { openTrunkDialog, TrunkDialog, closeTrunkDialog } = useTrunkDialog();
+  const { openCustomerDialog, TrunkDialog, closeCustomerDialog } =
+    useCustomerDialog();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'id', headerName: 'No', flex: 0.5 },
     { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'telecom', headerName: 'Telecom', flex: 1.25 },
-    {
-      field: 'ipPort',
-      headerName: 'IP:PORT',
-      flex: 1.25,
-    },
+    { field: 'hotline', headerName: 'Hotline', flex: 1.5 },
     {
       field: 'action',
       headerName: 'Action',
       flex: 1,
       sortable: false,
       renderCell: (cellValues) => {
-        const { name, telecom, ipPort, id } = cellValues.row;
+        const { name, hotline, id } = cellValues.row;
         return (
           <CellAction
             viewAble={false}
             handleEdit={() =>
               handleEdit({
                 name,
-                ipPort,
-                telecom,
+                hotline,
                 id,
               })
             }
-            deleteDialogInfo={{
-              title: 'Xóa Trunk?',
-              type: 'error',
-              description:
-                'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-              handleConfirm: () => onDelete({ name, ipPort, telecom, id }),
-            }}
           />
         );
       },
     },
   ]).current;
 
-  const onDelete = (data: TrunkForm) => {
-    // TODO: Call api delete
-  };
-
-  const onCreate = (data: TrunkForm) => {
+  const onCreate = (data: CustomerForm) => {
     // TODO: Call api create
-    closeTrunkDialog();
+    closeCustomerDialog();
   };
 
-  const onUpdate = (data: TrunkForm) => {
+  const onUpdate = (data: CustomerForm) => {
     // TODO: Call api update
-    closeTrunkDialog();
+    closeCustomerDialog();
   };
 
-  const handleEdit = (initialValues: TrunkForm) => {
-    openTrunkDialog({
+  const handleEdit = (initialValues: CustomerForm) => {
+    openCustomerDialog({
       initialValues,
       onSubmit: onUpdate,
-      title: 'Update Trunk',
-      nameButton: 'Update',
+      title: 'Cập nhật Khách hàng',
+      type: 'update',
     });
   };
 
-  const handleCreateTrunk = () => {
-    openTrunkDialog({
+  const handleCreateCustomer = () => {
+    openCustomerDialog({
       onSubmit: onCreate,
-      title: 'Create New Trunk',
-      nameButton: 'Create',
+      title: 'Tạo mới Khách hàng',
+      type: 'create',
     });
   };
 
   return (
     <Container maxWidth="xl" className="table-page">
       <Helmet>
-        <title>Trunk Management Page</title>
+        <title>Customer Management Page</title>
       </Helmet>
 
       <div className="create-button">
@@ -115,9 +100,9 @@ function TrunkManagement() {
           color="primary"
           startIcon={<AddCircleIcon />}
           className="admin-button --no-transform"
-          onClick={handleCreateTrunk}
+          onClick={handleCreateCustomer}
         >
-          Create
+          Tạo mới
         </Button>
       </div>
 
