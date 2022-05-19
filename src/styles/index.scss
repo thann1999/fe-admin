@@ -1,3 +1,4 @@
+//Common
 @import './font.scss';
 @import './variables.scss';
 @import './margin.scss';
@@ -7,6 +8,10 @@
 @import './mui/button.scss';
 @import './mui/text-field.scss';
 @import './mui/select.scss';
+@import './mui/modal.scss';
+
+//Page
+@import './page.scss';
 
 html {
   font-size: 16px;

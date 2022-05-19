@@ -14,8 +14,11 @@ export const customTheme = createTheme({
 
 const LoginRoute = React.lazy(() => import('app/modules/login/routing'));
 const HomeRoute = React.lazy(() => import('app/modules/home/routing'));
-const TrunkManagemenRoute = React.lazy(
+const TrunkManagementRoute = React.lazy(
   () => import('app/modules/trunk-management/routing')
+);
+const CustomerManagementRoute = React.lazy(
+  () => import('app/modules/custom-management/routing')
 );
 
 function App() {
@@ -37,7 +40,16 @@ function App() {
             path="/admin/trunk-management/*"
             element={
               <AuthGuard>
-                <TrunkManagemenRoute />
+                <TrunkManagementRoute />
+              </AuthGuard>
+            }
+          />
+
+          <Route
+            path="/admin/customer-management/*"
+            element={
+              <AuthGuard>
+                <CustomerManagementRoute />
               </AuthGuard>
             }
           />
