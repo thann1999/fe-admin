@@ -7,16 +7,18 @@ import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
 import SelectController from 'shared/form/select/select-controller.component';
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
+import clsx from 'clsx';
 import {
-  HotlineForm,
+  RoutingForm,
   DialogState,
   OpenDialogProps,
   STATUS_OPTIONS,
   TRUNK_NAME_OPTIONS,
-} from '../../shared/hotline-dialog.type';
-import './hotline-dialog.style.scss';
+  RoutingDialogProps,
+} from './routing-dialog.type';
+import './routing-dialog.style.scss';
 
-function useHotlineDialog() {
+function useRoutingDialog({ isHotlineDialog }: RoutingDialogProps) {
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     title: '',
@@ -26,24 +28,30 @@ function useHotlineDialog() {
   const schema = useRef(
     yup.object().shape({
       customerName: yup.string().required('Vui lòng nhập Tên khách hàng'),
-      hotline: yup.string().required('Vui lòng nhập số Hotline'),
+      hotline: isHotlineDialog
+        ? yup.string().required('Vui lòng nhập số Hotline')
+        : yup.string(),
       trunkName: yup.string().required('Vui lòng chọn Tên Trunk'),
       ipPort: yup.string().required('Vui lòng nhập IP:Port'),
       status: yup.string().required('Vui lòng chọn Trạng thái'),
+      virtual: isHotlineDialog
+        ? yup.string()
+        : yup.string().required('Vui lòng nhập số số Virtual'),
     })
   ).current;
-  const { control, handleSubmit, reset, setValue } = useForm<HotlineForm>({
+  const { control, handleSubmit, reset, setValue } = useForm<RoutingForm>({
     defaultValues: {
       customerName: '',
       hotline: '',
       ipPort: '',
       trunkName: '',
       status: '',
+      virtual: '',
     },
     resolver: yupResolver(schema),
   });
 
-  const openHotlineDialog = ({
+  const openRoutingDialog = ({
     title,
     type,
     onSubmit,
@@ -67,19 +75,19 @@ function useHotlineDialog() {
     }));
   };
 
-  const closeHotlineDialog = () => {
+  const closeRoutingDialog = () => {
     reset();
     setDialogState((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const HotlineDialog = useCallback(() => {
+  const RoutingDialog = useCallback(() => {
     return (
       <Dialog
         open={dialogState.isOpen}
         className="customer-dialog"
-        onClose={closeHotlineDialog}
+        onClose={closeRoutingDialog}
       >
-        <CloseDialog onClose={closeHotlineDialog} id="title">
+        <CloseDialog onClose={closeRoutingDialog} id="title">
           <Typography className="font--24b" textAlign="center">
             {dialogState.title}
           </Typography>
@@ -124,22 +132,41 @@ function useHotlineDialog() {
               </Grid>
             </div>
 
-            <div id="hotline">
-              <Grid item xs={12}>
-                <Typography className="mt--S mb--XXS require-field">
-                  Hotline
-                </Typography>
-              </Grid>
+            {isHotlineDialog ? (
+              <div id="hotline">
+                <Grid item xs={12}>
+                  <Typography className="mt--S mb--XXS require-field">
+                    Hotline
+                  </Typography>
+                </Grid>
 
-              <Grid item xs={12}>
-                <TextFieldController
-                  name="hotline"
-                  control={control}
-                  className="admin-text-field width-100"
-                  placeholder="Nhập số Hotline"
-                />
-              </Grid>
-            </div>
+                <Grid item xs={12}>
+                  <TextFieldController
+                    name="hotline"
+                    control={control}
+                    className="admin-text-field width-100"
+                    placeholder="Nhập số Hotline"
+                  />
+                </Grid>
+              </div>
+            ) : (
+              <div id="virtual">
+                <Grid item xs={12}>
+                  <Typography className="mt--S mb--XXS require-field">
+                    Virtual
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextFieldController
+                    name="virtual"
+                    control={control}
+                    className="admin-text-field width-100"
+                    placeholder="Nhập số Virtual"
+                  />
+                </Grid>
+              </div>
+            )}
 
             <div id="ipPort">
               <Grid item xs={12}>
@@ -178,7 +205,9 @@ function useHotlineDialog() {
             <Button
               variant="contained"
               type="submit"
-              className="action-button --no-transform width-100 "
+              className={clsx('action-button --no-transform width-100', {
+                '--update': dialogState.type === 'update',
+              })}
             >
               {dialogState.type === 'create' ? 'Tạo mới' : 'Cập nhật'}
             </Button>
@@ -189,7 +218,7 @@ function useHotlineDialog() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogState]);
 
-  return { HotlineDialog, openHotlineDialog, closeHotlineDialog };
+  return { RoutingDialog, openRoutingDialog, closeRoutingDialog };
 }
 
-export default useHotlineDialog;
+export default useRoutingDialog;

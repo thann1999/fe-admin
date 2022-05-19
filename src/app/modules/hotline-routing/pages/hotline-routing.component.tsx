@@ -4,9 +4,9 @@ import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import React, { useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
-import useCustomerDialog from '../components/hotline-dialog/hotline-dialog.component';
+import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
+import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
 import usePreviewDialog from '../components/preview-dialog/preview-dialog.component';
-import { HotlineForm } from '../shared/hotline-dialog.type';
 
 const rows = [
   {
@@ -60,8 +60,8 @@ const rows = [
 ];
 
 function TrunkManagement() {
-  const { HotlineDialog, openHotlineDialog, closeHotlineDialog } =
-    useCustomerDialog();
+  const { RoutingDialog, closeRoutingDialog, openRoutingDialog } =
+    useRoutingDialog({ isHotlineDialog: true });
   const { PreviewDialog, closePreviewDialog, openPreviewDialog } =
     usePreviewDialog();
 
@@ -100,30 +100,30 @@ function TrunkManagement() {
     },
   ]).current;
 
-  const onCreate = (data: HotlineForm) => {
+  const onCreate = (data: RoutingForm) => {
     // TODO: Call api create
-    closeHotlineDialog();
+    closeRoutingDialog();
   };
 
-  const onUpdate = (data: HotlineForm) => {
+  const onUpdate = (data: RoutingForm) => {
     // TODO: Call api update
-    closeHotlineDialog();
+    closeRoutingDialog();
   };
 
-  const onDelete = (data: HotlineForm) => {
+  const onDelete = (data: RoutingForm) => {
     // TODO: Call api delete
-    closeHotlineDialog();
+    closeRoutingDialog();
   };
 
-  const handleViewInfo = (data: HotlineForm) => {
+  const handleViewInfo = (data: RoutingForm) => {
     openPreviewDialog({
       title: 'Thông tin chi tiết Hotline',
       values: data,
     });
   };
 
-  const handleEdit = (initialValues: HotlineForm) => {
-    openHotlineDialog({
+  const handleEdit = (initialValues: RoutingForm) => {
+    openRoutingDialog({
       initialValues,
       onSubmit: onUpdate,
       title: 'Cập nhật Hotline Routing',
@@ -132,7 +132,7 @@ function TrunkManagement() {
   };
 
   const handleCreateHotline = () => {
-    openHotlineDialog({
+    openRoutingDialog({
       onSubmit: onCreate,
       title: 'Tạo mới Hotline Routing',
       type: 'create',
@@ -168,7 +168,7 @@ function TrunkManagement() {
         />
       </div>
 
-      <HotlineDialog />
+      <RoutingDialog />
       <PreviewDialog />
     </Container>
   );

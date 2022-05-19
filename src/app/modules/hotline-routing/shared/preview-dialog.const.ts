@@ -1,9 +1,9 @@
 import { GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import { HotlineForm } from './hotline-dialog.type';
+import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
 
 export interface OpenDialogProps {
   title: string;
-  values: HotlineForm;
+  values: RoutingForm;
 }
 
 export interface DialogState extends OpenDialogProps {
