@@ -37,6 +37,7 @@
     "react-scripts": "5.0.1",
     "react-tsparticles": "1.43.1",
     "reactstrap": "^9.0.2",
+    "redux-persist": "^6.0.0",
     "sass": "^1.51.0",
     "typescript": "^4.1.6",
     "yup": "^0.32.11"
