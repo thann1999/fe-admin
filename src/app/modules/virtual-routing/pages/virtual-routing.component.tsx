@@ -13,7 +13,7 @@ const rows = [
     id: 1,
     customerName: 'Snow',
     trunkName: 1,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -21,7 +21,7 @@ const rows = [
     id: 2,
     customerName: 'John',
     trunkName: 1,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -29,7 +29,7 @@ const rows = [
     id: 3,
     customerName: 'Thang',
     trunkName: 1,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 1,
   },
@@ -37,7 +37,7 @@ const rows = [
     id: 4,
     customerName: 'Ngoc',
     trunkName: 2,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 1,
   },
@@ -45,7 +45,7 @@ const rows = [
     id: 5,
     customerName: 'Anh',
     trunkName: 2,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -53,7 +53,7 @@ const rows = [
     id: 6,
     customerName: 'Nguyen',
     trunkName: 3,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -139,7 +139,6 @@ function VirtualRouting() {
   };
 
   const handleEdit = (initialValues: RoutingForm) => {
-    console.log(initialValues);
     openRoutingDialog({
       initialValues,
       onSubmit: onUpdate,

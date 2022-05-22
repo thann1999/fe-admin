@@ -1,0 +1,14 @@
+@import 'styles/variables.scss';
+
+.customer-detail {
+  margin-top: 8.5rem;
+
+  .data-grid {
+    width: 100%;
+    background-color: $color-white;
+
+    .css-1s0hp0k-MuiDataGrid-columnHeadersInner {
+      background-color: $color-blue-light;
+    }
+  }
+}

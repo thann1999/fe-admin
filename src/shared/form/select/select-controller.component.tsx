@@ -16,7 +16,7 @@ interface SelectControllerProps extends SelectProps {
 }
 
 function SelectController(props: SelectControllerProps) {
-  const { control, name, options } = props;
+  const { control, name, options, ...rest } = props;
 
   return (
     <Controller
@@ -27,7 +27,7 @@ function SelectController(props: SelectControllerProps) {
           <Select
             MenuProps={DEFAULT_MENU}
             {...field}
-            {...props}
+            {...rest}
             id={name}
             error={!!fieldState.error}
           >

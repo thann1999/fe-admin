@@ -8,7 +8,8 @@ export interface RoutingForm {
   id?: number;
   customerName: string;
   trunkName: string;
-  hotline?: string;
+  stringHotline?: string;
+  hotline: SelectItem[];
   virtual?: string;
   ipPort: string;
   status: string;
@@ -23,6 +24,7 @@ export interface OpenDialogProps {
 
 export interface DialogState extends OpenDialogProps {
   isOpen: boolean;
+  hotlineOptions: SelectItem[];
 }
 
 export const TRUNK_NAME_OPTIONS: SelectItem[] = [
