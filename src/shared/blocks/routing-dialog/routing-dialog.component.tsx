@@ -1,22 +1,24 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import clsx from 'clsx';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
+import AutocompleteController from 'shared/form/autocomplete/autocomplete-controller.component';
 import SelectController from 'shared/form/select/select-controller.component';
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
-import clsx from 'clsx';
+import { convertHotline } from './routing-dialog.helper';
+import './routing-dialog.style.scss';
 import {
-  RoutingForm,
   DialogState,
   OpenDialogProps,
+  RoutingDialogProps,
+  RoutingForm,
   STATUS_OPTIONS,
   TRUNK_NAME_OPTIONS,
-  RoutingDialogProps,
 } from './routing-dialog.type';
-import './routing-dialog.style.scss';
 
 function useRoutingDialog({ isHotlineDialog }: RoutingDialogProps) {
   const [dialogState, setDialogState] = useState<DialogState>({
@@ -24,13 +26,14 @@ function useRoutingDialog({ isHotlineDialog }: RoutingDialogProps) {
     title: '',
     type: 'create',
     onSubmit: () => {},
+    hotlineOptions: [],
   });
   const schema = useRef(
     yup.object().shape({
       customerName: yup.string().required('Vui lòng nhập Tên khách hàng'),
-      hotline: isHotlineDialog
-        ? yup.string().required('Vui lòng nhập số Hotline')
-        : yup.string(),
+      // hotline: isHotlineDialog
+      //   ? yup.array().required('Vui lòng nhập số Hotline')
+      //   : yup.array(),
       trunkName: yup.string().required('Vui lòng chọn Tên Trunk'),
       ipPort: yup.string().required('Vui lòng nhập IP:Port'),
       status: yup.string().required('Vui lòng chọn Trạng thái'),
@@ -42,11 +45,12 @@ function useRoutingDialog({ isHotlineDialog }: RoutingDialogProps) {
   const { control, handleSubmit, reset, setValue } = useForm<RoutingForm>({
     defaultValues: {
       customerName: '',
-      hotline: '',
       ipPort: '',
       trunkName: '',
       status: '',
       virtual: '',
+      stringHotline: '',
+      hotline: [],
     },
     resolver: yupResolver(schema),
   });
@@ -58,14 +62,22 @@ function useRoutingDialog({ isHotlineDialog }: RoutingDialogProps) {
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { customerName, hotline, ipPort, trunkName, status, virtual } =
-        initialValues;
+      const {
+        customerName,
+        stringHotline,
+        ipPort,
+        trunkName,
+        status,
+        virtual,
+      } = initialValues;
+      const hotlineOptions = stringHotline ? convertHotline(stringHotline) : [];
       setValue('customerName', customerName);
-      setValue('hotline', hotline);
+      // setValue('hotline', hotlineOptions);
       setValue('ipPort', ipPort);
       setValue('trunkName', trunkName);
       setValue('status', status);
       setValue('virtual', virtual);
+      setDialogState((prev) => ({ ...prev, hotlineOptions }));
     }
     setDialogState((prev) => ({
       ...prev,
@@ -134,19 +146,21 @@ function useRoutingDialog({ isHotlineDialog }: RoutingDialogProps) {
             </div>
 
             {isHotlineDialog ? (
-              <div id="hotline">
+              <div>
                 <Grid item xs={12}>
                   <Typography className="mt--S mb--XXS require-field">
-                    Hotline
+                    Số Hotline
                   </Typography>
                 </Grid>
 
                 <Grid item xs={12}>
-                  <TextFieldController
+                  <AutocompleteController
+                    multiple
                     name="hotline"
                     control={control}
-                    className="admin-text-field width-100"
-                    placeholder="Nhập số Hotline"
+                    options={dialogState.hotlineOptions}
+                    defaultValue={dialogState.hotlineOptions}
+                    placeholder="Nhập Hotline"
                   />
                 </Grid>
               </div>

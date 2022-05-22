@@ -1,6 +1,6 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import React, { useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
@@ -11,60 +11,56 @@ const rows = [
   {
     id: 1,
     name: 'Snow',
-    telecom: 1,
-    ipPort: '192.168.1.1:3006',
+    telecom: 'Viettel',
+    ip: '192.168.1.1',
+    port: '3006',
   },
   {
     id: 2,
+    telecom: 'Mobiphone',
     name: 'Lannister',
-    telecom: 2,
-    ipPort: '192.168.1.1:3006',
+    ip: '192.168.1.2',
+    port: '3008',
   },
   {
     id: 3,
-    name: 'Lannister',
-    telecom: 3,
-    ipPort: '192.168.1.1:3006',
+    name: 'Thang',
+    telecom: 'Vinaphone',
+    ip: '192.168.1.1',
+    port: '3009',
   },
-  { id: 4, name: 'Stark', telecom: 4, ipPort: '192.168.1.1:3006' },
+  { id: 4, name: 'Stark', telecom: 'Fix', ip: '192.168.1.1', port: '3007' },
 ];
 
 function TrunkManagement() {
   const { openTrunkDialog, TrunkDialog, closeTrunkDialog } = useTrunkDialog();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'No', flex: 0.5 },
-    { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'telecom', headerName: 'Telecom', flex: 1.25 },
+    { field: 'name', headerName: 'Tên Trunk', flex: 1 },
+    { field: 'telecom', headerName: 'Nhà mạng', flex: 1 },
     {
       field: 'ipPort',
       headerName: 'IP:PORT',
-      flex: 1.25,
+      flex: 1,
+      valueGetter: (params: GridValueGetterParams) =>
+        `${params.row.ip || ''}:${params.row.port}`,
     },
     {
       field: 'action',
-      headerName: 'Action',
-      flex: 1,
+      headerName: 'Chức năng',
+      flex: 1.5,
       sortable: false,
       renderCell: (cellValues) => {
-        const { name, telecom, ipPort, id } = cellValues.row;
         return (
           <CellAction
             viewAble={false}
-            handleEdit={() =>
-              handleEdit({
-                name,
-                ipPort,
-                telecom,
-                id,
-              })
-            }
+            handleEdit={() => handleEdit(cellValues.row)}
             deleteDialogInfo={{
               title: 'Xóa Trunk?',
               type: 'error',
               description:
                 'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-              handleConfirm: () => onDelete({ name, ipPort, telecom, id }),
+              handleConfirm: () => onDelete(cellValues.row),
             }}
           />
         );
@@ -78,6 +74,7 @@ function TrunkManagement() {
 
   const onCreate = (data: TrunkForm) => {
     // TODO: Call api create
+    console.log(data);
     closeTrunkDialog();
   };
 
@@ -90,7 +87,7 @@ function TrunkManagement() {
     openTrunkDialog({
       initialValues,
       onSubmit: onUpdate,
-      title: 'Update Trunk',
+      title: 'Cập nhật Trunk',
       type: 'update',
     });
   };
@@ -98,7 +95,7 @@ function TrunkManagement() {
   const handleCreateTrunk = () => {
     openTrunkDialog({
       onSubmit: onCreate,
-      title: 'Create New Trunk',
+      title: 'Tạo mới Trunk',
     });
   };
 

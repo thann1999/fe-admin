@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import React, { useCallback, useState } from 'react';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
 import './preview-dialog.style.scss';
@@ -26,11 +26,12 @@ function usePreviewDialog({ columnConfig }: PreviewDialogProps) {
     values: {
       id: 0,
       customerName: '',
-      hotline: '',
+      stringHotline: '',
       ipPort: '',
       status: '',
       trunkName: '',
       virtual: '',
+      hotline: [],
     },
   });
 

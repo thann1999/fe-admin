@@ -25,15 +25,17 @@ function useTrunkDialog() {
   });
   const schema = useRef(
     yup.object().shape({
-      name: yup.string().required('Name is required'),
-      ipPort: yup.string().required('IP:Port is required'),
-      telecom: yup.string().required('Telecom is required'),
+      name: yup.string().required('Vui lòng nhập tên Trunk'),
+      ip: yup.string().required('Vui lòng nhập địa chỉ IP'),
+      port: yup.string().required('Vui lòng nhập Port'),
+      telecom: yup.string().required('Vui lòng nhập Nhà mạng'),
     })
   ).current;
   const { control, handleSubmit, reset, setValue } = useForm<TrunkForm>({
     defaultValues: {
       name: '',
-      ipPort: '',
+      ip: '',
+      port: '',
       telecom: '',
     },
     resolver: yupResolver(schema),
@@ -46,10 +48,14 @@ function useTrunkDialog() {
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { ipPort, name, telecom } = initialValues;
+      const { ip, name, telecom, port } = initialValues;
       setValue('name', name);
-      setValue('ipPort', ipPort);
-      setValue('telecom', telecom);
+      setValue('ip', ip);
+      setValue('port', port);
+      setValue(
+        'telecom',
+        TELECOM_OPTIONS.find((item) => item.label === telecom)?.value || ''
+      );
     }
     setDialogState((prev) => ({
       ...prev,
@@ -83,10 +89,10 @@ function useTrunkDialog() {
             className="form-paper"
             onSubmit={handleSubmit(dialogState.onSubmit)}
           >
-            <div id="name">
+            <div>
               <Grid item xs={12}>
                 <Typography className="mt--XS mb--XS require-field">
-                  Trunk name
+                  Tên Trunk
                 </Typography>
               </Grid>
 
@@ -95,15 +101,15 @@ function useTrunkDialog() {
                   name="name"
                   control={control}
                   className="admin-text-field width-100"
-                  placeholder="Name"
+                  placeholder="Nhập tên Trunk"
                 />
               </Grid>
             </div>
 
-            <div id="telecom">
+            <div>
               <Grid item xs={12}>
                 <Typography className="mt--XS mb--XS require-field">
-                  Telecom
+                  Nhà mạng
                 </Typography>
               </Grid>
 
@@ -117,19 +123,36 @@ function useTrunkDialog() {
               </Grid>
             </div>
 
-            <div id="ipPort">
+            <div>
               <Grid item xs={12}>
                 <Typography className="mt--XS mb--XS require-field">
-                  IP:Port
+                  Địa chỉ IP
                 </Typography>
               </Grid>
 
               <Grid item xs={12}>
                 <TextFieldController
-                  name="ipPort"
+                  name="ip"
                   control={control}
                   className="admin-text-field width-100"
-                  placeholder="IP:Port"
+                  placeholder="Nhập địa chỉ IP"
+                />
+              </Grid>
+            </div>
+
+            <div>
+              <Grid item xs={12}>
+                <Typography className="mt--XS mb--XS require-field">
+                  Port
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextFieldController
+                  name="port"
+                  control={control}
+                  className="admin-text-field width-100"
+                  placeholder="Nhập Port"
                 />
               </Grid>
             </div>

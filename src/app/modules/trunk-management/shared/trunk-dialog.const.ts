@@ -10,8 +10,9 @@ export const TELECOM_OPTIONS: SelectItem[] = [
 export interface TrunkForm {
   id?: number;
   name: string;
-  ipPort: string;
-  telecom: string;
+  ip: string;
+  port: string;
+  telecom: string | number;
 }
 
 export interface OpenDialogProps {

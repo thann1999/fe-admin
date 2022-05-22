@@ -68,14 +68,14 @@ export default function useConfirmDialog() {
             color="inherit"
             variant="contained"
           >
-            Cancel
+            Hủy bỏ
           </Button>
           <Button
             variant="contained"
             color={dialogState.type || 'primary'}
             onClick={handleConfirm}
           >
-            Confirm
+            Xác nhận
           </Button>
         </DialogActions>
       </Dialog>
