@@ -1,8 +1,10 @@
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import LoginAPI from 'app/api/login.api';
 import logo from 'app/assets/images/leeon-logo.png';
 import { useAppDispatch } from 'app/services/redux/hooks';
 import { login } from 'app/services/redux/slices/user-slice';
+import StorageService from 'app/services/storage/index';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
@@ -20,6 +22,8 @@ import {
   Label,
   Row,
 } from 'reactstrap';
+import LoadingComponent from 'shared/blocks/loading/loading.component';
+import { ACCESS_TOKEN } from 'shared/const/user-info.const';
 import 'styles/velzon-template/app.scss';
 import * as Yup from 'yup';
 import ParticlesAuth from '../components/particles-auth.component.jsx';
@@ -29,6 +33,7 @@ function Login() {
   const [showPassword, handleShowPassword] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -37,22 +42,31 @@ function Login() {
       password: '',
     },
     validationSchema: Yup.object({
-      username: Yup.string().required('Please Enter Your Username'),
-      password: Yup.string().required('Please Enter Your Password'),
+      username: Yup.string().required('Vui lòng nhập Tên tài khoản'),
+      password: Yup.string().required('Vui lòng nhập Mật khẩu'),
     }),
-    onSubmit: (values) => {
-      dispatch(
-        login({
-          info: {
-            email: 'thang@gmail.com',
-            id: 1,
-            phoneNumber: '012345',
-            role: 'admin',
-            sex: 'male',
-          },
-        })
-      );
-      navigate('/admin/home');
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        const result = await LoginAPI.login({
+          userName: values.username,
+          password: values.password,
+        });
+        StorageService.set(ACCESS_TOKEN, result?.accessToken);
+        dispatch(
+          login({
+            info: {
+              id: '1',
+              role: 'admin',
+              username: values.username,
+            },
+          })
+        );
+        setLoading(false);
+        navigate('/admin/home');
+      } catch (error) {
+        setLoading(false);
+      }
     },
   });
 
@@ -62,6 +76,8 @@ function Login() {
 
   return (
     <>
+      <LoadingComponent open={loading} />
+
       <Helmet>
         <title>{t('login.title')}</title>
       </Helmet>
@@ -102,7 +118,7 @@ function Login() {
                       >
                         <div className="mb-3">
                           <Label htmlFor="username" className="form-label">
-                            Username
+                            Tên tài khoản
                           </Label>
                           <Input
                             name="username"
@@ -131,7 +147,7 @@ function Login() {
                             className="form-label"
                             htmlFor="password-input"
                           >
-                            Password
+                            Mật khẩu
                           </Label>
                           <div className="position-relative auth-pass-inputgroup mb-3">
                             <Input
@@ -172,7 +188,7 @@ function Login() {
                           </div>
                         </div>
 
-                        <div className="form-check mt-1">
+                        {/* <div className="form-check mt-1">
                           <Input
                             className="form-check-input"
                             type="checkbox"
@@ -185,9 +201,9 @@ function Login() {
                           >
                             Remember me
                           </Label>
-                        </div>
+                        </div> */}
 
-                        <div className="mt-4">
+                        <div className="mt--MS">
                           <Button
                             color="success"
                             className="btn btn-success w-100"

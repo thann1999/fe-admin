@@ -26,31 +26,41 @@ function useCustomerDialog() {
     onSubmit: () => {},
   });
   const schema = useRef(
-    yup.object().shape({
-      name: yup.string().required('Vui lòng nhập Tên khách hàng'),
-      hotline: dialogState.isUpdate
-        ? yup.string()
-        : yup.string().required('Vui lòng nhập số Hotline'),
-      virtual: dialogState.isUpdate
-        ? yup.string()
-        : yup.string().required('Vui lòng nhập số Virtual'),
-      description: dialogState.isUpdate
-        ? yup.string()
-        : yup.string().required('Vui lòng nhập Mô tả'),
-    })
+    yup.object().shape(
+      {
+        name: yup.string().required('Vui lòng nhập Tên khách hàng'),
+        hotline: dialogState.isUpdate
+          ? yup.string()
+          : yup.string().when('virtual', {
+              is: (value: string) => !value,
+              then: yup.string().required('Vui lòng nhập số Hotline'),
+            }),
+        virtual: dialogState.isUpdate
+          ? yup.string()
+          : yup.string().when('hotline', {
+              is: (value: string) => !value,
+              then: yup.string().required('Vui lòng nhập số Virtual'),
+            }),
+        description: dialogState.isUpdate
+          ? yup.string()
+          : yup.string().required('Vui lòng nhập Mô tả'),
+      },
+      [['virtual', 'hotline']]
+    )
   ).current;
-  const { control, handleSubmit, reset, setValue } = useForm<CustomerForm>({
-    defaultValues: {
-      name: '',
-      hotline: '',
-      virtual: '',
-      description: '',
-      editHotline: [],
-      editVirtual: [],
-      id: 1,
-    },
-    resolver: yupResolver(schema),
-  });
+  const { control, handleSubmit, reset, setValue, watch } =
+    useForm<CustomerForm>({
+      defaultValues: {
+        name: '',
+        hotline: '',
+        virtual: '',
+        description: '',
+        editHotline: [],
+        editVirtual: [],
+        id: 1,
+      },
+      resolver: yupResolver(schema),
+    });
 
   const openCustomerDialog = ({
     title,
@@ -146,6 +156,7 @@ function useCustomerDialog() {
                   <Grid item xs={12}>
                     <AutocompleteController
                       multiple
+                      freeSolo
                       options={dialogState.hotlineOptions}
                       defaultValue={dialogState.hotlineOptions}
                       name="editHotline"
@@ -165,6 +176,7 @@ function useCustomerDialog() {
                   <Grid item xs={12}>
                     <AutocompleteController
                       multiple
+                      freeSolo
                       options={dialogState.virtualOptions}
                       defaultValue={dialogState.virtualOptions}
                       name="editVirtual"
@@ -178,7 +190,11 @@ function useCustomerDialog() {
               <>
                 <div>
                   <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS require-field">
+                    <Typography
+                      className={clsx('mt--XS mb--XXS', {
+                        'require-field': !watch('virtual'),
+                      })}
+                    >
                       Số Hotline
                     </Typography>
                   </Grid>
@@ -187,6 +203,7 @@ function useCustomerDialog() {
                     <TextFieldController
                       name="hotline"
                       control={control}
+                      disabled={!!watch('virtual')}
                       className="admin-text-field width-100"
                       placeholder="Nhập số Hotline"
                     />
@@ -195,7 +212,11 @@ function useCustomerDialog() {
 
                 <div>
                   <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS require-field">
+                    <Typography
+                      className={clsx('mt--XS mb--XXS ', {
+                        'require-field': !watch('hotline'),
+                      })}
+                    >
                       Số Virtual
                     </Typography>
                   </Grid>
@@ -204,6 +225,7 @@ function useCustomerDialog() {
                     <TextFieldController
                       name="virtual"
                       control={control}
+                      disabled={!!watch('hotline')}
                       className="admin-text-field width-100"
                       placeholder="Nhập số Virtual"
                     />

@@ -14,6 +14,8 @@ import Toolbar from '@mui/material/Toolbar';
 import avatar from 'app/assets/images/avatar-demo.png';
 import logo from 'app/assets/images/leeon-logo.png';
 import miniLogo from 'app/assets/images/mini-logo.png';
+import { useAppDispatch } from 'app/services/redux/hooks';
+import { logout } from 'app/services/redux/slices/user-slice';
 import clsx from 'clsx';
 import React, { useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -93,6 +95,7 @@ export default function MiniDrawer() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const menuList = useRef<MenuItemProps[]>([
     {
       section: 'MANAGEMENT',
@@ -109,7 +112,7 @@ export default function MiniDrawer() {
       ],
     },
   ]).current;
-  const SETTING_MENU = useRef<string[]>(['Profile', 'Logout']).current;
+  const SETTING_MENU = useRef<string[]>(['Đăng xuất']).current;
 
   const handleDrawer = () => {
     setOpen((previous) => !previous);
@@ -121,6 +124,12 @@ export default function MiniDrawer() {
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    handleCloseMenu();
+    navigate('/login');
   };
 
   const handleRedirect = (url: string) => {
@@ -168,7 +177,7 @@ export default function MiniDrawer() {
               {SETTING_MENU.map((setting, index) => (
                 <MenuItem
                   key={setting}
-                  onClick={handleCloseMenu}
+                  onClick={handleLogout}
                   className="menu-item"
                 >
                   <Stack

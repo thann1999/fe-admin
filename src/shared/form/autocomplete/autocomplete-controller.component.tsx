@@ -12,6 +12,7 @@ interface SelectControllerProps {
   multiple?: boolean;
   freeSolo?: boolean;
   defaultValue?: SelectItem[];
+  limitTags?: number;
 }
 
 function AutocompleteController(props: SelectControllerProps) {
@@ -23,6 +24,7 @@ function AutocompleteController(props: SelectControllerProps) {
     multiple,
     defaultValue,
     freeSolo,
+    limitTags,
   } = props;
 
   return (
@@ -31,9 +33,11 @@ function AutocompleteController(props: SelectControllerProps) {
       control={control}
       render={({ field }) => (
         <Autocomplete
+          sx={{ maxHeight: 150, overflow: 'auto' }}
           multiple={multiple}
           options={options}
           defaultValue={defaultValue}
+          limitTags={limitTags}
           freeSolo={freeSolo}
           renderInput={(params) => (
             <TextField
@@ -57,6 +61,7 @@ AutocompleteController.defaultProps = {
   multiple: false,
   freeSolo: false,
   defaultValue: [],
+  limitTags: 6,
 };
 
 export default React.memo(AutocompleteController);
