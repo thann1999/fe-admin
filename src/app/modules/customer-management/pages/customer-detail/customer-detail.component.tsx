@@ -1,8 +1,14 @@
 import { Container } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import React, { useRef } from 'react';
+import CustomerAPI, {
+  CustomerDetailInfo,
+  CustomerVIps,
+} from 'app/api/customer.api';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
+import { useParams } from 'react-router-dom';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
+import LoadingComponent from 'shared/blocks/loading/loading.component';
 import useCustomerDialog from '../../components/customer-dialog/customer-dialog.component';
 import { CustomerForm } from '../../shared/customer-dialog.type';
 import './customer-detail.style.scss';
@@ -26,9 +32,16 @@ const rows = [
   },
 ];
 
+interface CustomerInfo extends CustomerVIps {
+  hotlines: string;
+}
+
 function CustomerDetail() {
   const { openCustomerDialog, CustomerDialog, closeCustomerDialog } =
     useCustomerDialog();
+  const { id } = useParams();
+  const customerDetail = useRef<CustomerInfo>();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'hotline', headerName: 'Số Hotline', flex: 1 },
@@ -72,26 +85,50 @@ function CustomerDetail() {
     });
   };
 
+  const getCustomerDetail = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await CustomerAPI.getDetailCustomer(id || '');
+      if (result) {
+        customerDetail.current = {
+          ...result.customerVIps[0],
+          hotlines: result.hotlines.join(';'),
+        };
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    getCustomerDetail();
+  });
+
   return (
-    <Container maxWidth="xl" className="customer-detail">
+    <>
       <Helmet>
         <title>Customer Detail Page</title>
       </Helmet>
 
-      <div className="data-grid">
-        <DataGrid
-          rows={rows}
-          columns={COLUMN_CONFIG}
-          pageSize={10}
-          rowHeight={192}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
-          disableColumnMenu
-          hideFooter
-        />
-      </div>
+      <LoadingComponent open={loading} />
 
-      <CustomerDialog />
-    </Container>
+      <Container maxWidth="xl" className="customer-detail">
+        <div className="data-grid">
+          <DataGrid
+            rows={rows}
+            columns={COLUMN_CONFIG}
+            pageSize={10}
+            rowHeight={192}
+            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            disableColumnMenu
+            hideFooter
+          />
+        </div>
+
+        <CustomerDialog />
+      </Container>
+    </>
   );
 }
 

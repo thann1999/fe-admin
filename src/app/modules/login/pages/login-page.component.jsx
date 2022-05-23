@@ -48,11 +48,11 @@ function Login() {
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        const result = await LoginAPI.login({
-          userName: values.username,
-          password: values.password,
-        });
-        StorageService.set(ACCESS_TOKEN, result?.accessToken);
+        // const result = await LoginAPI.login({
+        //   userName: values.username,
+        //   password: values.password,
+        // });
+        // StorageService.set(ACCESS_TOKEN, result?.accessToken);
         dispatch(
           login({
             info: {

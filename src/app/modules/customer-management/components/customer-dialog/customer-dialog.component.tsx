@@ -1,12 +1,14 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import { convertHotlineVirtual } from 'app/helpers/array-convert.helper';
+import { convertStringToSelectItem } from 'app/helpers/array-convert.helper';
 import clsx from 'clsx';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
+import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import AutocompleteController from 'shared/form/autocomplete/autocomplete-controller.component';
+import SelectController from 'shared/form/select/select-controller.component';
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
 import {
@@ -28,7 +30,7 @@ function useCustomerDialog() {
   const schema = useRef(
     yup.object().shape(
       {
-        name: yup.string().required('Vui lòng nhập Tên khách hàng'),
+        customerName: yup.string().required('Vui lòng nhập Tên khách hàng'),
         hotline: dialogState.isUpdate
           ? yup.string()
           : yup.string().when('virtual', {
@@ -51,13 +53,13 @@ function useCustomerDialog() {
   const { control, handleSubmit, reset, setValue, watch } =
     useForm<CustomerForm>({
       defaultValues: {
-        name: '',
+        customerName: '',
         hotline: '',
         virtual: '',
         description: '',
         editHotline: [],
         editVirtual: [],
-        id: 1,
+        id: '',
       },
       resolver: yupResolver(schema),
     });
@@ -69,13 +71,14 @@ function useCustomerDialog() {
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { name, hotline, description, virtual } = initialValues;
-      const hotlineOptions = hotline ? convertHotlineVirtual(hotline) : [];
-      const virtualOptions = virtual ? convertHotlineVirtual(virtual) : [];
-      setValue('name', name);
+      const { customerName, hotline, description, virtual, id } = initialValues;
+      const hotlineOptions = hotline ? convertStringToSelectItem(hotline) : [];
+      const virtualOptions = virtual ? convertStringToSelectItem(virtual) : [];
+      setValue('customerName', customerName);
       setValue('description', description);
       setValue('hotline', hotline);
       setValue('virtual', virtual);
+      setValue('id', id);
       setDialogState((prev) => ({ ...prev, hotlineOptions, virtualOptions }));
     }
     setDialogState((prev) => ({
@@ -119,7 +122,7 @@ function useCustomerDialog() {
 
               <Grid item xs={12}>
                 <TextFieldController
-                  name="name"
+                  name="customerName"
                   control={control}
                   className="admin-text-field width-100"
                   placeholder="Nhập tên Khách hàng"
@@ -182,6 +185,23 @@ function useCustomerDialog() {
                       name="editVirtual"
                       control={control}
                       placeholder="Nhập số Virtual"
+                    />
+                  </Grid>
+                </div>
+
+                <div>
+                  <Grid item xs={12}>
+                    <Typography className="mt--XS mb--XXS require-field">
+                      Trạng thái
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <SelectController
+                      name="status"
+                      control={control}
+                      className="admin-select width-100"
+                      options={STATUS_OPTIONS}
                     />
                   </Grid>
                 </div>

@@ -8,6 +8,7 @@ import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { Message } from 'shared/const/message.const';
+import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import useTrunkDialog from '../components/trunk-dialog/trunk-dialog.component';
 import { TrunkForm } from '../shared/trunk-dialog.const';
 
@@ -25,6 +26,13 @@ function TrunkManagement() {
       flex: 1,
       valueGetter: (params: GridValueGetterParams) =>
         `${params.row.ip || ''}:${params.row.port}`,
+    },
+    {
+      field: 'status',
+      headerName: 'Trạng thái',
+      flex: 0.5,
+      valueGetter: (params: GridValueGetterParams) =>
+        STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
@@ -116,13 +124,13 @@ function TrunkManagement() {
 
   return (
     <>
+      <Helmet>
+        <title>Trunk Management Page</title>
+      </Helmet>
+
       <LoadingComponent open={loading} />
 
       <Container maxWidth="xl" className="table-page">
-        <Helmet>
-          <title>Trunk Management Page</title>
-        </Helmet>
-
         <div className="create-button">
           <Button
             variant="contained"

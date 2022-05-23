@@ -1,8 +1,8 @@
 import { SelectItem } from 'shared/form/select/select-controller.component';
 
 export interface CustomerForm {
-  id: string | number;
-  name: string;
+  id?: string;
+  customerName: string;
   hotline?: string;
   virtual?: string;
   editHotline: SelectItem[]; // Required
