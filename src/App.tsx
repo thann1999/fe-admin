@@ -1,8 +1,12 @@
 import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
-import React, { Suspense } from 'react';
+import { useAppDispatch, useAppSelector } from 'app/services/redux/hooks';
+import { login, selectUser } from 'app/services/redux/slices/user-slice';
+import StorageService from 'app/services/storage';
+import React, { Suspense, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AuthGuard from 'routes/auth-guard';
+import LoginGuard from 'routes/login-guard';
 import './styles/index.scss';
 import './translation/i18n';
 
@@ -34,7 +38,15 @@ function App() {
     <ThemeProvider theme={customTheme}>
       <Suspense fallback={<div>...Loading</div>}>
         <Routes>
-          <Route path="/login/*" element={<LoginRoute />} />
+          <Route
+            path="/login/*"
+            element={
+              <LoginGuard>
+                <LoginRoute />
+              </LoginGuard>
+            }
+          />
+
           <Route
             path="/admin/home/*"
             element={

@@ -13,13 +13,13 @@ const persistor = persistStore(store);
 
 ReactDOM.render(
   <React.StrictMode>
-    <PersistGate loading={<div>...Loading</div>} persistor={persistor}>
-      <Provider store={store}>
+    <Provider store={store}>
+      <PersistGate loading={<div>...Loading</div>} persistor={persistor}>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </Provider>
-    </PersistGate>
+      </PersistGate>
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

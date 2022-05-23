@@ -11,9 +11,7 @@ const initialState: User = {
   info: {
     email: '',
     id: '',
-    phoneNumber: '',
     role: '',
-    sex: '',
   },
 };
 

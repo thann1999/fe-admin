@@ -5,10 +5,19 @@
 
   .data-grid {
     width: 100%;
+    height: 250px;
     background-color: $color-white;
 
     .css-1s0hp0k-MuiDataGrid-columnHeadersInner {
       background-color: $color-blue-light;
+    }
+
+    .css-ganwqa-MuiDataGrid-root .MuiDataGrid-cell {
+      padding: $space-XS;
+      overflow: auto;
+      white-space: initial;
+      display: flex;
+      flex-wrap: wrap;
     }
   }
 }

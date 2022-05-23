@@ -95,6 +95,7 @@ function CustomerManagement() {
           pageSize={10}
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
           disableColumnMenu
+          rowHeight={60}
           hideFooterSelectedRowCount
         />
       </div>
