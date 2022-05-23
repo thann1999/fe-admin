@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import StorageService from 'app/services/storage';
-import { ACCESS_TOKEN, UserInfo } from 'shared/const/user-info.const';
+import { UserInfo } from 'shared/const/user-info.const';
 import { RootState } from 'store';
 
 interface User {
@@ -9,7 +9,7 @@ interface User {
 
 const initialState: User = {
   info: {
-    email: '',
+    username: '',
     id: '',
     role: '',
   },
@@ -23,8 +23,12 @@ const userSlice = createSlice({
       state.info = action.payload.info;
     },
     logout: (state: User) => {
-      state.info = initialState.info;
-      StorageService.setSession(ACCESS_TOKEN, '');
+      state.info = {
+        id: '',
+        role: '',
+        username: '',
+      };
+      StorageService.clear();
     },
   },
 });

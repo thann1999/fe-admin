@@ -1,4 +1,6 @@
 import axios, { AxiosRequestHeaders, Method } from 'axios';
+import { ACCESS_TOKEN } from 'shared/const/user-info.const';
+import StorageService from '../storage';
 import { HttpMethod, HttpOptions } from './http.type';
 
 export class HttpService {
@@ -55,9 +57,12 @@ export class HttpService {
   private generateHeader = (
     header?: AxiosRequestHeaders
   ): AxiosRequestHeaders => {
+    const token = StorageService.get(ACCESS_TOKEN);
+
     return {
       ...this.commonHeader,
       ...header,
+      token: token || '',
     };
   };
 

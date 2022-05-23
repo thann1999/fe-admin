@@ -4,6 +4,7 @@ import LoginAPI from 'app/api/login.api';
 import logo from 'app/assets/images/leeon-logo.png';
 import { useAppDispatch } from 'app/services/redux/hooks';
 import { login } from 'app/services/redux/slices/user-slice';
+import StorageService from 'app/services/storage/index';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
@@ -22,6 +23,7 @@ import {
   Row,
 } from 'reactstrap';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
+import { ACCESS_TOKEN } from 'shared/const/user-info.const';
 import 'styles/velzon-template/app.scss';
 import * as Yup from 'yup';
 import ParticlesAuth from '../components/particles-auth.component.jsx';
@@ -46,21 +48,24 @@ function Login() {
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        const result = await LoginAPI.login(values);
-        console.log(result);
+        const result = await LoginAPI.login({
+          userName: values.username,
+          password: values.password,
+        });
+        StorageService.set(ACCESS_TOKEN, result?.accessToken);
         dispatch(
           login({
             info: {
-              email: 'thang@gmail.com',
-              id: 1,
+              id: '1',
               role: 'admin',
+              username: values.username,
             },
           })
         );
-        // setLoading(false);
+        setLoading(false);
         navigate('/admin/home');
       } catch (error) {
-        // setLoading(false);
+        setLoading(false);
       }
     },
   });
