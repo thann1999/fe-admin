@@ -16,8 +16,13 @@
       padding: $space-XS;
       overflow: auto;
       white-space: initial;
+      align-items: flex-start;
       display: flex;
       flex-wrap: wrap;
+
+      .cell-action {
+        margin-top: -$space-XXS;
+      }
     }
   }
 }

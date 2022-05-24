@@ -74,13 +74,15 @@ function CustomerDetail() {
       setLoading(true);
       const result = await CustomerAPI.getDetailCustomer(id || '');
       if (result) {
+        const { customerVIps, hotlines } = result;
         customerDetail.current = {
-          id: result.customerVIps[0]?.customerId,
-          customerId: result.customerVIps[0]?.customerId,
-          customerName: result.customerVIps[0]?.customerName,
-          status: result.customerVIps[0]?.status,
-          hotline: result.hotlines[0]?.hotlines?.join(';'),
-          virtual: '', // result.customerVIps[0]?.customerVIps?.join(';'),
+          id: customerVIps[0]?.customerId || hotlines[0]?.customerId,
+          customerId: customerVIps[0]?.customerId || hotlines[0]?.customerId,
+          customerName:
+            customerVIps[0]?.customerName || hotlines[0].customerName,
+          status: customerVIps[0]?.status,
+          hotline: hotlines[0]?.hotlines?.join(';'),
+          virtual: customerVIps[0]?.customerVIps?.join(';'),
         };
       }
       setLoading(false);

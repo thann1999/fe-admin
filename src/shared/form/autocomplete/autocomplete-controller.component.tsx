@@ -14,6 +14,7 @@ interface SelectControllerProps {
   defaultValue?: SelectItem[];
   limitTags?: number;
   disable?: boolean;
+  isError?: boolean;
 }
 
 function AutocompleteController(props: SelectControllerProps) {
@@ -27,6 +28,7 @@ function AutocompleteController(props: SelectControllerProps) {
     freeSolo,
     limitTags,
     disable,
+    isError,
   } = props;
 
   return (
@@ -47,6 +49,7 @@ function AutocompleteController(props: SelectControllerProps) {
               {...params}
               variant="outlined"
               placeholder={placeholder}
+              error={isError}
             />
           )}
           onChange={(event, data) => {
@@ -66,6 +69,7 @@ AutocompleteController.defaultProps = {
   defaultValue: [],
   limitTags: 6,
   disable: false,
+  isError: false,
 };
 
 export default React.memo(AutocompleteController);

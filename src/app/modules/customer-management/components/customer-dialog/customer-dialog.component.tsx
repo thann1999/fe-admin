@@ -31,17 +31,15 @@ function useCustomerDialog() {
     yup.object().shape(
       {
         customerName: yup.string().required('Vui lòng nhập Tên khách hàng'),
-        hotline: yup.string().when('virtual', {
-          is: (value: string) => !value,
-          then: yup.string().required('Vui lòng nhập số Hotline'),
-        }),
         virtual: yup.string().when('hotline', {
           is: (value: string) => !value,
           then: yup.string().required('Vui lòng nhập số Virtual'),
         }),
-        description: dialogState.isUpdate
-          ? yup.string()
-          : yup.string().required('Vui lòng nhập Mô tả'),
+        hotline: yup.string().when('virtual', {
+          is: (value: string) => !value,
+          then: yup.string().required('Vui lòng nhập số Hotline'),
+        }),
+        description: yup.string(),
       },
       [['virtual', 'hotline']]
     )
@@ -81,6 +79,8 @@ function useCustomerDialog() {
       schema.fields.hotline = yup.string();
       schema.fields.virtual = yup.string();
       setDialogState((prev) => ({ ...prev, hotlineOptions, virtualOptions }));
+    } else {
+      schema.fields.description = yup.string().required('Vui lòng nhập mô tả');
     }
     setDialogState((prev) => ({
       ...prev,
@@ -106,6 +106,9 @@ function useCustomerDialog() {
   };
 
   const CustomerDialog = useCallback(() => {
+    const requireAutocomplete =
+      !watch('editHotline').length && !watch('editVirtual').length;
+
     return (
       <Dialog
         open={dialogState.isOpen}
@@ -178,6 +181,7 @@ function useCustomerDialog() {
                     <AutocompleteController
                       multiple
                       freeSolo
+                      isError={requireAutocomplete}
                       options={dialogState.hotlineOptions}
                       defaultValue={dialogState.hotlineOptions}
                       name="editHotline"
@@ -189,9 +193,7 @@ function useCustomerDialog() {
 
                   <Grid item xs={12}>
                     <FormHelperText className="labelAsterisk">
-                      {!watch('editHotline').length &&
-                        !watch('editVirtual').length &&
-                        'Vui lòng nhập số Hotline'}
+                      {requireAutocomplete && 'Vui lòng nhập số Hotline'}
                     </FormHelperText>
                   </Grid>
                 </div>
@@ -211,6 +213,7 @@ function useCustomerDialog() {
                     <AutocompleteController
                       multiple
                       freeSolo
+                      isError={requireAutocomplete}
                       disable={!!watch('editHotline').length}
                       options={dialogState.virtualOptions}
                       defaultValue={dialogState.virtualOptions}
@@ -221,9 +224,7 @@ function useCustomerDialog() {
                   </Grid>
                   <Grid item xs={12}>
                     <FormHelperText className="labelAsterisk">
-                      {!watch('editHotline').length &&
-                        !watch('editVirtual').length &&
-                        'Vui lòng nhập số Virtual'}
+                      {requireAutocomplete && 'Vui lòng nhập số Virtual'}
                     </FormHelperText>
                   </Grid>
                 </div>

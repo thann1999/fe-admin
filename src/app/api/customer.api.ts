@@ -18,12 +18,13 @@ export interface CustomerDetail {
 }
 
 export interface Hotline {
-  customerId: number;
+  customerId: number | string;
+  customerName: string;
   hotlines: string[];
 }
 
 export interface CustomerVIps extends CustomerInfo {
-  customerId: string;
+  customerId: string | number;
   customerVIps: string[];
 }
 
