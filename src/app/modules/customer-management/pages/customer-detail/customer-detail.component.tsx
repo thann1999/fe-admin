@@ -7,21 +7,20 @@ import { useParams } from 'react-router-dom';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import useCustomerDialog from '../../components/customer-dialog/customer-dialog.component';
-import { CustomerForm } from '../../shared/customer-dialog.type';
 import './customer-detail.style.scss';
 
-interface CustomerInfo {
+export interface CustomerInfo {
   id: number | string;
   customerId: number | string;
   customerName: string;
   status: number;
   virtual: string;
   hotline: string;
+  description: string;
 }
 
 function CustomerDetail() {
-  const { openCustomerDialog, CustomerDialog, closeCustomerDialog } =
-    useCustomerDialog();
+  const { openCustomerDialog, CustomerDialog } = useCustomerDialog();
   const { id } = useParams();
   const customerDetail = useRef<CustomerInfo>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -37,33 +36,16 @@ function CustomerDetail() {
       renderCell: (cellValues) => (
         <CellAction
           viewAble={false}
+          deleteAble={false}
           handleEdit={() => handleEdit(cellValues.row)}
-          deleteDialogInfo={{
-            title: 'Xóa Khách hàng?',
-            type: 'error',
-            description:
-              'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-            handleConfirm: () => onDelete(cellValues.row),
-          }}
         />
       ),
     },
   ]).current;
 
-  const onUpdate = (data: CustomerForm) => {
-    // TODO: Call api update
-    console.log(data);
-    closeCustomerDialog();
-  };
-
-  const onDelete = (data: CustomerForm) => {
-    closeCustomerDialog();
-  };
-
-  const handleEdit = (initialValues: CustomerForm) => {
+  const handleEdit = (initialValues: CustomerInfo) => {
     openCustomerDialog({
       initialValues,
-      onSubmit: onUpdate,
       title: 'Cập nhật Khách hàng',
       isUpdate: true,
     });
@@ -81,6 +63,7 @@ function CustomerDetail() {
           customerName:
             customerVIps[0]?.customerName || hotlines[0].customerName,
           status: customerVIps[0]?.status,
+          description: customerVIps[0]?.description,
           hotline: hotlines[0]?.hotlines?.join(';'),
           virtual: customerVIps[0]?.customerVIps?.join(';'),
         };

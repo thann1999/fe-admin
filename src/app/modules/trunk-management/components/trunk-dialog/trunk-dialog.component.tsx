@@ -58,7 +58,7 @@ function useTrunkDialog() {
   }: OpenDialogProps) => {
     if (initialValues) {
       const { ip, trunkName, groupCode, port, status, id } = initialValues;
-      initialUpdateValues.current = initialValues;
+      initialUpdateValues.current = { ...initialValues };
       setValue('trunkName', trunkName);
       setValue('ip', ip);
       setValue('port', port);

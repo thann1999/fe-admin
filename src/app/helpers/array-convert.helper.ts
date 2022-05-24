@@ -1,8 +1,5 @@
-export const convertStringToSelectItem = (
-  stringHotline: string,
-  separate = ';'
-) => {
+export const convertStringToSelectItem = (stringHotline: string) => {
   return stringHotline
-    .split(separate)
+    .split(/[,;]/)
     .map((item) => ({ label: item, value: item }));
 };

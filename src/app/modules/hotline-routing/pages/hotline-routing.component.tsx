@@ -1,77 +1,22 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import React, { useRef } from 'react';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import HotlineRoutingAPI from 'app/api/hotline-routing.api';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
+import LoadingComponent from 'shared/blocks/loading/loading.component';
 import usePreviewDialog from 'shared/blocks/preview-dialog/preview-dialog.component';
 import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
 import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
-
-const rows = [
-  {
-    id: 1,
-    customerName: 'Snow',
-    trunkName: 1,
-    stringHotline: '11111111, 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-  {
-    id: 2,
-    customerName: 'John',
-    trunkName: 1,
-    stringHotline: '11111111, 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-  {
-    id: 3,
-    customerName: 'Thang',
-    trunkName: 1,
-    stringHotline: '11111111, 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 1,
-  },
-  {
-    id: 4,
-    customerName: 'Ngoc',
-    trunkName: 2,
-    stringHotline: '11111111, 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 1,
-  },
-  {
-    id: 5,
-    customerName: 'Anh',
-    trunkName: 2,
-    stringHotline: '11111111, 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-  {
-    id: 6,
-    customerName: 'Nguyen',
-    trunkName: 3,
-    stringHotline: '11111111, 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-];
+import { HotlineRoutingTableInfo } from '../shared/hotline-routing.const';
 
 export const PREVIEW_CONFIG: GridColDef[] = [
-  { field: 'id', headerName: 'No', flex: 0.5 },
   { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
   { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
   { field: 'stringHotline', headerName: 'Hotline', flex: 1 },
-  { field: 'ipPort', headerName: 'IP:PORT', flex: 1 },
-  {
-    field: 'status',
-    headerName: 'Trạng thái',
-    flex: 1,
-    valueGetter: (params: GridValueGetterParams) =>
-      params.row.status ? 'Active' : 'Disable',
-  },
+  { field: 'ip', headerName: 'Đỉa chỉ IP', flex: 1 },
+  { field: 'port', headerName: 'port', flex: 1 },
 ];
 
 function HotlineRoutingPage() {
@@ -80,35 +25,25 @@ function HotlineRoutingPage() {
   const { PreviewDialog, openPreviewDialog } = usePreviewDialog({
     columnConfig: PREVIEW_CONFIG,
   });
+  const [loading, setLoading] = useState<boolean>(false);
+  const listData = useRef<HotlineRoutingTableInfo[]>();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'No', flex: 0.5 },
     { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
-    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1.25 },
-    { field: 'stringHotline', headerName: 'Hotline', flex: 1.25 },
-    {
-      field: 'status',
-      headerName: 'Trạng thái',
-      flex: 0.75,
-      valueGetter: (params: GridValueGetterParams) =>
-        params.row.status ? 'Active' : 'Disable',
-    },
+    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
+    { field: 'stringHotline', headerName: 'Hotline', flex: 1 },
+    { field: 'ip', headerName: 'Địa chỉ IP', flex: 1 },
+    { field: 'port', headerName: 'Port', flex: 1 },
     {
       field: 'action',
       headerName: 'Action',
-      flex: 1.25,
+      flex: 1,
       sortable: false,
       renderCell: (cellValues) => {
         return (
           <CellAction
+            deleteAble={false}
             handleEdit={() => handleEdit(cellValues.row)}
-            deleteDialogInfo={{
-              title: 'Xóa Hotline?',
-              type: 'error',
-              description:
-                'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-              handleConfirm: () => onDelete(cellValues.row),
-            }}
             handleView={() => handleViewInfo(cellValues.row)}
           />
         );
@@ -126,14 +61,9 @@ function HotlineRoutingPage() {
     closeRoutingDialog();
   };
 
-  const onDelete = (data: RoutingForm) => {
-    // TODO: Call api delete
-    closeRoutingDialog();
-  };
-
   const handleViewInfo = (data: RoutingForm) => {
     openPreviewDialog({
-      title: 'Thông tin chi tiết Hotline',
+      title: 'Thông tin chi tiết Hotline Trunk',
       values: data,
     });
   };
@@ -142,7 +72,7 @@ function HotlineRoutingPage() {
     openRoutingDialog({
       initialValues,
       onSubmit: onUpdate,
-      title: 'Cập nhật Hotline',
+      title: 'Cập nhật Hotline Trunk',
       type: 'update',
     });
   };
@@ -150,43 +80,71 @@ function HotlineRoutingPage() {
   const handleCreateHotline = () => {
     openRoutingDialog({
       onSubmit: onCreate,
-      title: 'Tạo mới Hotline',
+      title: 'Tạo mới Hotline Trunk',
       type: 'create',
     });
   };
 
+  const getListHotline = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await HotlineRoutingAPI.getListHotlineRouting();
+      if (result) {
+        listData.current = result.hotlines.map((item) => ({
+          id: item.customerId,
+          customerId: item.customerId,
+          customerName: item.customerName,
+          ip: item.host,
+          port: item.port,
+          stringHotline: item.hotlines.join(','),
+        }));
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    getListHotline();
+  }, [getListHotline]);
+
   return (
-    <Container maxWidth="xl" className="table-page">
-      <Helmet>
-        <title>Hotline Routing Page</title>
-      </Helmet>
+    <>
+      <LoadingComponent open={loading} />
 
-      <div className="create-button">
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddCircleIcon />}
-          className="admin-button --no-transform"
-          onClick={handleCreateHotline}
-        >
-          Tạo mới
-        </Button>
-      </div>
+      <Container maxWidth="xl" className="table-page">
+        <Helmet>
+          <title>Hotline Routing Page</title>
+        </Helmet>
 
-      <div className="data-grid">
-        <DataGrid
-          rows={rows}
-          columns={COLUMN_CONFIG}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
-          disableColumnMenu
-          hideFooterSelectedRowCount
-        />
-      </div>
+        <div className="create-button">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddCircleIcon />}
+            className="admin-button --no-transform"
+            onClick={handleCreateHotline}
+          >
+            Tạo mới
+          </Button>
+        </div>
 
-      <RoutingDialog />
-      <PreviewDialog />
-    </Container>
+        <div className="data-grid">
+          <DataGrid
+            rows={listData.current ? listData.current : []}
+            columns={COLUMN_CONFIG}
+            pageSize={10}
+            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            disableColumnMenu
+            hideFooterSelectedRowCount
+          />
+        </div>
+
+        <RoutingDialog />
+        <PreviewDialog />
+      </Container>
+    </>
   );
 }
 
