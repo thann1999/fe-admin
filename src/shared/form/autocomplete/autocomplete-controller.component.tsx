@@ -13,6 +13,7 @@ interface SelectControllerProps {
   freeSolo?: boolean;
   defaultValue?: SelectItem[];
   limitTags?: number;
+  disable?: boolean;
 }
 
 function AutocompleteController(props: SelectControllerProps) {
@@ -25,6 +26,7 @@ function AutocompleteController(props: SelectControllerProps) {
     defaultValue,
     freeSolo,
     limitTags,
+    disable,
   } = props;
 
   return (
@@ -38,6 +40,7 @@ function AutocompleteController(props: SelectControllerProps) {
           options={options}
           defaultValue={defaultValue}
           limitTags={limitTags}
+          disabled={disable}
           freeSolo={freeSolo}
           renderInput={(params) => (
             <TextField
@@ -62,6 +65,7 @@ AutocompleteController.defaultProps = {
   freeSolo: false,
   defaultValue: [],
   limitTags: 6,
+  disable: false,
 };
 
 export default React.memo(AutocompleteController);

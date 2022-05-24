@@ -1,9 +1,6 @@
 import { Container } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import CustomerAPI, {
-  CustomerDetailInfo,
-  CustomerVIps,
-} from 'app/api/customer.api';
+import CustomerAPI from 'app/api/customer.api';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
@@ -13,27 +10,13 @@ import useCustomerDialog from '../../components/customer-dialog/customer-dialog.
 import { CustomerForm } from '../../shared/customer-dialog.type';
 import './customer-detail.style.scss';
 
-const rows = [
-  {
-    id: 1,
-    name: 'Thang',
-    description: 'This is description',
-    hotline: `11111111, 9744124556, 123456, 11111111, 9744124556, 123456, 11111111, 
-      9744124556, 123456, 11111111, 9744124556, 12345611111111, 
-      9744124556, 123456, 11111111, 9744124556, 123456, 11111111, 
-      9744124556, 123456, 11111111, 9744124556, 12345611111111, 
-      9744124556, 123456, 11111111, 9744124556, 123456, 11111111, 
-      9744124556, 123456, 11111111, 9744124556, 123456 
-      9744124556, 123456, 11111111, 9744124556, 123456
-      9744124556, 123456, 11111111, 9744124556, 123456
-      9744124556, 123456, 11111111, 9744124556, 123456
-      9744124556, 123456, 11111111, 9744124556, 123456`,
-    virtual: '11111111, 9744124556, 123456, 11111111, 9744124556, 123456',
-  },
-];
-
-interface CustomerInfo extends CustomerVIps {
-  hotlines: string;
+interface CustomerInfo {
+  id: number | string;
+  customerId: number | string;
+  customerName: string;
+  status: number;
+  virtual: string;
+  hotline: string;
 }
 
 function CustomerDetail() {
@@ -69,6 +52,7 @@ function CustomerDetail() {
 
   const onUpdate = (data: CustomerForm) => {
     // TODO: Call api update
+    console.log(data);
     closeCustomerDialog();
   };
 
@@ -91,8 +75,12 @@ function CustomerDetail() {
       const result = await CustomerAPI.getDetailCustomer(id || '');
       if (result) {
         customerDetail.current = {
-          ...result.customerVIps[0],
-          hotlines: result.hotlines.join(';'),
+          id: result.customerVIps[0]?.customerId,
+          customerId: result.customerVIps[0]?.customerId,
+          customerName: result.customerVIps[0]?.customerName,
+          status: result.customerVIps[0]?.status,
+          hotline: result.hotlines[0]?.hotlines?.join(';'),
+          virtual: '', // result.customerVIps[0]?.customerVIps?.join(';'),
         };
       }
       setLoading(false);
@@ -103,7 +91,7 @@ function CustomerDetail() {
 
   useEffect(() => {
     getCustomerDetail();
-  });
+  }, [getCustomerDetail]);
 
   return (
     <>
@@ -116,7 +104,7 @@ function CustomerDetail() {
       <Container maxWidth="xl" className="customer-detail">
         <div className="data-grid">
           <DataGrid
-            rows={rows}
+            rows={customerDetail.current ? [customerDetail.current] : []}
             columns={COLUMN_CONFIG}
             pageSize={10}
             rowHeight={192}

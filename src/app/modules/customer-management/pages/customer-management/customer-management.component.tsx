@@ -55,11 +55,12 @@ function CustomerManagement() {
       setLoading(true);
       await CustomerAPI.createCustomer({
         customerName,
-        description,
+        description: description || '',
         hotlines: hotline || '',
         virtualnumbers: virtual || '',
       });
-      getListCustomer();
+
+      await getListCustomer();
       addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
       closeCustomerDialog();
     } catch (error) {

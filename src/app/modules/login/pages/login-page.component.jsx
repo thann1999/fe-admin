@@ -8,7 +8,6 @@ import StorageService from 'app/services/storage/index';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -29,7 +28,6 @@ import * as Yup from 'yup';
 import ParticlesAuth from '../components/particles-auth.component.jsx';
 
 function Login() {
-  const { t } = useTranslation();
   const [showPassword, handleShowPassword] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -48,11 +46,11 @@ function Login() {
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        // const result = await LoginAPI.login({
-        //   userName: values.username,
-        //   password: values.password,
-        // });
-        // StorageService.set(ACCESS_TOKEN, result?.accessToken);
+        const result = await LoginAPI.login({
+          userName: values.username,
+          password: values.password,
+        });
+        StorageService.set(ACCESS_TOKEN, result?.accessToken);
         dispatch(
           login({
             info: {
@@ -79,7 +77,7 @@ function Login() {
       <LoadingComponent open={loading} />
 
       <Helmet>
-        <title>{t('login.title')}</title>
+        <title>Login Page</title>
       </Helmet>
 
       <ParticlesAuth>

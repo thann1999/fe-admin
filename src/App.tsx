@@ -7,7 +7,6 @@ import AuthGuard from 'routes/auth-guard';
 import LoginGuard from 'routes/login-guard';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import './styles/index.scss';
-import './translation/i18n';
 
 export const customTheme = createTheme({
   typography: {

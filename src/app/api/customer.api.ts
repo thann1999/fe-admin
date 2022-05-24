@@ -12,14 +12,19 @@ export interface CustomerInfo {
   status: number;
 }
 
-export interface CustomerDetailInfo {
+export interface CustomerDetail {
   customerVIps: CustomerVIps[];
+  hotlines: Hotline[];
+}
+
+export interface Hotline {
+  customerId: number;
   hotlines: string[];
 }
 
 export interface CustomerVIps extends CustomerInfo {
   customerId: string;
-  virtualNumber: string;
+  customerVIps: string[];
 }
 
 export interface CreateCustomerParams {
@@ -41,6 +46,6 @@ export default class CustomerAPI {
   };
 
   static getDetailCustomer = async (id: string) => {
-    return await httpService.get<CustomerDetailInfo>(`/customer/${id}/all`);
+    return await httpService.get<CustomerDetail>(`/customer/${id}/all`);
   };
 }

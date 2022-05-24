@@ -61,7 +61,8 @@ function TrunkManagement() {
         trunkName,
         groupName: telecom,
       });
-      getListTrunk();
+
+      await getListTrunk();
       addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
       closeTrunkDialog();
     } catch (error) {
@@ -69,19 +70,28 @@ function TrunkManagement() {
     }
   };
 
-  const onUpdate = async (data: TrunkForm) => {
+  const onUpdate = async (data: TrunkForm, isOnlyChangeStatus?: boolean) => {
     try {
       const { id, telecom, ip, port, trunkName, status } = data;
       setLoading(true);
-      await TrunkAPI.updateTrunk({
-        groupCode: telecom,
-        ip,
-        port,
-        status: status ?? 0,
-        trunkId: id || '',
-        trunkName,
-      });
-      getListTrunk();
+      await TrunkAPI.updateTrunk(
+        isOnlyChangeStatus
+          ? {
+              groupCode: telecom,
+              status: status ?? 0,
+              trunkId: id || '',
+            }
+          : {
+              groupCode: telecom,
+              ip,
+              port,
+              status: status ?? 0,
+              trunkId: id || '',
+              trunkName,
+            }
+      );
+
+      await getListTrunk();
       addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
       closeTrunkDialog();
     } catch (error) {

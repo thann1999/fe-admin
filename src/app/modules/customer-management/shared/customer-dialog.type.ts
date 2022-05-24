@@ -7,7 +7,8 @@ export interface CustomerForm {
   virtual?: string;
   editHotline: SelectItem[]; // Required
   editVirtual: SelectItem[]; // Required
-  description: string;
+  description?: string;
+  status: number;
 }
 
 export interface OpenDialogProps {

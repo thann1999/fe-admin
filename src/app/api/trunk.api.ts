@@ -32,10 +32,13 @@ export interface CreateTrunkParams {
   port: string;
 }
 
-export interface UpdateTrunkParams extends CreateTrunkParams {
+export interface UpdateTrunkParams {
   groupCode: string;
   trunkId: string;
   status: number;
+  trunkName?: string;
+  ip?: string;
+  port?: string;
 }
 
 export default class TrunkAPI {

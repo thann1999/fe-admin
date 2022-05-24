@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import TrunkAPI from 'app/api/trunk.api';
+import TrunkAPI, { TrunkInfo } from 'app/api/trunk.api';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -27,6 +27,7 @@ function useTrunkDialog() {
     isUpdate: false,
     onSubmit: () => {},
   });
+  const initialUpdateValues = useRef<TrunkInfo>();
   const [loading, setLoading] = useState<boolean>(false);
   const telecomList = useRef<SelectItem[]>();
   const schema = useRef(
@@ -57,6 +58,7 @@ function useTrunkDialog() {
   }: OpenDialogProps) => {
     if (initialValues) {
       const { ip, trunkName, groupCode, port, status, id } = initialValues;
+      initialUpdateValues.current = initialValues;
       setValue('trunkName', trunkName);
       setValue('ip', ip);
       setValue('port', port);
@@ -101,6 +103,26 @@ function useTrunkDialog() {
     });
   };
 
+  const handleUpdate = (data: TrunkForm) => {
+    const { ip, port, telecom, trunkName, status } = data;
+    if (
+      initialUpdateValues.current?.groupCode !== telecom ||
+      initialUpdateValues.current?.trunkName !== trunkName ||
+      initialUpdateValues.current?.ip !== ip ||
+      initialUpdateValues.current?.port !== port
+    ) {
+      dialogState.onSubmit(data);
+      return;
+    }
+
+    if (initialUpdateValues.current?.status !== status) {
+      dialogState.onSubmit(data, true);
+      return;
+    }
+
+    closeTrunkDialog();
+  };
+
   useEffect(() => {
     getTelecomList();
   }, [getTelecomList]);
@@ -125,7 +147,7 @@ function useTrunkDialog() {
             <form
               className="form-paper"
               onSubmit={handleSubmit(
-                dialogState.isUpdate ? dialogState.onSubmit : handleCreate
+                dialogState.isUpdate ? handleUpdate : handleCreate
               )}
             >
               <div>
