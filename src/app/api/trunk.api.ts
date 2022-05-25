@@ -25,17 +25,20 @@ export interface TelecomInfo {
   groupCode: string;
 }
 
-export interface CreateTrunkInfo {
+export interface CreateTrunkParams {
   groupName?: string;
   trunkName: string;
   ip: string;
   port: string;
 }
 
-export interface UpdateTrunkInfo extends CreateTrunkInfo {
+export interface UpdateTrunkParams {
   groupCode: string;
   trunkId: string;
   status: number;
+  trunkName?: string;
+  ip?: string;
+  port?: string;
 }
 
 export default class TrunkAPI {
@@ -47,7 +50,7 @@ export default class TrunkAPI {
     return await httpService.get<TelecomList>('/group');
   };
 
-  static createNewTrunk = async (data: CreateTrunkInfo) => {
+  static createNewTrunk = async (data: CreateTrunkParams) => {
     const { groupName, ...rest } = data;
 
     return await httpService.post<TrunkInfo>(`/group/${groupName}/ip`, {
@@ -55,9 +58,9 @@ export default class TrunkAPI {
     });
   };
 
-  static updateTrunk = async (data: UpdateTrunkInfo) => {
+  static updateTrunk = async (data: UpdateTrunkParams) => {
     const { trunkId, groupCode, ...rest } = data;
-    return await httpService.put<any>(`/group/${groupCode}/ip/${trunkId}`, {
+    return await httpService.put(`/group/${groupCode}/ip/${trunkId}`, {
       body: { ...rest },
     });
   };

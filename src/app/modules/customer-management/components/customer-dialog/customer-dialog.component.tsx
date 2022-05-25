@@ -1,7 +1,12 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Grid, Typography } from '@mui/material';
+import { Button, FormHelperText, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import { convertHotlineVirtual } from 'app/helpers/array-convert.helper';
+import CustomerAPI from 'app/api/customer.api';
+import {
+  convertStringToArray,
+  convertStringToSelectItem,
+  getDifferenceTwoArray,
+} from 'app/helpers/array.helper';
 import clsx from 'clsx';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,6 +14,7 @@ import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
 import AutocompleteController from 'shared/form/autocomplete/autocomplete-controller.component';
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
+import { CustomerInfo } from '../../pages/customer-detail/customer-detail.component';
 import {
   CustomerForm,
   DialogState,
@@ -24,40 +30,36 @@ function useCustomerDialog() {
     hotlineOptions: [],
     virtualOptions: [],
     onSubmit: () => {},
+    onCallAPIUpdate: () => {},
   });
   const schema = useRef(
     yup.object().shape(
       {
-        name: yup.string().required('Vui lòng nhập Tên khách hàng'),
-        hotline: dialogState.isUpdate
-          ? yup.string()
-          : yup.string().when('virtual', {
-              is: (value: string) => !value,
-              then: yup.string().required('Vui lòng nhập số Hotline'),
-            }),
-        virtual: dialogState.isUpdate
-          ? yup.string()
-          : yup.string().when('hotline', {
-              is: (value: string) => !value,
-              then: yup.string().required('Vui lòng nhập số Virtual'),
-            }),
-        description: dialogState.isUpdate
-          ? yup.string()
-          : yup.string().required('Vui lòng nhập Mô tả'),
+        customerName: yup.string().required('Vui lòng nhập Tên khách hàng'),
+        virtual: yup.string().when('hotline', {
+          is: (value: string) => !value,
+          then: yup.string().required('Vui lòng nhập số Virtual'),
+        }),
+        hotline: yup.string().when('virtual', {
+          is: (value: string) => !value,
+          then: yup.string().required('Vui lòng nhập số Hotline'),
+        }),
+        description: yup.string().required('Vui lòng nhập Mô tả'),
       },
       [['virtual', 'hotline']]
     )
   ).current;
+  const customerInitialValues = useRef<CustomerInfo>();
   const { control, handleSubmit, reset, setValue, watch } =
     useForm<CustomerForm>({
       defaultValues: {
-        name: '',
+        customerName: '',
         hotline: '',
         virtual: '',
         description: '',
         editHotline: [],
         editVirtual: [],
-        id: 1,
+        id: 0,
       },
       resolver: yupResolver(schema),
     });
@@ -69,13 +71,18 @@ function useCustomerDialog() {
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { name, hotline, description, virtual } = initialValues;
-      const hotlineOptions = hotline ? convertHotlineVirtual(hotline) : [];
-      const virtualOptions = virtual ? convertHotlineVirtual(virtual) : [];
-      setValue('name', name);
-      setValue('description', description);
+      const { customerName, hotline, stringVirtual, id } = initialValues;
+      customerInitialValues.current = { ...initialValues };
+      const hotlineOptions = convertStringToSelectItem(hotline);
+      const virtualOptions = convertStringToSelectItem(stringVirtual);
+      setValue('customerName', customerName);
       setValue('hotline', hotline);
-      setValue('virtual', virtual);
+      setValue('virtual', stringVirtual);
+      setValue('id', id);
+      setValue('editHotline', hotlineOptions);
+      setValue('editVirtual', virtualOptions);
+      schema.fields.hotline = yup.string();
+      schema.fields.virtual = yup.string();
       setDialogState((prev) => ({ ...prev, hotlineOptions, virtualOptions }));
     }
     setDialogState((prev) => ({
@@ -92,7 +99,93 @@ function useCustomerDialog() {
     setDialogState((prev) => ({ ...prev, isOpen: false }));
   };
 
+  const handleUpdate = async (data: CustomerForm) => {
+    const requireAutocomplete =
+      !watch('editHotline').length && !watch('editVirtual').length;
+    if (requireAutocomplete) {
+      return;
+    }
+
+    const { customerName, description, editHotline, editVirtual } = data;
+    const callAPI = [];
+
+    if (
+      customerName !== customerInitialValues.current?.customerName ||
+      description !== customerInitialValues.current?.description
+    ) {
+      callAPI.push(
+        CustomerAPI.updateCustomer.bind({
+          customerId: data.id,
+          customerName,
+          description,
+        })
+      );
+    }
+
+    // Convert SelectItem[], string to string[]
+    const arrayHotline = editHotline.map((hotline) => hotline.value || hotline);
+    const arrayVirtual = editVirtual.map((virtual) => virtual.value || virtual);
+    const initialHotline = convertStringToArray(
+      customerInitialValues.current?.hotline
+    );
+    const initialVirtual = convertStringToArray(
+      customerInitialValues.current?.stringVirtual
+    );
+
+    // Get add, delete hotline and virtualNumber
+    const deleteHotlines = getDifferenceTwoArray(initialHotline, arrayHotline);
+    const addHotlines = getDifferenceTwoArray(arrayHotline, initialHotline);
+    const deleteVirtual = getDifferenceTwoArray(initialVirtual, arrayVirtual);
+    const addVirtual = getDifferenceTwoArray(arrayVirtual, initialVirtual);
+
+    if (deleteHotlines.length) {
+      deleteHotlines.forEach((item) => {
+        callAPI.push(CustomerAPI.deleteHotline.bind(item));
+      });
+    }
+
+    if (addHotlines.length) {
+      callAPI.push(
+        CustomerAPI.addHotline.bind({
+          msisdn: addHotlines.join(','),
+          customerId: data.id,
+        })
+      );
+    }
+
+    if (addVirtual.length) {
+      callAPI.push(
+        CustomerAPI.addVirtualNumber.bind({
+          virtualNumber: addVirtual.join(','),
+          customerId: data.id,
+        })
+      );
+    }
+
+    if (deleteVirtual.length) {
+      deleteVirtual.forEach((virtual) => {
+        const findVirtual = customerInitialValues.current?.virtual.find(
+          (item) => item.virtualNumber === virtual
+        );
+        callAPI.push(
+          CustomerAPI.deleteVirtualNumber.bind({
+            customerId: data.id,
+            virtualNumber: findVirtual?.virtualNumber || '',
+            id: findVirtual?.id,
+          })
+        );
+      });
+    }
+
+    if (dialogState.onCallAPIUpdate) {
+      dialogState.onCallAPIUpdate(callAPI);
+    }
+  };
+
   const CustomerDialog = useCallback(() => {
+    const requireAutocomplete =
+      !watch('editHotline').length && !watch('editVirtual').length;
+
     return (
       <Dialog
         open={dialogState.isOpen}
@@ -108,7 +201,9 @@ function useCustomerDialog() {
         <Grid>
           <form
             className="form-paper"
-            onSubmit={handleSubmit(dialogState.onSubmit)}
+            onSubmit={handleSubmit(
+              dialogState.onSubmit ? dialogState.onSubmit : handleUpdate
+            )}
           >
             <div>
               <Grid item xs={12}>
@@ -119,7 +214,7 @@ function useCustomerDialog() {
 
               <Grid item xs={12}>
                 <TextFieldController
-                  name="name"
+                  name="customerName"
                   control={control}
                   className="admin-text-field width-100"
                   placeholder="Nhập tên Khách hàng"
@@ -148,7 +243,11 @@ function useCustomerDialog() {
               <>
                 <div>
                   <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS require-field">
+                    <Typography
+                      className={clsx('mt--XS mb--XXS', {
+                        'require-field': !watch('editVirtual').length,
+                      })}
+                    >
                       Số Hotline
                     </Typography>
                   </Grid>
@@ -157,18 +256,30 @@ function useCustomerDialog() {
                     <AutocompleteController
                       multiple
                       freeSolo
+                      isError={requireAutocomplete}
                       options={dialogState.hotlineOptions}
                       defaultValue={dialogState.hotlineOptions}
                       name="editHotline"
+                      disable={!!watch('editVirtual').length}
                       control={control}
                       placeholder="Nhập số Hotline"
                     />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <FormHelperText className="labelAsterisk">
+                      {requireAutocomplete && 'Vui lòng nhập số Hotline'}
+                    </FormHelperText>
                   </Grid>
                 </div>
 
                 <div>
                   <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS require-field">
+                    <Typography
+                      className={clsx('mt--XS mb--XXS', {
+                        'require-field': !watch('editHotline').length,
+                      })}
+                    >
                       Số Virtual
                     </Typography>
                   </Grid>
@@ -177,12 +288,19 @@ function useCustomerDialog() {
                     <AutocompleteController
                       multiple
                       freeSolo
+                      isError={requireAutocomplete}
+                      disable={!!watch('editHotline').length}
                       options={dialogState.virtualOptions}
                       defaultValue={dialogState.virtualOptions}
                       name="editVirtual"
                       control={control}
                       placeholder="Nhập số Virtual"
                     />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormHelperText className="labelAsterisk">
+                      {requireAutocomplete && 'Vui lòng nhập số Virtual'}
+                    </FormHelperText>
                   </Grid>
                 </div>
               </>

@@ -8,7 +8,6 @@ import StorageService from 'app/services/storage/index';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -29,7 +28,6 @@ import * as Yup from 'yup';
 import ParticlesAuth from '../components/particles-auth.component.jsx';
 
 function Login() {
-  const { t } = useTranslation();
   const [showPassword, handleShowPassword] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -79,7 +77,7 @@ function Login() {
       <LoadingComponent open={loading} />
 
       <Helmet>
-        <title>{t('login.title')}</title>
+        <title>Login Page</title>
       </Helmet>
 
       <ParticlesAuth>
@@ -209,7 +207,7 @@ function Login() {
                             className="btn btn-success w-100"
                             type="submit"
                           >
-                            Sign In
+                            Đăng nhập
                           </Button>
                         </div>
                       </Form>

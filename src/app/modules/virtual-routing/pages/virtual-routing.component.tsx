@@ -1,12 +1,15 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
 import React, { useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
 import usePreviewDialog from 'shared/blocks/preview-dialog/preview-dialog.component';
 import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
 import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 
 const rows = [
   {
@@ -80,6 +83,7 @@ function VirtualRouting() {
   const { PreviewDialog, openPreviewDialog } = usePreviewDialog({
     columnConfig: PREVIEW_CONFIG,
   });
+  const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'id', headerName: 'No', flex: 0.5 },
@@ -177,10 +181,13 @@ function VirtualRouting() {
         <DataGrid
           rows={rows}
           columns={COLUMN_CONFIG}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
+          pageSize={pageSize}
+          onPageSizeChange={changePageSize}
+          rowsPerPageOptions={ROW_PAGE_OPTIONS}
           disableColumnMenu
+          autoHeight
           hideFooterSelectedRowCount
+          components={{ Row: CustomRow }}
         />
       </div>
 

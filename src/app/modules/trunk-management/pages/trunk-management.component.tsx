@@ -8,6 +8,10 @@ import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { Message } from 'shared/const/message.const';
+import { STATUS_OPTIONS } from 'shared/const/select-option.const';
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import useTrunkDialog from '../components/trunk-dialog/trunk-dialog.component';
 import { TrunkForm } from '../shared/trunk-dialog.const';
 
@@ -15,8 +19,10 @@ function TrunkManagement() {
   const { openTrunkDialog, TrunkDialog, closeTrunkDialog } = useTrunkDialog();
   const [loading, setLoading] = useState<boolean>(false);
   const listTrunk = useRef<TrunkInfo[]>();
+  const { pageSize, changePageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
+    { field: 'no', headerName: 'STT', flex: 0.3 },
     { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
     { field: 'groupName', headerName: 'Nhà mạng', flex: 1 },
     {
@@ -25,6 +31,13 @@ function TrunkManagement() {
       flex: 1,
       valueGetter: (params: GridValueGetterParams) =>
         `${params.row.ip || ''}:${params.row.port}`,
+    },
+    {
+      field: 'status',
+      headerName: 'Trạng thái',
+      flex: 0.5,
+      valueGetter: (params: GridValueGetterParams) =>
+        STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
@@ -53,7 +66,8 @@ function TrunkManagement() {
         trunkName,
         groupName: telecom,
       });
-      getListTrunk();
+
+      await getListTrunk();
       addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
       closeTrunkDialog();
     } catch (error) {
@@ -61,19 +75,28 @@ function TrunkManagement() {
     }
   };
 
-  const onUpdate = async (data: TrunkForm) => {
+  const onUpdate = async (data: TrunkForm, isOnlyChangeStatus?: boolean) => {
     try {
       const { id, telecom, ip, port, trunkName, status } = data;
       setLoading(true);
-      await TrunkAPI.updateTrunk({
-        groupCode: telecom,
-        ip,
-        port,
-        status: status ?? 0,
-        trunkId: id || '',
-        trunkName,
-      });
-      getListTrunk();
+      await TrunkAPI.updateTrunk(
+        isOnlyChangeStatus
+          ? {
+              groupCode: telecom,
+              status: status ?? 0,
+              trunkId: id || '',
+            }
+          : {
+              groupCode: telecom,
+              ip,
+              port,
+              status: status ?? 0,
+              trunkId: id || '',
+              trunkName,
+            }
+      );
+
+      await getListTrunk();
       addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
       closeTrunkDialog();
     } catch (error) {
@@ -102,7 +125,10 @@ function TrunkManagement() {
       setLoading(true);
       const result = await TrunkAPI.getListTrunk();
       if (result) {
-        listTrunk.current = result.groupIps;
+        listTrunk.current = result.groupIps.map((item, index) => ({
+          ...item,
+          no: index + 1,
+        }));
       }
       setLoading(false);
     } catch (error) {
@@ -116,13 +142,13 @@ function TrunkManagement() {
 
   return (
     <>
+      <Helmet>
+        <title>Trunk Management Page</title>
+      </Helmet>
+
       <LoadingComponent open={loading} />
 
       <Container maxWidth="xl" className="table-page">
-        <Helmet>
-          <title>Trunk Management Page</title>
-        </Helmet>
-
         <div className="create-button">
           <Button
             variant="contained"
@@ -139,11 +165,14 @@ function TrunkManagement() {
           <DataGrid
             rows={listTrunk.current || []}
             columns={COLUMN_CONFIG}
-            pageSize={10}
-            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            pageSize={pageSize}
+            onPageSizeChange={changePageSize}
+            rowsPerPageOptions={ROW_PAGE_OPTIONS}
             disableColumnMenu
+            autoHeight
             rowHeight={60}
             hideFooterSelectedRowCount
+            components={{ Row: CustomRow }}
           />
         </div>
 
