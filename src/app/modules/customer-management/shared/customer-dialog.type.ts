@@ -2,19 +2,20 @@ import { SelectItem } from 'shared/form/select/select-controller.component';
 import { CustomerInfo } from '../pages/customer-detail/customer-detail.component';
 
 export interface CustomerForm {
-  id: string | number;
+  id: number;
   customerName: string;
   hotline?: string;
   virtual?: string;
   editHotline: SelectItem[]; // Required
   editVirtual: SelectItem[]; // Required
   description: string;
-  status: number;
 }
 
 export interface OpenDialogProps {
   title: string;
   onSubmit?: (data: CustomerForm) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onCallAPIUpdate?: (callAPI: any[]) => void;
   isUpdate?: boolean;
   initialValues?: CustomerInfo;
 }

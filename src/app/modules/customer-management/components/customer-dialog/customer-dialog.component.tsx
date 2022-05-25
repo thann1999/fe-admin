@@ -2,15 +2,16 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, FormHelperText, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import CustomerAPI from 'app/api/customer.api';
-import { convertStringToSelectItem } from 'app/helpers/array-convert.helper';
+import {
+  convertStringToArray,
+  convertStringToSelectItem,
+  getDifferenceTwoArray,
+} from 'app/helpers/array.helper';
 import clsx from 'clsx';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
-import LoadingComponent from 'shared/blocks/loading/loading.component';
-import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import AutocompleteController from 'shared/form/autocomplete/autocomplete-controller.component';
-import SelectController from 'shared/form/select/select-controller.component';
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
 import { CustomerInfo } from '../../pages/customer-detail/customer-detail.component';
@@ -29,8 +30,8 @@ function useCustomerDialog() {
     hotlineOptions: [],
     virtualOptions: [],
     onSubmit: () => {},
+    onCallAPIUpdate: () => {},
   });
-  const [loading, setLoading] = useState<boolean>(false);
   const schema = useRef(
     yup.object().shape(
       {
@@ -58,8 +59,7 @@ function useCustomerDialog() {
         description: '',
         editHotline: [],
         editVirtual: [],
-        id: '',
-        status: 0,
+        id: 0,
       },
       resolver: yupResolver(schema),
     });
@@ -71,15 +71,14 @@ function useCustomerDialog() {
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { customerName, hotline, virtual, id, status } = initialValues;
+      const { customerName, hotline, stringVirtual, id } = initialValues;
       customerInitialValues.current = { ...initialValues };
-      const hotlineOptions = hotline ? convertStringToSelectItem(hotline) : [];
-      const virtualOptions = virtual ? convertStringToSelectItem(virtual) : [];
+      const hotlineOptions = convertStringToSelectItem(hotline);
+      const virtualOptions = convertStringToSelectItem(stringVirtual);
       setValue('customerName', customerName);
       setValue('hotline', hotline);
-      setValue('virtual', virtual);
+      setValue('virtual', stringVirtual);
       setValue('id', id);
-      setValue('status', status);
       setValue('editHotline', hotlineOptions);
       setValue('editVirtual', virtualOptions);
       schema.fields.hotline = yup.string();
@@ -100,7 +99,7 @@ function useCustomerDialog() {
     setDialogState((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const handleUpdate = (data: CustomerForm) => {
+  const handleUpdate = async (data: CustomerForm) => {
     const requireAutocomplete =
       !watch('editHotline').length && !watch('editVirtual').length;
     if (requireAutocomplete) {
@@ -108,7 +107,6 @@ function useCustomerDialog() {
     }
 
     const { customerName, description, editHotline, editVirtual } = data;
-
     const callAPI = [];
 
     if (
@@ -116,21 +114,72 @@ function useCustomerDialog() {
       description !== customerInitialValues.current?.description
     ) {
       callAPI.push(
-        CustomerAPI.updateCustomer({
+        CustomerAPI.updateCustomer.bind({
           customerId: data.id,
           customerName,
           description,
         })
       );
     }
-    const stringHotline = editHotline.reduce(
-      (previousValue, currentValue) => previousValue + currentValue.value,
-      ''
+
+    // Convert SelectItem[], string to string[]
+    const arrayHotline = editHotline.map((hotline) => hotline.value || hotline);
+    const arrayVirtual = editVirtual.map((virtual) => virtual.value || virtual);
+    const initialHotline = convertStringToArray(
+      customerInitialValues.current?.hotline
     );
-    const stringVirtual = editVirtual.reduce(
-      (previousValue, currentValue) => previousValue + currentValue.value,
-      ''
+    const initialVirtual = convertStringToArray(
+      customerInitialValues.current?.stringVirtual
     );
+
+    // Get add, delete hotline and virtualNumber
+    const deleteHotlines = getDifferenceTwoArray(initialHotline, arrayHotline);
+    const addHotlines = getDifferenceTwoArray(arrayHotline, initialHotline);
+    const deleteVirtual = getDifferenceTwoArray(initialVirtual, arrayVirtual);
+    const addVirtual = getDifferenceTwoArray(arrayVirtual, initialVirtual);
+
+    if (deleteHotlines.length) {
+      deleteHotlines.forEach((item) => {
+        callAPI.push(CustomerAPI.deleteHotline.bind(item));
+      });
+    }
+
+    if (addHotlines.length) {
+      callAPI.push(
+        CustomerAPI.addHotline.bind({
+          msisdn: addHotlines.join(','),
+          customerId: data.id,
+        })
+      );
+    }
+
+    if (addVirtual.length) {
+      callAPI.push(
+        CustomerAPI.addVirtualNumber.bind({
+          virtualNumber: addVirtual.join(','),
+          customerId: data.id,
+        })
+      );
+    }
+
+    if (deleteVirtual.length) {
+      deleteVirtual.forEach((virtual) => {
+        const findVirtual = customerInitialValues.current?.virtual.find(
+          (item) => item.virtualNumber === virtual
+        );
+        callAPI.push(
+          CustomerAPI.deleteVirtualNumber.bind({
+            customerId: data.id,
+            virtualNumber: findVirtual?.virtualNumber || '',
+            id: findVirtual?.id,
+          })
+        );
+      });
+    }
+
+    if (dialogState.onCallAPIUpdate) {
+      dialogState.onCallAPIUpdate(callAPI);
+    }
   };
 
   const CustomerDialog = useCallback(() => {
@@ -138,204 +187,183 @@ function useCustomerDialog() {
       !watch('editHotline').length && !watch('editVirtual').length;
 
     return (
-      <>
-        <LoadingComponent open={loading} />
+      <Dialog
+        open={dialogState.isOpen}
+        className="customer-dialog"
+        onClose={closeCustomerDialog}
+      >
+        <CloseDialog onClose={closeCustomerDialog} id="title">
+          <Typography className="font--24b" textAlign="center">
+            {dialogState.title}
+          </Typography>
+        </CloseDialog>
 
-        <Dialog
-          open={dialogState.isOpen}
-          className="customer-dialog"
-          onClose={closeCustomerDialog}
-        >
-          <CloseDialog onClose={closeCustomerDialog} id="title">
-            <Typography className="font--24b" textAlign="center">
-              {dialogState.title}
-            </Typography>
-          </CloseDialog>
+        <Grid>
+          <form
+            className="form-paper"
+            onSubmit={handleSubmit(
+              dialogState.onSubmit ? dialogState.onSubmit : handleUpdate
+            )}
+          >
+            <div>
+              <Grid item xs={12}>
+                <Typography className="mt--XS mb--XXS require-field">
+                  Tên khách hàng
+                </Typography>
+              </Grid>
 
-          <Grid>
-            <form
-              className="form-paper"
-              onSubmit={handleSubmit(
-                dialogState.onSubmit ? dialogState.onSubmit : handleUpdate
-              )}
+              <Grid item xs={12}>
+                <TextFieldController
+                  name="customerName"
+                  control={control}
+                  className="admin-text-field width-100"
+                  placeholder="Nhập tên Khách hàng"
+                />
+              </Grid>
+            </div>
+
+            <div>
+              <Grid item xs={12}>
+                <Typography className="mt--XS mb--XXS require-field">
+                  Mô tả
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextFieldController
+                  name="description"
+                  control={control}
+                  className="admin-text-field width-100"
+                  placeholder="Nhập Mô tả"
+                />
+              </Grid>
+            </div>
+
+            {dialogState.isUpdate ? (
+              <>
+                <div>
+                  <Grid item xs={12}>
+                    <Typography
+                      className={clsx('mt--XS mb--XXS', {
+                        'require-field': !watch('editVirtual').length,
+                      })}
+                    >
+                      Số Hotline
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <AutocompleteController
+                      multiple
+                      freeSolo
+                      isError={requireAutocomplete}
+                      options={dialogState.hotlineOptions}
+                      defaultValue={dialogState.hotlineOptions}
+                      name="editHotline"
+                      disable={!!watch('editVirtual').length}
+                      control={control}
+                      placeholder="Nhập số Hotline"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <FormHelperText className="labelAsterisk">
+                      {requireAutocomplete && 'Vui lòng nhập số Hotline'}
+                    </FormHelperText>
+                  </Grid>
+                </div>
+
+                <div>
+                  <Grid item xs={12}>
+                    <Typography
+                      className={clsx('mt--XS mb--XXS', {
+                        'require-field': !watch('editHotline').length,
+                      })}
+                    >
+                      Số Virtual
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <AutocompleteController
+                      multiple
+                      freeSolo
+                      isError={requireAutocomplete}
+                      disable={!!watch('editHotline').length}
+                      options={dialogState.virtualOptions}
+                      defaultValue={dialogState.virtualOptions}
+                      name="editVirtual"
+                      control={control}
+                      placeholder="Nhập số Virtual"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormHelperText className="labelAsterisk">
+                      {requireAutocomplete && 'Vui lòng nhập số Virtual'}
+                    </FormHelperText>
+                  </Grid>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Grid item xs={12}>
+                    <Typography
+                      className={clsx('mt--XS mb--XXS', {
+                        'require-field': !watch('virtual'),
+                      })}
+                    >
+                      Số Hotline
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextFieldController
+                      name="hotline"
+                      control={control}
+                      disabled={!!watch('virtual')}
+                      className="admin-text-field width-100"
+                      placeholder="Nhập số Hotline"
+                    />
+                  </Grid>
+                </div>
+
+                <div>
+                  <Grid item xs={12}>
+                    <Typography
+                      className={clsx('mt--XS mb--XXS ', {
+                        'require-field': !watch('hotline'),
+                      })}
+                    >
+                      Số Virtual
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextFieldController
+                      name="virtual"
+                      control={control}
+                      disabled={!!watch('hotline')}
+                      className="admin-text-field width-100"
+                      placeholder="Nhập số Virtual"
+                    />
+                  </Grid>
+                </div>
+              </>
+            )}
+
+            <Button
+              variant="contained"
+              type="submit"
+              className={clsx('action-button --no-transform width-100', {
+                '--update': dialogState.isUpdate,
+              })}
             >
-              <div>
-                <Grid item xs={12}>
-                  <Typography className="mt--XS mb--XXS require-field">
-                    Tên khách hàng
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextFieldController
-                    name="customerName"
-                    control={control}
-                    className="admin-text-field width-100"
-                    placeholder="Nhập tên Khách hàng"
-                  />
-                </Grid>
-              </div>
-
-              <div>
-                <Grid item xs={12}>
-                  <Typography className="mt--XS mb--XXS require-field">
-                    Mô tả
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextFieldController
-                    name="description"
-                    control={control}
-                    className="admin-text-field width-100"
-                    placeholder="Nhập Mô tả"
-                  />
-                </Grid>
-              </div>
-
-              {dialogState.isUpdate ? (
-                <>
-                  <div>
-                    <Grid item xs={12}>
-                      <Typography
-                        className={clsx('mt--XS mb--XXS', {
-                          'require-field': !watch('editVirtual').length,
-                        })}
-                      >
-                        Số Hotline
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <AutocompleteController
-                        multiple
-                        freeSolo
-                        isError={requireAutocomplete}
-                        options={dialogState.hotlineOptions}
-                        defaultValue={dialogState.hotlineOptions}
-                        name="editHotline"
-                        disable={!!watch('editVirtual').length}
-                        control={control}
-                        placeholder="Nhập số Hotline"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <FormHelperText className="labelAsterisk">
-                        {requireAutocomplete && 'Vui lòng nhập số Hotline'}
-                      </FormHelperText>
-                    </Grid>
-                  </div>
-
-                  <div>
-                    <Grid item xs={12}>
-                      <Typography
-                        className={clsx('mt--XS mb--XXS', {
-                          'require-field': !watch('editHotline').length,
-                        })}
-                      >
-                        Số Virtual
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <AutocompleteController
-                        multiple
-                        freeSolo
-                        isError={requireAutocomplete}
-                        disable={!!watch('editHotline').length}
-                        options={dialogState.virtualOptions}
-                        defaultValue={dialogState.virtualOptions}
-                        name="editVirtual"
-                        control={control}
-                        placeholder="Nhập số Virtual"
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormHelperText className="labelAsterisk">
-                        {requireAutocomplete && 'Vui lòng nhập số Virtual'}
-                      </FormHelperText>
-                    </Grid>
-                  </div>
-
-                  <div>
-                    <Grid item xs={12}>
-                      <Typography className="mt--XS mb--XXS require-field">
-                        Trạng thái
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <SelectController
-                        name="status"
-                        control={control}
-                        className="admin-select width-100"
-                        options={STATUS_OPTIONS}
-                      />
-                    </Grid>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <Grid item xs={12}>
-                      <Typography
-                        className={clsx('mt--XS mb--XXS', {
-                          'require-field': !watch('virtual'),
-                        })}
-                      >
-                        Số Hotline
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <TextFieldController
-                        name="hotline"
-                        control={control}
-                        disabled={!!watch('virtual')}
-                        className="admin-text-field width-100"
-                        placeholder="Nhập số Hotline"
-                      />
-                    </Grid>
-                  </div>
-
-                  <div>
-                    <Grid item xs={12}>
-                      <Typography
-                        className={clsx('mt--XS mb--XXS ', {
-                          'require-field': !watch('hotline'),
-                        })}
-                      >
-                        Số Virtual
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <TextFieldController
-                        name="virtual"
-                        control={control}
-                        disabled={!!watch('hotline')}
-                        className="admin-text-field width-100"
-                        placeholder="Nhập số Virtual"
-                      />
-                    </Grid>
-                  </div>
-                </>
-              )}
-
-              <Button
-                variant="contained"
-                type="submit"
-                className={clsx('action-button --no-transform width-100', {
-                  '--update': dialogState.isUpdate,
-                })}
-              >
-                {dialogState.isUpdate ? 'Cập nhật' : 'Tạo mới'}
-              </Button>
-            </form>
-          </Grid>
-        </Dialog>
-      </>
+              {dialogState.isUpdate ? 'Cập nhật' : 'Tạo mới'}
+            </Button>
+          </form>
+        </Grid>
+      </Dialog>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogState]);

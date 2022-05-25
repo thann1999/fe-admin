@@ -18,14 +18,14 @@ export interface CustomerDetail {
 }
 
 export interface Hotline {
-  customerId: number | string;
+  customerId: number;
   customerName: string;
   hotlines: string[];
 }
 
 export interface CustomerVIps extends CustomerInfo {
-  customerId: string | number;
-  customerVIps: string[];
+  customerId: number;
+  customerVIps: VirtualNumber[];
 }
 
 export interface CreateCustomerParams {
@@ -35,20 +35,24 @@ export interface CreateCustomerParams {
   virtualnumbers: string;
 }
 
+export interface VirtualNumber {
+  virtualNumber: string;
+  id?: string;
+}
+
 export interface UpdateCustomerParams {
-  customerId: string | number;
+  customerId: number;
   customerName: string;
   description: string;
 }
 
-interface UpdateCustomerVirtual {
-  customerId: string | number;
-  virtualNumber: string;
+interface UpdateCustomerVirtual extends VirtualNumber {
+  customerId: number;
 }
 
 interface AddNewHotline {
   msisdn: string;
-  customerId: string | number;
+  customerId: number;
 }
 
 export default class CustomerAPI {
@@ -73,11 +77,22 @@ export default class CustomerAPI {
     });
   };
 
-  static updateVirtualNumber = async ({
+  static deleteVirtualNumber = async ({
     customerId,
     virtualNumber,
+    id,
   }: UpdateCustomerVirtual) => {
-    return await httpService.put(`/customer/1/virtual-number/${customerId}`, {
+    return await httpService.put(
+      `/customer/${customerId}/virtual-number/${id}`,
+      {
+        body: { virtualNumber },
+      }
+    );
+  };
+
+  static addVirtualNumber = async (params: UpdateCustomerVirtual) => {
+    const { customerId, virtualNumber } = params;
+    return await httpService.put(`/customer/${customerId}/virtual-number`, {
       body: { virtualNumber },
     });
   };
@@ -87,7 +102,6 @@ export default class CustomerAPI {
       body: {
         msisdn,
         customerId,
-        groupIpId: 0,
       },
     });
   };
@@ -95,7 +109,6 @@ export default class CustomerAPI {
   static deleteHotline = async (hotline: string) => {
     return await httpService.put(`/hotline/${hotline}`, {
       body: {
-        groupIpId: 0,
         status: 0,
       },
     });
