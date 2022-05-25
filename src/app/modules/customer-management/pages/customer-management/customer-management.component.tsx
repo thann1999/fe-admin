@@ -10,6 +10,9 @@ import LoadingComponent from 'shared/blocks/loading/loading.component';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { Message } from 'shared/const/message.const';
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
 import useCustomerDialog from '../../components/customer-dialog/customer-dialog.component';
 import { CustomerForm } from '../../shared/customer-dialog.type';
 
@@ -19,8 +22,10 @@ function CustomerManagement() {
   const customerList = useRef<CustomerInfo[]>();
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
+    { field: 'no', headerName: 'STT', flex: 0.2 },
     { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
     { field: 'description', headerName: 'Mô tả', flex: 1 },
     {
@@ -80,7 +85,10 @@ function CustomerManagement() {
       setLoading(true);
       const result = await CustomerAPI.getListCustomer();
       if (result) {
-        customerList.current = result.customers;
+        customerList.current = result.customers.map((item, index) => ({
+          ...item,
+          no: index + 1,
+        }));
       }
       setLoading(false);
     } catch (error) {
@@ -117,11 +125,14 @@ function CustomerManagement() {
           <DataGrid
             rows={customerList.current || []}
             columns={COLUMN_CONFIG}
-            pageSize={10}
-            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            pageSize={pageSize}
+            onPageSizeChange={changePageSize}
+            rowsPerPageOptions={ROW_PAGE_OPTIONS}
             disableColumnMenu
             rowHeight={60}
+            autoHeight
             hideFooterSelectedRowCount
+            components={{ Row: CustomRow }}
           />
         </div>
 

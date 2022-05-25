@@ -2,13 +2,16 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import HotlineRoutingAPI from 'app/api/hotline-routing.api';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import usePreviewDialog from 'shared/blocks/preview-dialog/preview-dialog.component';
 import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
 import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { HotlineRoutingTableInfo } from '../shared/hotline-routing.const';
 
 export const PREVIEW_CONFIG: GridColDef[] = [
@@ -27,8 +30,10 @@ function HotlineRoutingPage() {
   });
   const [loading, setLoading] = useState<boolean>(false);
   const listData = useRef<HotlineRoutingTableInfo[]>();
+  const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
+    { field: 'no', headerName: 'STT', flex: 0.35 },
     { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
     { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
     { field: 'stringHotline', headerName: 'Hotline', flex: 1 },
@@ -90,13 +95,14 @@ function HotlineRoutingPage() {
       setLoading(true);
       const result = await HotlineRoutingAPI.getListHotlineRouting();
       if (result) {
-        listData.current = result.hotlines.map((item) => ({
+        listData.current = result.hotlines.map((item, index) => ({
           id: item.customerId,
           customerId: item.customerId,
           customerName: item.customerName,
           ip: item.host,
           port: item.port,
           stringHotline: item.hotlines.join(','),
+          no: index + 1,
         }));
       }
       setLoading(false);
@@ -134,10 +140,13 @@ function HotlineRoutingPage() {
           <DataGrid
             rows={listData.current ? listData.current : []}
             columns={COLUMN_CONFIG}
-            pageSize={10}
-            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            pageSize={pageSize}
+            onPageSizeChange={changePageSize}
+            rowsPerPageOptions={ROW_PAGE_OPTIONS}
+            autoHeight
             disableColumnMenu
             hideFooterSelectedRowCount
+            components={{ Row: CustomRow }}
           />
         </div>
 

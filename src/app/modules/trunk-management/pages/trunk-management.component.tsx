@@ -9,6 +9,9 @@ import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import useTrunkDialog from '../components/trunk-dialog/trunk-dialog.component';
 import { TrunkForm } from '../shared/trunk-dialog.const';
 
@@ -16,8 +19,10 @@ function TrunkManagement() {
   const { openTrunkDialog, TrunkDialog, closeTrunkDialog } = useTrunkDialog();
   const [loading, setLoading] = useState<boolean>(false);
   const listTrunk = useRef<TrunkInfo[]>();
+  const { pageSize, changePageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
+    { field: 'no', headerName: 'STT', flex: 0.3 },
     { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
     { field: 'groupName', headerName: 'Nhà mạng', flex: 1 },
     {
@@ -120,7 +125,10 @@ function TrunkManagement() {
       setLoading(true);
       const result = await TrunkAPI.getListTrunk();
       if (result) {
-        listTrunk.current = result.groupIps;
+        listTrunk.current = result.groupIps.map((item, index) => ({
+          ...item,
+          no: index + 1,
+        }));
       }
       setLoading(false);
     } catch (error) {
@@ -157,11 +165,14 @@ function TrunkManagement() {
           <DataGrid
             rows={listTrunk.current || []}
             columns={COLUMN_CONFIG}
-            pageSize={10}
-            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            pageSize={pageSize}
+            onPageSizeChange={changePageSize}
+            rowsPerPageOptions={ROW_PAGE_OPTIONS}
             disableColumnMenu
+            autoHeight
             rowHeight={60}
             hideFooterSelectedRowCount
+            components={{ Row: CustomRow }}
           />
         </div>
 
