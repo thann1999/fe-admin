@@ -6,111 +6,107 @@ export interface CustomerList {
 }
 
 export interface CustomerInfo {
-  id: string;
+  id: number;
   customerName: string;
   description: string;
-  status: number;
-}
-
-export interface CustomerDetail {
-  customerVIps: CustomerVIps[];
-  hotlines: Hotline[];
-}
-
-export interface Hotline {
-  customerId: number;
-  customerName: string;
-  hotlines: string[];
-}
-
-export interface CustomerVIps extends CustomerInfo {
-  customerId: number;
-  customerVIps: VirtualNumber[];
+  status?: number;
 }
 
 export interface CreateCustomerParams {
   customerName: string;
   description: string;
-  hotlines: string;
-  virtualnumbers: string;
+}
+
+export interface GroupHotlineList {
+  hotlineGroups: HotlineGroups[];
+}
+
+export interface HotlineGroups {
+  hotlineGroupId: number;
+  hotlineGroupName: string;
+  customerId: number;
+  customerDisplayName: string;
+  customerName: string;
+  groupStatus: number;
+  hotlines: Hotline[];
+}
+
+export interface Hotline {
+  isdn: string;
+  status: number;
+  hotlineId: string;
+}
+
+interface CreateGroupHotlineInfo {
+  customerId: number;
+  groupHotlineName: string;
+  isdns: string[];
+}
+
+interface CreateVirtualNumberGroup {
+  customerId: number;
+  vngName: string;
+  isdns: string[];
+}
+
+export interface GroupVirtualList {
+  virtualNumberGroups: VirtualNumberGroup[];
+}
+
+export interface VirtualNumberGroup {
+  vngId: number;
+  vngName: string;
+  isdn: string;
+  status: number;
+  customerId: number;
+  customerName: string;
+  customerDisplayName: string;
+  virtualNumbers: Hotline[];
 }
 
 export interface VirtualNumber {
-  virtualNumber: string;
-  id?: string;
-}
-
-export interface UpdateCustomerParams {
-  customerId: number;
-  customerName: string;
-  description: string;
-}
-
-interface UpdateCustomerVirtual extends VirtualNumber {
-  customerId: number;
-}
-
-interface AddNewHotline {
-  msisdn: string;
-  customerId: number;
+  isdn: string;
+  status: number;
+  vnId: string;
 }
 
 export default class CustomerAPI {
-  static getListCustomer = async () => {
-    return await httpService.get<CustomerList>('/customer');
+  static getListCustomer = () => {
+    return httpService.get<CustomerList>('/customer');
   };
 
-  static createCustomer = async (params: CreateCustomerParams) => {
-    return await httpService.post<CustomerInfo>('/customer', {
+  static createCustomer = (params: CreateCustomerParams) => {
+    return httpService.post<CustomerInfo>('/customer', {
       body: params,
     });
   };
 
-  static getDetailCustomer = async (id: string) => {
-    return await httpService.get<CustomerDetail>(`/customer/${id}/all`);
-  };
-
-  static updateCustomer = async (params: UpdateCustomerParams) => {
-    const { customerId, ...rest } = params;
-    return await httpService.put(`/customer/${customerId}`, {
+  static updateCustomer = (params: CustomerInfo) => {
+    const { id, ...rest } = params;
+    return httpService.put<CustomerInfo>(`/customer/${id}`, {
       body: { ...rest },
     });
   };
 
-  static deleteVirtualNumber = async ({
-    customerId,
-    virtualNumber,
-    id,
-  }: UpdateCustomerVirtual) => {
-    return await httpService.put(
-      `/customer/${customerId}/virtual-number/${id}`,
-      {
-        body: { virtualNumber },
-      }
-    );
+  static getListGroupHotline = () => {
+    return httpService.get<GroupHotlineList>('/hotline');
   };
 
-  static addVirtualNumber = async (params: UpdateCustomerVirtual) => {
-    const { customerId, virtualNumber } = params;
-    return await httpService.put(`/customer/${customerId}/virtual-number`, {
-      body: { virtualNumber },
+  static createGroupHotline = (params: CreateGroupHotlineInfo) => {
+    const { customerId, ...rest } = params;
+    return httpService.post(`/customer/${customerId}/hotline-group`, {
+      body: { ...rest },
     });
   };
 
-  static addHotline = async ({ customerId, msisdn }: AddNewHotline) => {
-    return await httpService.put(`/hotline`, {
-      body: {
-        msisdn,
-        customerId,
-      },
-    });
+  static getListVirtual = () => {
+    return httpService.get<GroupVirtualList>('/virtual-number');
   };
 
-  static deleteHotline = async (hotline: string) => {
-    return await httpService.put(`/hotline/${hotline}`, {
-      body: {
-        status: 0,
-      },
+  static createGroupVirtual = (params: CreateVirtualNumberGroup) => {
+    const { customerId, ...rest } = params;
+    return httpService.post(`/customer/${customerId}/virtual-number-group`, {
+      body: { ...rest },
     });
   };
 }

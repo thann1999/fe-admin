@@ -11,6 +11,16 @@ export const convertStringToSelectItem = (
     .map((item) => ({ label: item, value: item }));
 };
 
+export const convertArrayToSelectItem = <T>(
+  array: any[],
+  label: keyof T,
+  value: keyof T
+): SelectItem[] => {
+  if (!array || !array?.length) return [];
+
+  return array.map((item) => ({ label: item[label], value: item[value] }));
+};
+
 export const convertStringToArray = (stringHotline?: string): string[] => {
   if (!stringHotline) return [];
 
