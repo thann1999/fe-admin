@@ -1,104 +1,53 @@
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Button, Container } from '@mui/material';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+/* eslint-disable react/jsx-no-useless-fragment */
+import { Container } from '@mui/material';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import * as React from 'react';
 import { Helmet } from 'react-helmet';
-import CellAction from 'shared/blocks/cell-action/cell-action.component';
-import { useNavigate } from 'react-router-dom';
-import CustomerAPI, { CustomerInfo } from 'app/api/customer.api';
-import LoadingComponent from 'shared/blocks/loading/loading.component';
-import { STATUS_OPTIONS } from 'shared/const/select-option.const';
-import addToast from 'shared/blocks/toastify/add-toast.component';
-import { Message } from 'shared/const/message.const';
-import CustomRow from 'shared/blocks/custom-row/custom-row.component';
-import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
-import useChangePageSize from 'app/hooks/change-page-size.hook';
-import useCustomerDialog from '../../components/customer-dialog/customer-dialog.component';
-import { CustomerForm } from '../../shared/customer-dialog.type';
+import CustomerInfo from '../../components/customer-info/customer-info.component';
+import HotlineGroup from '../../components/hotline-group/hotline-group.component';
+import VirtualGroup from '../../components/virtual-group/virtual-group.component';
+import './customer-management.style.scss';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`customer-tab-${index}`}
+      aria-labelledby={`customer-tabpanel-${index}`}
+      {...other}
+    >
+      {value === index && <>{children}</>}
+    </div>
+  );
+}
+
+TabPanel.defaultProps = {
+  children: null,
+};
+
+function a11yProps(index: number) {
+  return {
+    id: `customer-tab-${index}`,
+    'aria-controls': `customer-tabpanel-${index}`,
+  };
+}
 
 function CustomerManagement() {
-  const { openCustomerDialog, CustomerDialog, closeCustomerDialog } =
-    useCustomerDialog();
-  const customerList = useRef<CustomerInfo[]>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const navigate = useNavigate();
-  const { changePageSize, pageSize } = useChangePageSize();
+  const [value, setValue] = React.useState(0);
 
-  const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'no', headerName: 'STT', flex: 0.2 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
-    { field: 'description', headerName: 'Mô tả', flex: 1 },
-    {
-      field: 'status',
-      headerName: 'Trạng thái',
-      flex: 0.5,
-      valueGetter: (params: GridValueGetterParams) =>
-        STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
-    },
-    {
-      field: 'action',
-      headerName: 'Chức năng',
-      flex: 1,
-      sortable: false,
-      renderCell: (cellValues) => (
-        <CellAction
-          editAble={false}
-          deleteAble={false}
-          handleView={() => handleViewDetail(cellValues.row)}
-        />
-      ),
-    },
-  ]).current;
-
-  const handleViewDetail = (data: CustomerForm) => {
-    navigate(`detail/${data.id}`);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
   };
-
-  const onCreate = async (data: CustomerForm) => {
-    try {
-      const { description, hotline, virtual, customerName } = data;
-      setLoading(true);
-      await CustomerAPI.createCustomer({
-        customerName,
-        description: description || '',
-        hotlines: hotline || '',
-        virtualnumbers: virtual || '',
-      });
-
-      await getListCustomer();
-      addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
-      closeCustomerDialog();
-    } catch (error) {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateCustomer = () => {
-    openCustomerDialog({
-      onSubmit: onCreate,
-      title: 'Tạo mới Khách hàng',
-    });
-  };
-
-  const getListCustomer = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result = await CustomerAPI.getListCustomer();
-      if (result) {
-        customerList.current = result.customers.map((item, index) => ({
-          ...item,
-          no: index + 1,
-        }));
-      }
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    getListCustomer();
-  }, [getListCustomer]);
 
   return (
     <>
@@ -106,37 +55,24 @@ function CustomerManagement() {
         <title>Customer Management Page</title>
       </Helmet>
 
-      <LoadingComponent open={loading} />
+      <Container maxWidth="xl" className="customer-management">
+        <Tabs value={value} onChange={handleChange}>
+          <Tab label="Khách hàng" {...a11yProps(0)} />
+          <Tab label="Số Hotline" {...a11yProps(1)} />
+          <Tab label="Số Virtual" {...a11yProps(2)} />
+        </Tabs>
 
-      <Container maxWidth="xl" className="table-page">
-        <div className="create-button">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddCircleIcon />}
-            className="admin-button --no-transform"
-            onClick={handleCreateCustomer}
-          >
-            Tạo mới
-          </Button>
-        </div>
+        <TabPanel value={value} index={0}>
+          <CustomerInfo />
+        </TabPanel>
 
-        <div className="data-grid">
-          <DataGrid
-            rows={customerList.current || []}
-            columns={COLUMN_CONFIG}
-            pageSize={pageSize}
-            onPageSizeChange={changePageSize}
-            rowsPerPageOptions={ROW_PAGE_OPTIONS}
-            disableColumnMenu
-            rowHeight={60}
-            autoHeight
-            hideFooterSelectedRowCount
-            components={{ Row: CustomRow }}
-          />
-        </div>
+        <TabPanel value={value} index={1}>
+          <HotlineGroup />
+        </TabPanel>
 
-        <CustomerDialog />
+        <TabPanel value={value} index={2}>
+          <VirtualGroup />
+        </TabPanel>
       </Container>
     </>
   );

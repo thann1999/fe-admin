@@ -1,0 +1,6 @@
+@import 'styles/variables';
+@import 'styles/page.scss';
+
+.customer-management {
+  @extend .table-page;
+}
