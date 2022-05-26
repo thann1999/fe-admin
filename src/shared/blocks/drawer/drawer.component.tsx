@@ -58,14 +58,14 @@ const AppBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(!open && {
-    width: `calc(100% - ${theme.spacing(7)} - 6px)`,
+    width: `calc(100% - ${theme.spacing(7)} - 6px - 10px)`,
     [theme.breakpoints.up('sm')]: {
-      width: `calc(100% - ${theme.spacing(8)} - 6px)`,
+      width: `calc(100% - ${theme.spacing(8)} - 6px - 10px)`,
     },
   }),
   ...(open && {
     marginLeft: DRAWER_WIDTH,
-    width: `calc(100% - ${DRAWER_WIDTH}px)`,
+    width: `calc(100% - ${DRAWER_WIDTH}px - 10px)`,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -148,6 +148,10 @@ export default function MiniDrawer() {
           >
             {open ? <ArrowForwardIosIcon /> : <MenuIcon />}
           </IconButton>
+
+          <Typography variant="h6" className="page-name ml--XXS">
+            Trunk Management
+          </Typography>
 
           <div className="setting">
             <IconButton onClick={handleOpenMenu} disableRipple>
