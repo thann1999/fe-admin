@@ -6,9 +6,6 @@ import React, { useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import CustomRow from 'shared/blocks/custom-row/custom-row.component';
-import usePreviewDialog from 'shared/blocks/preview-dialog/preview-dialog.component';
-import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
-import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 
 const rows = [
@@ -78,11 +75,6 @@ export const PREVIEW_CONFIG: GridColDef[] = [
 ];
 
 function VirtualRouting() {
-  const { RoutingDialog, closeRoutingDialog, openRoutingDialog } =
-    useRoutingDialog({ isHotlineDialog: false });
-  const { PreviewDialog, openPreviewDialog } = usePreviewDialog({
-    columnConfig: PREVIEW_CONFIG,
-  });
   const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
@@ -103,61 +95,12 @@ function VirtualRouting() {
       flex: 1.25,
       sortable: false,
       renderCell: (cellValues) => {
-        return (
-          <CellAction
-            handleEdit={() => handleEdit(cellValues.row)}
-            deleteDialogInfo={{
-              title: 'Xóa Virtual?',
-              type: 'error',
-              description:
-                'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-              handleConfirm: () => onDelete(cellValues.row),
-            }}
-            handleView={() => handleViewInfo(cellValues.row)}
-          />
-        );
+        return <CellAction />;
       },
     },
   ]).current;
 
-  const onCreate = (data: RoutingForm) => {
-    // TODO: Call api create
-    closeRoutingDialog();
-  };
-
-  const onUpdate = (data: RoutingForm) => {
-    // TODO: Call api update
-    closeRoutingDialog();
-  };
-
-  const onDelete = (data: RoutingForm) => {
-    // TODO: Call api delete
-    closeRoutingDialog();
-  };
-
-  const handleViewInfo = (data: RoutingForm) => {
-    openPreviewDialog({
-      title: 'Thông tin chi tiết Virtual',
-      values: data,
-    });
-  };
-
-  const handleEdit = (initialValues: RoutingForm) => {
-    openRoutingDialog({
-      initialValues,
-      onSubmit: onUpdate,
-      title: 'Cập nhật Virtual',
-      type: 'update',
-    });
-  };
-
-  const handleCreateVirtual = () => {
-    openRoutingDialog({
-      onSubmit: onCreate,
-      title: 'Tạo mới Virtual',
-      type: 'create',
-    });
-  };
+  const handleCreateVirtual = () => {};
 
   return (
     <Container maxWidth="xl" className="table-page">
@@ -190,9 +133,6 @@ function VirtualRouting() {
           components={{ Row: CustomRow }}
         />
       </div>
-
-      <RoutingDialog />
-      <PreviewDialog />
     </Container>
   );
 }

@@ -6,110 +6,173 @@ export interface CustomerList {
 }
 
 export interface CustomerInfo {
-  id: string;
+  id: number;
   customerName: string;
   description: string;
-  status: number;
-}
-
-export interface CustomerDetail {
-  customerVIps: CustomerVIps[];
-  hotlines: Hotline[];
-}
-
-export interface Hotline {
-  customerId: number;
-  customerName: string;
-  hotlines: string[];
-}
-
-export interface CustomerVIps extends CustomerInfo {
-  customerId: number;
-  customerVIps: VirtualNumber[];
+  status?: number;
 }
 
 export interface CreateCustomerParams {
   customerName: string;
   description: string;
-  hotlines: string;
-  virtualnumbers: string;
+}
+
+export interface GroupHotlineList {
+  hotlineGroups: HotlineGroups[];
+}
+
+export interface HotlineGroups {
+  hotlineGroupId: number;
+  hotlineGroupName: string;
+  customerId: number;
+  customerDisplayName: string;
+  customerName: string;
+  groupStatus: number;
+  hotlines: Hotline[];
+}
+
+export interface Hotline {
+  isdn: string;
+  status: number;
+  hotlineId: string;
+}
+
+interface CreateGroupHotlineInfo {
+  customerId: number;
+  groupHotlineName: string;
+  isdns: string[];
+}
+
+interface CreateVirtualNumberGroup {
+  customerId: number;
+  vngName: string;
+  isdns: string[];
+}
+
+export interface GroupVirtualList {
+  virtualNumberGroups: VirtualNumberGroup[];
+}
+
+export interface VirtualNumberGroup {
+  vngId: number;
+  vngName: string;
+  isdn: string;
+  status: number;
+  customerId: number;
+  customerName: string;
+  customerDisplayName: string;
+  virtualNumbers: VirtualNumber[];
 }
 
 export interface VirtualNumber {
-  virtualNumber: string;
-  id?: string;
+  isdn: string;
+  status: number;
+  vnId: string;
 }
 
-export interface UpdateCustomerParams {
+interface UpdateHotlineGroup {
   customerId: number;
-  customerName: string;
-  description: string;
+  hotlineGroupId: number;
+  groupHotlineName?: string;
+  status?: number;
+  isdns?: string[];
 }
 
-interface UpdateCustomerVirtual extends VirtualNumber {
+interface UpdateVirtualGroup {
   customerId: number;
-}
-
-interface AddNewHotline {
-  msisdn: string;
-  customerId: number;
+  vngId: number;
+  vngName?: string;
+  status?: number;
+  isdns?: string[];
 }
 
 export default class CustomerAPI {
-  static getListCustomer = async () => {
-    return await httpService.get<CustomerList>('/customer');
+  // Customer
+  static getListCustomer = () => {
+    return httpService.get<CustomerList>('/customer');
   };
 
-  static createCustomer = async (params: CreateCustomerParams) => {
-    return await httpService.post<CustomerInfo>('/customer', {
+  static createCustomer = (params: CreateCustomerParams) => {
+    return httpService.post<CustomerInfo>('/customer', {
       body: params,
     });
   };
 
-  static getDetailCustomer = async (id: string) => {
-    return await httpService.get<CustomerDetail>(`/customer/${id}/all`);
-  };
-
-  static updateCustomer = async (params: UpdateCustomerParams) => {
-    const { customerId, ...rest } = params;
-    return await httpService.put(`/customer/${customerId}`, {
+  static updateCustomer = (params: CustomerInfo) => {
+    const { id, ...rest } = params;
+    return httpService.put<CustomerInfo>(`/customer/${id}`, {
       body: { ...rest },
     });
   };
 
-  static deleteVirtualNumber = async ({
-    customerId,
-    virtualNumber,
-    id,
-  }: UpdateCustomerVirtual) => {
-    return await httpService.put(
-      `/customer/${customerId}/virtual-number/${id}`,
+  // Hotline
+  static getListGroupHotline = () => {
+    return httpService.get<GroupHotlineList>('/hotline');
+  };
+
+  static getHotlineDetail = (customerId: string, groupHotlineId: string) => {
+    return httpService.get<HotlineGroups>(
+      `/customer/${customerId}/hotline-group/${groupHotlineId}`
+    );
+  };
+
+  static createGroupHotline = (params: CreateGroupHotlineInfo) => {
+    const { customerId, ...rest } = params;
+    return httpService.post(`/customer/${customerId}/hotline-group`, {
+      body: { ...rest },
+    });
+  };
+
+  static updateHotlineGroup = (params: UpdateHotlineGroup) => {
+    const { customerId, hotlineGroupId, ...rest } = params;
+    return httpService.put(
+      `/customer/${customerId}/hotline-group/${hotlineGroupId}`,
       {
-        body: { virtualNumber },
+        body: { ...rest },
       }
     );
   };
 
-  static addVirtualNumber = async (params: UpdateCustomerVirtual) => {
-    const { customerId, virtualNumber } = params;
-    return await httpService.put(`/customer/${customerId}/virtual-number`, {
-      body: { virtualNumber },
-    });
-  };
-
-  static addHotline = async ({ customerId, msisdn }: AddNewHotline) => {
-    return await httpService.put(`/hotline`, {
+  static changeActiveHotline = (hotlineId: string, status: number) => {
+    return httpService.put(`/hotline/${hotlineId}`, {
       body: {
-        msisdn,
-        customerId,
+        status,
       },
     });
   };
 
-  static deleteHotline = async (hotline: string) => {
-    return await httpService.put(`/hotline/${hotline}`, {
+  // Virtual
+  static getListVirtual = () => {
+    return httpService.get<GroupVirtualList>('/virtual-number');
+  };
+
+  static getVirtualDetail = (customerId: string, virtualGroupId: string) => {
+    return httpService.get<VirtualNumberGroup>(
+      `/customer/${customerId}/virtual-number-group/${virtualGroupId}`
+    );
+  };
+
+  static createGroupVirtual = (params: CreateVirtualNumberGroup) => {
+    const { customerId, ...rest } = params;
+    return httpService.post(`/customer/${customerId}/virtual-number-group`, {
+      body: { ...rest },
+    });
+  };
+
+  static updateVirtualGroup = (params: UpdateVirtualGroup) => {
+    const { customerId, vngId, ...rest } = params;
+    return httpService.put(
+      `/customer/${customerId}/virtual-number-group/${vngId}`,
+      {
+        body: { ...rest },
+      }
+    );
+  };
+
+  static changeActiveVirtual = (virtualId: string, status: number) => {
+    return httpService.put(`/virtual-number/${virtualId}`, {
       body: {
-        status: 0,
+        status,
       },
     });
   };

@@ -8,9 +8,6 @@ import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import CustomRow from 'shared/blocks/custom-row/custom-row.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
-import usePreviewDialog from 'shared/blocks/preview-dialog/preview-dialog.component';
-import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
-import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { HotlineRoutingTableInfo } from '../shared/hotline-routing.const';
 
@@ -23,11 +20,6 @@ export const PREVIEW_CONFIG: GridColDef[] = [
 ];
 
 function HotlineRoutingPage() {
-  const { RoutingDialog, closeRoutingDialog, openRoutingDialog } =
-    useRoutingDialog({ isHotlineDialog: true });
-  const { PreviewDialog, openPreviewDialog } = usePreviewDialog({
-    columnConfig: PREVIEW_CONFIG,
-  });
   const [loading, setLoading] = useState<boolean>(false);
   const listData = useRef<HotlineRoutingTableInfo[]>();
   const { changePageSize, pageSize } = useChangePageSize();
@@ -45,50 +37,12 @@ function HotlineRoutingPage() {
       flex: 1,
       sortable: false,
       renderCell: (cellValues) => {
-        return (
-          <CellAction
-            deleteAble={false}
-            handleEdit={() => handleEdit(cellValues.row)}
-            handleView={() => handleViewInfo(cellValues.row)}
-          />
-        );
+        return <CellAction />;
       },
     },
   ]).current;
 
-  const onCreate = (data: RoutingForm) => {
-    // TODO: Call api create
-    closeRoutingDialog();
-  };
-
-  const onUpdate = (data: RoutingForm) => {
-    // TODO: Call api update
-    closeRoutingDialog();
-  };
-
-  const handleViewInfo = (data: RoutingForm) => {
-    openPreviewDialog({
-      title: 'Thông tin chi tiết Hotline Trunk',
-      values: data,
-    });
-  };
-
-  const handleEdit = (initialValues: RoutingForm) => {
-    openRoutingDialog({
-      initialValues,
-      onSubmit: onUpdate,
-      title: 'Cập nhật Hotline Trunk',
-      type: 'update',
-    });
-  };
-
-  const handleCreateHotline = () => {
-    openRoutingDialog({
-      onSubmit: onCreate,
-      title: 'Tạo mới Hotline Trunk',
-      type: 'create',
-    });
-  };
+  const handleCreateHotline = () => {};
 
   const getListHotline = useCallback(async () => {
     try {
@@ -101,7 +55,7 @@ function HotlineRoutingPage() {
           customerName: item.customerName,
           ip: item.host,
           port: item.port,
-          stringHotline: item.hotlines.join(','),
+          stringHotline: item.hotlines.join(', '),
           no: index + 1,
         }));
       }
@@ -149,9 +103,6 @@ function HotlineRoutingPage() {
             components={{ Row: CustomRow }}
           />
         </div>
-
-        <RoutingDialog />
-        <PreviewDialog />
       </Container>
     </>
   );

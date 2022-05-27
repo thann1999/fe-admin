@@ -149,9 +149,7 @@ export default function MiniDrawer() {
             {open ? <ArrowForwardIosIcon /> : <MenuIcon />}
           </IconButton>
 
-          <Typography variant="h6" className="page-name ml--XXS">
-            Trunk Management
-          </Typography>
+          <Typography variant="h6" className="page-name ml--XXS" />
 
           <div className="setting">
             <IconButton onClick={handleOpenMenu} disableRipple>
