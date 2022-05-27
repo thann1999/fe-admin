@@ -1,10 +1,12 @@
 import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
-import React, { Suspense } from 'react';
+import StorageService from 'app/services/storage';
+import React, { Suspense, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AuthGuard from 'routes/auth-guard';
+import LoginGuard from 'routes/login-guard';
+import LoadingComponent from 'shared/blocks/loading/loading.component';
 import './styles/index.scss';
-import './translation/i18n';
 
 export const customTheme = createTheme({
   typography: {
@@ -30,11 +32,22 @@ const VirtualRoute = React.lazy(
 );
 
 function App() {
+  useEffect(() => {
+    StorageService.init();
+  }, []);
   return (
     <ThemeProvider theme={customTheme}>
-      <Suspense fallback={<div>...Loading</div>}>
+      <Suspense fallback={<LoadingComponent open />}>
         <Routes>
-          <Route path="/login/*" element={<LoginRoute />} />
+          <Route
+            path="/login/*"
+            element={
+              <LoginGuard>
+                <LoginRoute />
+              </LoginGuard>
+            }
+          />
+
           <Route
             path="/admin/home/*"
             element={

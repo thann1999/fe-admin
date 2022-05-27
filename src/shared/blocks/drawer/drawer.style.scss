@@ -2,9 +2,14 @@
 @import 'styles/font.scss';
 
 .mini-drawer {
+  margin-right: 10px;
   .app-bar {
     background-color: $color-white !important;
     height: $space-L;
+
+    .page-name {
+      color: $color-black;
+    }
 
     .setting {
       margin-left: auto;
@@ -13,6 +18,12 @@
   }
 
   .drawer-content {
+    *,
+    *::before,
+    *::after {
+      box-sizing: content-box;
+    }
+
     .css-12i7wg6-MuiPaper-root-MuiDrawer-paper {
       @extend .font--14-8md;
       padding: 0px 5px;

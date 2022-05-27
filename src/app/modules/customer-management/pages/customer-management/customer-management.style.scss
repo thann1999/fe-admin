@@ -1,0 +1,12 @@
+@import 'styles/variables';
+@import 'styles/page.scss';
+
+.customer-management {
+  @extend .table-page;
+
+  .MuiTabs-root {
+    button {
+      text-transform: none;
+    }
+  }
+}

@@ -1,138 +1,184 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import React, { useRef } from 'react';
+import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import TrunkAPI, { TrunkInfo } from 'app/api/trunk.api';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
+import LoadingComponent from 'shared/blocks/loading/loading.component';
+import addToast from 'shared/blocks/toastify/add-toast.component';
+import { Message } from 'shared/const/message.const';
+import { STATUS_OPTIONS } from 'shared/const/select-option.const';
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import useTrunkDialog from '../components/trunk-dialog/trunk-dialog.component';
 import { TrunkForm } from '../shared/trunk-dialog.const';
 
-const rows = [
-  {
-    id: 1,
-    name: 'Snow',
-    telecom: 1,
-    ipPort: '192.168.1.1:3006',
-  },
-  {
-    id: 2,
-    name: 'Lannister',
-    telecom: 2,
-    ipPort: '192.168.1.1:3006',
-  },
-  {
-    id: 3,
-    name: 'Lannister',
-    telecom: 3,
-    ipPort: '192.168.1.1:3006',
-  },
-  { id: 4, name: 'Stark', telecom: 4, ipPort: '192.168.1.1:3006' },
-];
-
 function TrunkManagement() {
   const { openTrunkDialog, TrunkDialog, closeTrunkDialog } = useTrunkDialog();
+  const [loading, setLoading] = useState<boolean>(false);
+  const listTrunk = useRef<TrunkInfo[]>();
+  const { pageSize, changePageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'No', flex: 0.5 },
-    { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'telecom', headerName: 'Telecom', flex: 1.25 },
+    { field: 'no', headerName: 'STT', flex: 0.3 },
+    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
+    { field: 'groupName', headerName: 'Nhà mạng', flex: 1 },
     {
       field: 'ipPort',
       headerName: 'IP:PORT',
-      flex: 1.25,
+      flex: 1,
+      valueGetter: (params: GridValueGetterParams) =>
+        `${params.row.ip || ''}:${params.row.port}`,
+    },
+    {
+      field: 'status',
+      headerName: 'Trạng thái',
+      flex: 0.5,
+      valueGetter: (params: GridValueGetterParams) =>
+        STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
-      headerName: 'Action',
-      flex: 1,
+      headerName: 'Chức năng',
+      flex: 1.5,
       sortable: false,
       renderCell: (cellValues) => {
-        const { name, telecom, ipPort, id } = cellValues.row;
         return (
           <CellAction
             viewAble={false}
-            handleEdit={() =>
-              handleEdit({
-                name,
-                ipPort,
-                telecom,
-                id,
-              })
-            }
-            deleteDialogInfo={{
-              title: 'Xóa Trunk?',
-              type: 'error',
-              description:
-                'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-              handleConfirm: () => onDelete({ name, ipPort, telecom, id }),
-            }}
+            deleteAble={false}
+            handleEdit={() => handleEdit(cellValues.row)}
           />
         );
       },
     },
   ]).current;
 
-  const onDelete = (data: TrunkForm) => {
-    // TODO: Call api delete
+  const onCreate = async (data: TrunkForm) => {
+    try {
+      const { ip, trunkName, port, telecom } = data;
+      setLoading(true);
+      await TrunkAPI.createNewTrunk({
+        ip,
+        port,
+        trunkName,
+        groupName: telecom,
+      });
+
+      await getListTrunk();
+      addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
+      closeTrunkDialog();
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
-  const onCreate = (data: TrunkForm) => {
-    // TODO: Call api create
-    closeTrunkDialog();
+  const onUpdate = async (data: TrunkForm, isOnlyChangeStatus?: boolean) => {
+    try {
+      const { id, telecom, ip, port, trunkName, status } = data;
+      setLoading(true);
+      await TrunkAPI.updateTrunk(
+        isOnlyChangeStatus
+          ? {
+              groupCode: telecom,
+              status: status ?? 0,
+              trunkId: id || '',
+            }
+          : {
+              groupCode: telecom,
+              ip,
+              port,
+              status: status ?? 0,
+              trunkId: id || '',
+              trunkName,
+            }
+      );
+
+      await getListTrunk();
+      addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
+      closeTrunkDialog();
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
-  const onUpdate = (data: TrunkForm) => {
-    // TODO: Call api update
-    closeTrunkDialog();
-  };
-
-  const handleEdit = (initialValues: TrunkForm) => {
+  const handleEdit = (initialValues: TrunkInfo) => {
     openTrunkDialog({
       initialValues,
       onSubmit: onUpdate,
-      title: 'Update Trunk',
-      type: 'update',
+      title: 'Cập nhật Trunk',
+      isUpdate: true,
     });
   };
 
   const handleCreateTrunk = () => {
     openTrunkDialog({
+      title: 'Tạo mới Trunk',
       onSubmit: onCreate,
-      title: 'Create New Trunk',
     });
   };
 
+  const getListTrunk = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await TrunkAPI.getListTrunk();
+      if (result) {
+        listTrunk.current = result.groupIps.map((item, index) => ({
+          ...item,
+          no: index + 1,
+        }));
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    getListTrunk();
+  }, [getListTrunk]);
+
   return (
-    <Container maxWidth="xl" className="table-page">
+    <>
       <Helmet>
         <title>Trunk Management Page</title>
       </Helmet>
 
-      <div className="create-button">
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddCircleIcon />}
-          className="admin-button --no-transform"
-          onClick={handleCreateTrunk}
-        >
-          Create
-        </Button>
-      </div>
+      <LoadingComponent open={loading} />
 
-      <div className="data-grid">
-        <DataGrid
-          rows={rows}
-          columns={COLUMN_CONFIG}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
-          disableColumnMenu
-          hideFooterSelectedRowCount
-        />
-      </div>
+      <Container maxWidth="xl" className="table-page">
+        <div className="create-button">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddCircleIcon />}
+            className="admin-button --no-transform"
+            onClick={handleCreateTrunk}
+          >
+            Tạo mới
+          </Button>
+        </div>
 
-      <TrunkDialog />
-    </Container>
+        <div className="data-grid">
+          <DataGrid
+            rows={listTrunk.current || []}
+            columns={COLUMN_CONFIG}
+            pageSize={pageSize}
+            onPageSizeChange={changePageSize}
+            rowsPerPageOptions={ROW_PAGE_OPTIONS}
+            disableColumnMenu
+            autoHeight
+            rowHeight={60}
+            hideFooterSelectedRowCount
+            components={{ Row: CustomRow }}
+          />
+        </div>
+
+        <TrunkDialog />
+      </Container>
+    </>
   );
 }
 

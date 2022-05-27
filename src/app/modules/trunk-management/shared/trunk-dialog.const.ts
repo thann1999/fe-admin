@@ -1,24 +1,19 @@
-import { SelectItem } from 'shared/form/select/select-controller.component';
-
-export const TELECOM_OPTIONS: SelectItem[] = [
-  { label: 'Viettel', value: 1 },
-  { label: 'Mobiphone', value: 2 },
-  { label: 'Vinaphone', value: 3 },
-  { label: 'Fix', value: 4 },
-];
+import { TrunkInfo } from 'app/api/trunk.api';
 
 export interface TrunkForm {
-  id?: number;
-  name: string;
-  ipPort: string;
+  id?: string;
+  trunkName: string;
+  ip: string;
+  port: string;
   telecom: string;
+  status?: number;
 }
 
 export interface OpenDialogProps {
   title: string;
-  onSubmit: (data: TrunkForm) => void;
-  type?: 'create' | 'update';
-  initialValues?: TrunkForm;
+  onSubmit: (data: TrunkForm, isOnlyChangeStatus?: boolean) => void;
+  isUpdate?: boolean;
+  initialValues?: TrunkInfo;
 }
 
 export interface DialogState extends OpenDialogProps {

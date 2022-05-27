@@ -1,192 +1,110 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import React, { useRef } from 'react';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import HotlineRoutingAPI from 'app/api/hotline-routing.api';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
-import usePreviewDialog from 'shared/blocks/preview-dialog/preview-dialog.component';
-import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
-import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
-
-const rows = [
-  {
-    id: 1,
-    customerName: 'Snow',
-    trunkName: 1,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-  {
-    id: 2,
-    customerName: 'John',
-    trunkName: 1,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-  {
-    id: 3,
-    customerName: 'Thang',
-    trunkName: 1,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 1,
-  },
-  {
-    id: 4,
-    customerName: 'Ngoc',
-    trunkName: 2,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 1,
-  },
-  {
-    id: 5,
-    customerName: 'Anh',
-    trunkName: 2,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-  {
-    id: 6,
-    customerName: 'Nguyen',
-    trunkName: 3,
-    hotline: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
-    ipPort: '192.168.1.1:3006',
-    status: 0,
-  },
-];
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
+import LoadingComponent from 'shared/blocks/loading/loading.component';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
+import { HotlineRoutingTableInfo } from '../shared/hotline-routing.const';
 
 export const PREVIEW_CONFIG: GridColDef[] = [
-  { field: 'id', headerName: 'No', flex: 0.5 },
   { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
   { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
-  { field: 'hotline', headerName: 'Hotline', flex: 1 },
-  { field: 'ipPort', headerName: 'IP:PORT', flex: 1 },
-  {
-    field: 'status',
-    headerName: 'Trạng thái',
-    flex: 1,
-    valueGetter: (params: GridValueGetterParams) =>
-      params.row.status ? 'Active' : 'Disable',
-  },
+  { field: 'stringHotline', headerName: 'Hotline', flex: 1 },
+  { field: 'ip', headerName: 'Đỉa chỉ IP', flex: 1 },
+  { field: 'port', headerName: 'port', flex: 1 },
 ];
 
 function HotlineRoutingPage() {
-  const { RoutingDialog, closeRoutingDialog, openRoutingDialog } =
-    useRoutingDialog({ isHotlineDialog: true });
-  const { PreviewDialog, openPreviewDialog } = usePreviewDialog({
-    columnConfig: PREVIEW_CONFIG,
-  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const listData = useRef<HotlineRoutingTableInfo[]>();
+  const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'No', flex: 0.5 },
+    { field: 'no', headerName: 'STT', flex: 0.35 },
     { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
-    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1.25 },
-    { field: 'hotline', headerName: 'Hotline', flex: 1.25 },
-    {
-      field: 'status',
-      headerName: 'Trạng thái',
-      flex: 0.75,
-      valueGetter: (params: GridValueGetterParams) =>
-        params.row.status ? 'Active' : 'Disable',
-    },
+    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
+    { field: 'stringHotline', headerName: 'Hotline', flex: 1 },
+    { field: 'ip', headerName: 'Địa chỉ IP', flex: 1 },
+    { field: 'port', headerName: 'Port', flex: 1 },
     {
       field: 'action',
       headerName: 'Action',
-      flex: 1.25,
+      flex: 1,
       sortable: false,
       renderCell: (cellValues) => {
-        return (
-          <CellAction
-            handleEdit={() => handleEdit(cellValues.row)}
-            deleteDialogInfo={{
-              title: 'Xóa Hotline?',
-              type: 'error',
-              description:
-                'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-              handleConfirm: () => onDelete(cellValues.row),
-            }}
-            handleView={() => handleViewInfo(cellValues.row)}
-          />
-        );
+        return <CellAction />;
       },
     },
   ]).current;
 
-  const onCreate = (data: RoutingForm) => {
-    // TODO: Call api create
-    closeRoutingDialog();
-  };
+  const handleCreateHotline = () => {};
 
-  const onUpdate = (data: RoutingForm) => {
-    // TODO: Call api update
-    closeRoutingDialog();
-  };
+  const getListHotline = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await HotlineRoutingAPI.getListHotlineRouting();
+      if (result) {
+        listData.current = result.hotlines.map((item, index) => ({
+          id: item.customerId,
+          customerId: item.customerId,
+          customerName: item.customerName,
+          ip: item.host,
+          port: item.port,
+          stringHotline: item.hotlines.join(', '),
+          no: index + 1,
+        }));
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  }, []);
 
-  const onDelete = (data: RoutingForm) => {
-    // TODO: Call api delete
-    closeRoutingDialog();
-  };
-
-  const handleViewInfo = (data: RoutingForm) => {
-    openPreviewDialog({
-      title: 'Thông tin chi tiết Hotline',
-      values: data,
-    });
-  };
-
-  const handleEdit = (initialValues: RoutingForm) => {
-    openRoutingDialog({
-      initialValues,
-      onSubmit: onUpdate,
-      title: 'Cập nhật Hotline',
-      type: 'update',
-    });
-  };
-
-  const handleCreateHotline = () => {
-    openRoutingDialog({
-      onSubmit: onCreate,
-      title: 'Tạo mới Hotline',
-      type: 'create',
-    });
-  };
+  useEffect(() => {
+    getListHotline();
+  }, [getListHotline]);
 
   return (
-    <Container maxWidth="xl" className="table-page">
-      <Helmet>
-        <title>Hotline Routing Page</title>
-      </Helmet>
+    <>
+      <LoadingComponent open={loading} />
 
-      <div className="create-button">
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddCircleIcon />}
-          className="admin-button --no-transform"
-          onClick={handleCreateHotline}
-        >
-          Tạo mới
-        </Button>
-      </div>
+      <Container maxWidth="xl" className="table-page">
+        <Helmet>
+          <title>Hotline Routing Page</title>
+        </Helmet>
 
-      <div className="data-grid">
-        <DataGrid
-          rows={rows}
-          columns={COLUMN_CONFIG}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
-          disableColumnMenu
-          hideFooterSelectedRowCount
-        />
-      </div>
+        <div className="create-button">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddCircleIcon />}
+            className="admin-button --no-transform"
+            onClick={handleCreateHotline}
+          >
+            Tạo mới
+          </Button>
+        </div>
 
-      <RoutingDialog />
-      <PreviewDialog />
-    </Container>
+        <div className="data-grid">
+          <DataGrid
+            rows={listData.current ? listData.current : []}
+            columns={COLUMN_CONFIG}
+            pageSize={pageSize}
+            onPageSizeChange={changePageSize}
+            rowsPerPageOptions={ROW_PAGE_OPTIONS}
+            autoHeight
+            disableColumnMenu
+            hideFooterSelectedRowCount
+            components={{ Row: CustomRow }}
+          />
+        </div>
+      </Container>
+    </>
   );
 }
 

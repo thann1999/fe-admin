@@ -1,13 +1,12 @@
-import React from 'react';
 import {
   ListAlt,
+  Logout,
   ManageAccounts,
   PhoneForwarded,
   Route,
-  Logout,
-  AccountCircle,
 } from '@mui/icons-material';
 import { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import React from 'react';
 
 export const DRAWER_WIDTH = 250;
 
@@ -30,9 +29,6 @@ export const ICON = [
   [<PhoneForwarded fontSize="small" />, <Route fontSize="small" />],
 ];
 
-export const SETTING_ICON = [
-  <AccountCircle fontSize="small" color="action" />,
-  <Logout fontSize="small" color="action" />,
-];
+export const SETTING_ICON = [<Logout fontSize="small" color="action" />];
 
 export const HREF = [];

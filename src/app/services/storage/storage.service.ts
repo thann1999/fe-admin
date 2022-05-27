@@ -22,6 +22,14 @@ class StorageService {
       : null;
   }
 
+  public remove(key: string): void {
+    this.localStorage?.removeItem(this.generateKey(key));
+  }
+
+  public clear(): void {
+    this.localStorage?.clear();
+  }
+
   public setObject(key: string, data: ObjectOrArray): void {
     this.set(key, JSON.stringify(data));
   }

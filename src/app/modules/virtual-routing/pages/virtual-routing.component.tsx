@@ -1,19 +1,19 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container } from '@mui/material';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import useChangePageSize from 'app/hooks/change-page-size.hook';
 import React, { useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
-import usePreviewDialog from 'shared/blocks/preview-dialog/preview-dialog.component';
-import useRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog.component';
-import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
+import CustomRow from 'shared/blocks/custom-row/custom-row.component';
+import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 
 const rows = [
   {
     id: 1,
     customerName: 'Snow',
     trunkName: 1,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -21,7 +21,7 @@ const rows = [
     id: 2,
     customerName: 'John',
     trunkName: 1,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -29,7 +29,7 @@ const rows = [
     id: 3,
     customerName: 'Thang',
     trunkName: 1,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 1,
   },
@@ -37,7 +37,7 @@ const rows = [
     id: 4,
     customerName: 'Ngoc',
     trunkName: 2,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 1,
   },
@@ -45,7 +45,7 @@ const rows = [
     id: 5,
     customerName: 'Anh',
     trunkName: 2,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -53,7 +53,7 @@ const rows = [
     id: 6,
     customerName: 'Nguyen',
     trunkName: 3,
-    virtual: '11111111, 9744124556, 9744124556, 9744124556 , 9744124556',
+    virtual: '11111111, 9744124556',
     ipPort: '192.168.1.1:3006',
     status: 0,
   },
@@ -75,11 +75,7 @@ export const PREVIEW_CONFIG: GridColDef[] = [
 ];
 
 function VirtualRouting() {
-  const { RoutingDialog, closeRoutingDialog, openRoutingDialog } =
-    useRoutingDialog({ isHotlineDialog: false });
-  const { PreviewDialog, openPreviewDialog } = usePreviewDialog({
-    columnConfig: PREVIEW_CONFIG,
-  });
+  const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'id', headerName: 'No', flex: 0.5 },
@@ -99,62 +95,12 @@ function VirtualRouting() {
       flex: 1.25,
       sortable: false,
       renderCell: (cellValues) => {
-        return (
-          <CellAction
-            handleEdit={() => handleEdit(cellValues.row)}
-            deleteDialogInfo={{
-              title: 'Xóa Virtual?',
-              type: 'error',
-              description:
-                'Bạn có thực sự muốn xóa bản ghi này? Hành động này không thể hoàn tác.',
-              handleConfirm: () => onDelete(cellValues.row),
-            }}
-            handleView={() => handleViewInfo(cellValues.row)}
-          />
-        );
+        return <CellAction />;
       },
     },
   ]).current;
 
-  const onCreate = (data: RoutingForm) => {
-    // TODO: Call api create
-    closeRoutingDialog();
-  };
-
-  const onUpdate = (data: RoutingForm) => {
-    // TODO: Call api update
-    closeRoutingDialog();
-  };
-
-  const onDelete = (data: RoutingForm) => {
-    // TODO: Call api delete
-    closeRoutingDialog();
-  };
-
-  const handleViewInfo = (data: RoutingForm) => {
-    openPreviewDialog({
-      title: 'Thông tin chi tiết Virtual',
-      values: data,
-    });
-  };
-
-  const handleEdit = (initialValues: RoutingForm) => {
-    console.log(initialValues);
-    openRoutingDialog({
-      initialValues,
-      onSubmit: onUpdate,
-      title: 'Cập nhật Virtual',
-      type: 'update',
-    });
-  };
-
-  const handleCreateVirtual = () => {
-    openRoutingDialog({
-      onSubmit: onCreate,
-      title: 'Tạo mới Virtual',
-      type: 'create',
-    });
-  };
+  const handleCreateVirtual = () => {};
 
   return (
     <Container maxWidth="xl" className="table-page">
@@ -178,15 +124,15 @@ function VirtualRouting() {
         <DataGrid
           rows={rows}
           columns={COLUMN_CONFIG}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
+          pageSize={pageSize}
+          onPageSizeChange={changePageSize}
+          rowsPerPageOptions={ROW_PAGE_OPTIONS}
           disableColumnMenu
+          autoHeight
           hideFooterSelectedRowCount
+          components={{ Row: CustomRow }}
         />
       </div>
-
-      <RoutingDialog />
-      <PreviewDialog />
     </Container>
   );
 }
