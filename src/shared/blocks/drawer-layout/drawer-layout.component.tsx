@@ -4,11 +4,11 @@ import MiniDrawer from '../drawer/drawer.component';
 
 function DrawerLayout({ children }: { children: JSX.Element }) {
   return (
-    <>
+    <Stack direction="row" spacing={0}>
       <MiniDrawer />
 
       {children}
-    </>
+    </Stack>
   );
 }
 

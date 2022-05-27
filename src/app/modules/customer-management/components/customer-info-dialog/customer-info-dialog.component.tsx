@@ -11,7 +11,7 @@ import {
   CustomerInfoForm,
   DialogState,
   OpenDialogProps,
-} from '../../shared/customer-info-dialog.type';
+} from '../../shared/type/customer-info-dialog.type';
 import './customer-info-dialog.style.scss';
 
 function useCustomerInfoDialog() {

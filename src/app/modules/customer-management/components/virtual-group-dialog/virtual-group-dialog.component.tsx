@@ -21,7 +21,7 @@ import {
   DialogState,
   GroupVirtualForm,
   OpenDialogProps,
-} from '../../shared/virtual-group-dialog.type';
+} from '../../shared/type/virtual-group-dialog.type';
 import './virtual-group-dialog.style.scss';
 
 function useVirtualGroupDialog() {
@@ -107,8 +107,8 @@ function useVirtualGroupDialog() {
   }, []);
 
   useEffect(() => {
-    if (dialogState.isOpen) getListCustomer();
-  }, [dialogState.isOpen, getListCustomer]);
+    if (!dialogState.isUpdate) getListCustomer();
+  }, [getListCustomer, dialogState.isUpdate]);
 
   const VirtualGroupDialog = useCallback(() => {
     return (

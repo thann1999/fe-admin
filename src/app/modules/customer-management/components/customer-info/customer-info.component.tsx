@@ -11,7 +11,7 @@ import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
-import { CustomerInfoForm } from '../../shared/customer-info-dialog.type';
+import { CustomerInfoForm } from '../../shared/type/customer-info-dialog.type';
 import useCustomerInfoDialog from '../customer-info-dialog/customer-info-dialog.component';
 
 function CustomerInfoTab() {

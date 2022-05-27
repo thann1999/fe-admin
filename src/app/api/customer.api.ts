@@ -70,7 +70,16 @@ export interface VirtualNumber {
   vnId: string;
 }
 
+interface UpdateHotlineGroup {
+  customerId: number;
+  hotlineGroupId: number;
+  groupHotlineName?: string;
+  status?: number;
+  isdns?: string[];
+}
+
 export default class CustomerAPI {
+  // Customer
   static getListCustomer = () => {
     return httpService.get<CustomerList>('/customer');
   };
@@ -88,8 +97,15 @@ export default class CustomerAPI {
     });
   };
 
+  // Hotline
   static getListGroupHotline = () => {
     return httpService.get<GroupHotlineList>('/hotline');
+  };
+
+  static getHotlineDetail = (customerId: string, groupHotlineId: string) => {
+    return httpService.get<HotlineGroups>(
+      `/customer/${customerId}/hotline-group/${groupHotlineId}`
+    );
   };
 
   static createGroupHotline = (params: CreateGroupHotlineInfo) => {
@@ -99,8 +115,33 @@ export default class CustomerAPI {
     });
   };
 
+  static updateHotlineGroup = (params: UpdateHotlineGroup) => {
+    const { customerId, hotlineGroupId, ...rest } = params;
+    return httpService.put(
+      `/customer/${customerId}/hotline-group/${hotlineGroupId}`,
+      {
+        body: { ...rest },
+      }
+    );
+  };
+
+  static activeHotline = (hotlineId: string, status: number) => {
+    return httpService.put(`/hotline/${hotlineId}`, {
+      body: {
+        status,
+      },
+    });
+  };
+
+  // Virtual
   static getListVirtual = () => {
     return httpService.get<GroupVirtualList>('/virtual-number');
+  };
+
+  static getVirtualDetail = (customerId: string, virtualGroupId: string) => {
+    return httpService.get<VirtualNumberGroup>(
+      `/customer/${customerId}/virtual-number-group/${virtualGroupId}`
+    );
   };
 
   static createGroupVirtual = (params: CreateVirtualNumberGroup) => {

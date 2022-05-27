@@ -3,4 +3,10 @@
 
 .customer-management {
   @extend .table-page;
+
+  .MuiTabs-root {
+    button {
+      text-transform: none;
+    }
+  }
 }

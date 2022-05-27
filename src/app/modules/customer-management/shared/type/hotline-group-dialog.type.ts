@@ -2,11 +2,11 @@ import { HotlineGroups } from 'app/api/customer.api';
 import { SelectItem } from 'shared/form/select/select-controller.component';
 
 export interface GroupHotlineForm {
-  id?: number;
-  customerId: number;
+  customerId: number | string;
   groupHotlineName: string;
   stringHotline: string;
   hotline: SelectItem[];
+  customerName?: string;
   status?: number;
 }
 

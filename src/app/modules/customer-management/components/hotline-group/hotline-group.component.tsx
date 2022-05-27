@@ -1,7 +1,7 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Link } from '@mui/material';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import CustomerAPI, { HotlineGroups } from 'app/api/customer.api';
+import CustomerAPI from 'app/api/customer.api';
 import { convertStringToArray } from 'app/helpers/array.helper';
 import useChangePageSize from 'app/hooks/change-page-size.hook';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,17 +11,14 @@ import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
-import { GroupHotlineForm } from '../../shared/hotline-group-dialog.type';
+import { HotlineGroupInfo } from '../../shared/type/customer.type';
+import { GroupHotlineForm } from '../../shared/type/hotline-group-dialog.type';
 import useHotlineGroupDialog from '../hotline-group-dialog/hotline-group-dialog.component';
-
-interface HotlineList extends HotlineGroups {
-  stringHotline: string;
-}
 
 function HotlineGroup() {
   const { HotlineGroupDialog, closeHotlineGroup, openHotlineGroup } =
     useHotlineGroupDialog();
-  const groupHotlineList = useRef<HotlineList[]>();
+  const groupHotlineList = useRef<HotlineGroupInfo[]>();
   const [loading, setLoading] = useState<boolean>(false);
   const { changePageSize, pageSize } = useChangePageSize();
 
@@ -34,7 +31,7 @@ function HotlineGroup() {
       flex: 1,
       renderCell: (cellValues) => (
         <Link
-          href={`hotline-detail/${cellValues.row.customerId}/${cellValues.row.hotlineGroupId}`}
+          href={`customer-management/hotline-detail/${cellValues.row.customerId}/${cellValues.row.hotlineGroupId}`}
           underline="none"
         >
           {cellValues.row.hotlineGroupName}
@@ -57,7 +54,7 @@ function HotlineGroup() {
       setLoading(true);
       const { customerId, groupHotlineName, stringHotline } = data;
       await CustomerAPI.createGroupHotline({
-        customerId,
+        customerId: Number(customerId),
         groupHotlineName,
         isdns: convertStringToArray(stringHotline),
       });
@@ -84,7 +81,9 @@ function HotlineGroup() {
         groupHotlineList.current = result.hotlineGroups.map((item, index) => ({
           ...item,
           id: index + 1,
-          stringHotline: item.hotlines.map((hotline) => hotline.isdn).join(','),
+          stringHotline: item.hotlines
+            .map((hotline) => hotline.isdn)
+            .join(', '),
         }));
       }
       setLoading(false);

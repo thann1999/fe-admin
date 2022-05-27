@@ -1,13 +1,14 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import CustomerAPI, { Hotline, HotlineGroups } from 'app/api/customer.api';
+import CustomerAPI, { Hotline } from 'app/api/customer.api';
 import { convertArrayToSelectItem } from 'app/helpers/array.helper';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
+import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import AutocompleteController from 'shared/form/autocomplete/autocomplete-controller.component';
 import SelectController, {
   SelectItem,
@@ -18,7 +19,7 @@ import {
   DialogState,
   GroupHotlineForm,
   OpenDialogProps,
-} from '../../shared/hotline-group-dialog.type';
+} from '../../shared/type/hotline-group-dialog.type';
 import './hotline-group-dialog.style.scss';
 
 function useHotlineGroupDialog() {
@@ -33,15 +34,14 @@ function useHotlineGroupDialog() {
   const customerList = useRef<SelectItem[]>();
   const schema = useRef(
     yup.object().shape({
-      customerName: yup.string().required('Vui lòng chọn Khách hàng'),
+      customerId: yup.string(),
       groupHotlineName: yup.string().required('Vui lòng nhập tên nhóm Hotline'),
-      stringHotline: yup.string().required('Vui lòng nhập số Hotline'),
+      stringHotline: yup.string(),
     })
   ).current;
-  const initialGroupHotline = useRef<HotlineGroups>();
   const { control, handleSubmit, reset, setValue } = useForm<GroupHotlineForm>({
     defaultValues: {
-      customerId: 0,
+      customerId: '',
       stringHotline: '',
       groupHotlineName: '',
       hotline: [],
@@ -59,11 +59,10 @@ function useHotlineGroupDialog() {
       const {
         customerId,
         hotlineGroupName,
-        hotlineGroupId,
         groupStatus,
         hotlines,
+        customerName,
       } = initialValues;
-      initialGroupHotline.current = initialValues;
       const hotlineOptions = convertArrayToSelectItem<Hotline>(
         hotlines,
         'isdn',
@@ -71,10 +70,17 @@ function useHotlineGroupDialog() {
       );
       setValue('customerId', customerId);
       setValue('hotline', hotlineOptions);
-      setValue('id', hotlineGroupId);
+      setValue('customerName', customerName);
       setValue('groupHotlineName', hotlineGroupName);
       setValue('status', groupStatus);
       setDialogState((prev) => ({ ...prev, hotlineOptions }));
+    } else {
+      schema.fields.stringHotline = yup
+        .string()
+        .required('Vui lòng nhập số Hotline');
+      schema.fields.customerId = yup
+        .string()
+        .required('Vui lòng chọn Khách hàng');
     }
     setDialogState((prev) => ({
       ...prev,
@@ -181,8 +187,8 @@ function useHotlineGroupDialog() {
   }, []);
 
   useEffect(() => {
-    if (dialogState.isOpen) getListCustomer();
-  }, [dialogState.isOpen, getListCustomer]);
+    getListCustomer();
+  }, [getListCustomer]);
 
   const HotlineGroupDialog = useCallback(() => {
     return (
@@ -202,27 +208,43 @@ function useHotlineGroupDialog() {
           <Grid>
             <form
               className="form-paper"
-              onSubmit={handleSubmit(
-                dialogState.onSubmit ? dialogState.onSubmit : handleUpdate
-              )}
+              onSubmit={handleSubmit(dialogState.onSubmit)}
             >
-              <div>
-                <Grid item xs={12}>
-                  <Typography className="mt--XS mb--XXS require-field">
-                    Tên khách hàng
-                  </Typography>
-                </Grid>
+              {dialogState.isUpdate ? (
+                <div>
+                  <Grid item xs={12}>
+                    <Typography className="mt--XS mb--XXS">
+                      Tên Khách hàng
+                    </Typography>
+                  </Grid>
 
-                <Grid item xs={12}>
-                  <SelectController
-                    name="customerName"
-                    options={customerList.current || []}
-                    control={control}
-                    className="admin-select width-100"
-                    placeholder="Chọn khách hàng"
-                  />
-                </Grid>
-              </div>
+                  <Grid item xs={12}>
+                    <TextFieldController
+                      name="customerName"
+                      control={control}
+                      className="admin-select width-100"
+                      disabled
+                    />
+                  </Grid>
+                </div>
+              ) : (
+                <div>
+                  <Grid item xs={12}>
+                    <Typography className="mt--XS mb--XXS require-field">
+                      Tên Khách hàng
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <SelectController
+                      name="customerId"
+                      options={customerList.current || []}
+                      control={control}
+                      className="admin-select width-100"
+                    />
+                  </Grid>
+                </div>
+              )}
 
               <div>
                 <Grid item xs={12}>
@@ -242,25 +264,44 @@ function useHotlineGroupDialog() {
               </div>
 
               {dialogState.isUpdate ? (
-                <div>
-                  <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS require-field">
-                      Số Hotline
-                    </Typography>
-                  </Grid>
+                <>
+                  <div>
+                    <Grid item xs={12}>
+                      <Typography className="mt--XS mb--XXS require-field">
+                        Số Hotline
+                      </Typography>
+                    </Grid>
 
-                  <Grid item xs={12}>
-                    <AutocompleteController
-                      multiple
-                      freeSolo
-                      options={dialogState.hotlineOptions}
-                      defaultValue={dialogState.hotlineOptions}
-                      name="hotline"
-                      control={control}
-                      placeholder="Nhập số Hotline"
-                    />
-                  </Grid>
-                </div>
+                    <Grid item xs={12}>
+                      <AutocompleteController
+                        multiple
+                        freeSolo
+                        options={dialogState.hotlineOptions}
+                        defaultValue={dialogState.hotlineOptions}
+                        name="hotline"
+                        control={control}
+                        placeholder="Nhập số Hotline"
+                      />
+                    </Grid>
+                  </div>
+
+                  <div>
+                    <Grid item xs={12}>
+                      <Typography className="mt--XS mb--XXS require-field">
+                        Trạng thái
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <SelectController
+                        name="status"
+                        options={STATUS_OPTIONS}
+                        control={control}
+                        className="admin-select width-100"
+                      />
+                    </Grid>
+                  </div>
+                </>
               ) : (
                 <div>
                   <Grid item xs={12}>

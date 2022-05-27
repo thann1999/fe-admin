@@ -1,7 +1,7 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Link } from '@mui/material';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import CustomerAPI, { VirtualNumberGroup } from 'app/api/customer.api';
+import CustomerAPI from 'app/api/customer.api';
 import { convertStringToArray } from 'app/helpers/array.helper';
 import useChangePageSize from 'app/hooks/change-page-size.hook';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,17 +11,14 @@ import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
-import { GroupVirtualForm } from '../../shared/virtual-group-dialog.type';
+import { VirtualGroupInfo } from '../../shared/type/customer.type';
+import { GroupVirtualForm } from '../../shared/type/virtual-group-dialog.type';
 import useVirtualGroupDialog from '../virtual-group-dialog/virtual-group-dialog.component';
 
-interface HotlineList extends VirtualNumberGroup {
-  stringVirtual: string;
-}
-
-function HotlineGroup() {
+function VirtualGroup() {
   const { VirtualGroupDialog, closeVirtualGroup, openVirtualGroup } =
     useVirtualGroupDialog();
-  const groupVirtualList = useRef<HotlineList[]>();
+  const groupVirtualList = useRef<VirtualGroupInfo[]>();
   const [loading, setLoading] = useState<boolean>(false);
   const { changePageSize, pageSize } = useChangePageSize();
 
@@ -34,7 +31,7 @@ function HotlineGroup() {
       flex: 1,
       renderCell: (cellValues) => (
         <Link
-          href={`virtual-detail/${cellValues.row.customerId}/${cellValues.row.vngId}`}
+          href={`customer-management/virtual-detail/${cellValues.row.customerId}/${cellValues.row.vngId}`}
           underline="none"
         >
           {cellValues.row.vngName}
@@ -61,7 +58,7 @@ function HotlineGroup() {
         vngName,
         isdns: convertStringToArray(stringVirtual),
       });
-      await getListHotlineGroup();
+      await getListVirtualGroup();
       closeVirtualGroup();
       addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
     } catch (error) {
@@ -69,14 +66,14 @@ function HotlineGroup() {
     }
   };
 
-  const handleCreateHotlineGroup = () => {
+  const handleCreateVirtualGroup = () => {
     openVirtualGroup({
       onSubmit: onCreate,
       title: 'Tạo mới nhóm Virtual',
     });
   };
 
-  const getListHotlineGroup = useCallback(async () => {
+  const getListVirtualGroup = useCallback(async () => {
     try {
       setLoading(true);
       const result = await CustomerAPI.getListVirtual();
@@ -87,7 +84,7 @@ function HotlineGroup() {
             id: index + 1,
             stringVirtual: item.virtualNumbers
               .map((virtual) => virtual.isdn)
-              .join(','),
+              .join(', '),
           })
         );
       }
@@ -98,8 +95,8 @@ function HotlineGroup() {
   }, []);
 
   useEffect(() => {
-    getListHotlineGroup();
-  }, [getListHotlineGroup]);
+    getListVirtualGroup();
+  }, [getListVirtualGroup]);
 
   return (
     <>
@@ -111,7 +108,7 @@ function HotlineGroup() {
           color="primary"
           startIcon={<AddCircleIcon />}
           className="admin-button --no-transform"
-          onClick={handleCreateHotlineGroup}
+          onClick={handleCreateVirtualGroup}
         >
           Tạo mới
         </Button>
@@ -137,4 +134,4 @@ function HotlineGroup() {
   );
 }
 
-export default HotlineGroup;
+export default VirtualGroup;
