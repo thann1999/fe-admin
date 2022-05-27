@@ -1,5 +1,5 @@
-import { HotlineGroups } from 'app/api/customer.api';
 import { SelectItem } from 'shared/form/select/select-controller.component';
+import { HotlineGroupInfo } from './customer.type';
 
 export interface GroupHotlineForm {
   customerId: number | string;
@@ -14,7 +14,7 @@ export interface OpenDialogProps {
   title: string;
   onSubmit: (data: GroupHotlineForm) => void;
   isUpdate?: boolean;
-  initialValues?: HotlineGroups;
+  initialValues?: HotlineGroupInfo;
 }
 
 export interface DialogState extends OpenDialogProps {

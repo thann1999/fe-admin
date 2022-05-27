@@ -61,7 +61,7 @@ export interface VirtualNumberGroup {
   customerId: number;
   customerName: string;
   customerDisplayName: string;
-  virtualNumbers: Hotline[];
+  virtualNumbers: VirtualNumber[];
 }
 
 export interface VirtualNumber {
@@ -74,6 +74,14 @@ interface UpdateHotlineGroup {
   customerId: number;
   hotlineGroupId: number;
   groupHotlineName?: string;
+  status?: number;
+  isdns?: string[];
+}
+
+interface UpdateVirtualGroup {
+  customerId: number;
+  vngId: number;
+  vngName?: string;
   status?: number;
   isdns?: string[];
 }
@@ -125,7 +133,7 @@ export default class CustomerAPI {
     );
   };
 
-  static activeHotline = (hotlineId: string, status: number) => {
+  static changeActiveHotline = (hotlineId: string, status: number) => {
     return httpService.put(`/hotline/${hotlineId}`, {
       body: {
         status,
@@ -148,6 +156,24 @@ export default class CustomerAPI {
     const { customerId, ...rest } = params;
     return httpService.post(`/customer/${customerId}/virtual-number-group`, {
       body: { ...rest },
+    });
+  };
+
+  static updateVirtualGroup = (params: UpdateVirtualGroup) => {
+    const { customerId, vngId, ...rest } = params;
+    return httpService.put(
+      `/customer/${customerId}/virtual-number-group/${vngId}`,
+      {
+        body: { ...rest },
+      }
+    );
+  };
+
+  static changeActiveVirtual = (virtualId: string, status: number) => {
+    return httpService.put(`/virtual-number/${virtualId}`, {
+      body: {
+        status,
+      },
     });
   };
 }

@@ -44,8 +44,7 @@ function VirtualGroup() {
       headerName: 'Trạng thái',
       flex: 0.5,
       valueGetter: (params: GridValueGetterParams) =>
-        STATUS_OPTIONS.find((item) => item.value === params.row.groupStatus)
-          ?.label,
+        STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
   ]).current;
 
@@ -54,7 +53,7 @@ function VirtualGroup() {
       setLoading(true);
       const { customerId, vngName, stringVirtual } = data;
       await CustomerAPI.createGroupVirtual({
-        customerId,
+        customerId: Number(customerId),
         vngName,
         isdns: convertStringToArray(stringVirtual),
       });
@@ -83,7 +82,10 @@ function VirtualGroup() {
             ...item,
             id: index + 1,
             stringVirtual: item.virtualNumbers
-              .map((virtual) => virtual.isdn)
+              .reduce((prev: string[], current) => {
+                if (current.status) prev.push(current.isdn);
+                return prev;
+              }, [])
               .join(', '),
           })
         );

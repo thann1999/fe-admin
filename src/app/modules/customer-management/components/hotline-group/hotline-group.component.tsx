@@ -82,7 +82,10 @@ function HotlineGroup() {
           ...item,
           id: index + 1,
           stringHotline: item.hotlines
-            .map((hotline) => hotline.isdn)
+            .reduce((prev: string[], current) => {
+              if (current.status) prev.push(current.isdn);
+              return prev;
+            }, [])
             .join(', '),
         }));
       }

@@ -1,13 +1,11 @@
-import { Container } from '@mui/material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { Container, Stack, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import CustomerAPI, { HotlineGroups } from 'app/api/customer.api';
-import {
-  convertStringToArray,
-  getDifferenceTwoArray,
-} from 'app/helpers/array.helper';
+import CustomerAPI from 'app/api/customer.api';
+import { getDifferenceTwoArray } from 'app/helpers/array.helper';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
@@ -23,6 +21,7 @@ function HotlineDetailPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const { HotlineGroupDialog, closeHotlineGroup, openHotlineGroup } =
     useHotlineGroupDialog();
+  const navigate = useNavigate();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'id', headerName: 'STT', flex: 0.3, sortable: false },
@@ -80,36 +79,64 @@ function HotlineDetailPage() {
       const arrayHotline = hotline.map(
         (hotlineItem) => hotlineItem.label || hotlineItem
       );
-      const initialArayHotline =
-        hotlineDetailInfo.current?.hotlines.map((item) => item.isdn) || [];
+      const initialArrayHotline =
+        hotlineDetailInfo.current?.activeHotlines?.map((item) => item.isdn) ||
+        [];
 
       const deleteHotlines = getDifferenceTwoArray(
-        initialArayHotline,
+        initialArrayHotline,
         arrayHotline
       );
       const addHotlines = getDifferenceTwoArray(
         arrayHotline,
-        initialArayHotline
+        initialArrayHotline
       );
 
       if (addHotlines.length) {
-        callAPI.push(() => {
-          CustomerAPI.updateHotlineGroup({
-            isdns: addHotlines,
-            customerId: hotlineDetailInfo.current?.customerId || 0,
-            hotlineGroupId: hotlineDetailInfo.current?.hotlineGroupId || 0,
-          });
+        const disableHotline = hotlineDetailInfo.current?.hotlines.filter(
+          (item) => !item.status
+        );
+        const addNewHotlines: string[] = [];
+        addHotlines?.forEach((addItem) => {
+          const findHotline = disableHotline?.find(
+            (item) => item.isdn === addItem
+          );
+          if (findHotline) {
+            callAPI.push(() => {
+              CustomerAPI.changeActiveHotline(
+                String(findHotline?.hotlineId),
+                1
+              );
+            });
+            return;
+          }
+
+          addNewHotlines.push(addItem);
         });
+
+        if (addNewHotlines.length) {
+          callAPI.push(() => {
+            CustomerAPI.updateHotlineGroup({
+              isdns: addNewHotlines,
+              customerId: hotlineDetailInfo.current?.customerId || 0,
+              hotlineGroupId: hotlineDetailInfo.current?.hotlineGroupId || 0,
+            });
+          });
+        }
       }
 
       if (deleteHotlines.length) {
         deleteHotlines.forEach((deleteItem) => {
-          const findHotline = hotlineDetailInfo.current?.hotlines.find(
+          const findHotline = hotlineDetailInfo.current?.activeHotlines?.find(
             (item) => item.isdn === deleteItem
           );
-          callAPI.push(() => {
-            CustomerAPI.activeHotline(String(findHotline?.hotlineId), 0);
-          });
+          if (findHotline)
+            callAPI.push(() => {
+              CustomerAPI.changeActiveHotline(
+                String(findHotline?.hotlineId),
+                0
+              );
+            });
         });
       }
     }
@@ -127,7 +154,7 @@ function HotlineDetailPage() {
     }
   };
 
-  const handleEdit = (initialValues: HotlineGroups) => {
+  const handleEdit = (initialValues: HotlineGroupInfo) => {
     openHotlineGroup({
       initialValues,
       onSubmit: onUpdate,
@@ -144,11 +171,13 @@ function HotlineDetailPage() {
         hotlineGroupId || ''
       );
       if (result) {
+        const activeHotlines = result.hotlines.filter((item) => !!item.status);
         hotlineDetailInfo.current = {
           ...result,
+          activeHotlines,
           id: 1,
           stringHotline:
-            result?.hotlines.map((item) => item.isdn).join(', ') || '',
+            activeHotlines?.map((item) => item.isdn).join(', ') || '',
         };
       }
       setLoading(false);
@@ -165,12 +194,22 @@ function HotlineDetailPage() {
   return (
     <>
       <Helmet>
-        <title>Customer Detail Page</title>
+        <title>Hotline Detail Page</title>
       </Helmet>
 
       <LoadingComponent open={loading} />
 
       <Container maxWidth="xl" className="detail-page">
+        <Stack
+          direction="row"
+          alignItems="center"
+          className="back mb--S"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowBackIosIcon />
+          <Typography>Quay lại</Typography>
+        </Stack>
+
         <div className="data-grid">
           <DataGrid
             rows={hotlineDetailInfo.current ? [hotlineDetailInfo.current] : []}

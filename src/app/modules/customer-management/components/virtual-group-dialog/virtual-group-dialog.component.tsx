@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
+import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import AutocompleteController from 'shared/form/autocomplete/autocomplete-controller.component';
 import SelectController, {
   SelectItem,
@@ -36,15 +37,15 @@ function useVirtualGroupDialog() {
   const customerList = useRef<SelectItem[]>();
   const schema = useRef(
     yup.object().shape({
-      customerName: yup.string().required('Vui lòng chọn Khách hàng'),
+      customerId: yup.string(),
       vngName: yup.string().required('Vui lòng nhập tên nhóm Virtual'),
-      stringVirtual: yup.string().required('Vui lòng nhập số Virtual'),
+      stringVirtual: yup.string(),
     })
   ).current;
   const initialGroupVirtual = useRef<VirtualNumberGroup>();
   const { control, handleSubmit, reset, setValue } = useForm<GroupVirtualForm>({
     defaultValues: {
-      customerId: 0,
+      customerId: '',
       stringVirtual: '',
       vngName: '',
       virtual: [],
@@ -59,20 +60,27 @@ function useVirtualGroupDialog() {
     initialValues,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { customerId, vngName, vngId, virtualNumbers, status } =
+      const { customerId, vngName, activeVirtual, status, customerName } =
         initialValues;
       initialGroupVirtual.current = initialValues;
       const virtualOptions = convertArrayToSelectItem<VirtualNumber>(
-        virtualNumbers,
+        activeVirtual || [],
         'isdn',
         'vnId'
       );
       setValue('customerId', customerId);
+      setValue('customerName', customerName);
       setValue('virtual', virtualOptions);
-      setValue('id', vngId);
       setValue('vngName', vngName);
       setValue('status', status);
       setDialogState((prev) => ({ ...prev, virtualOptions }));
+    } else {
+      schema.fields.stringVirtual = yup
+        .string()
+        .required('Vui lòng nhập số Virtual');
+      schema.fields.customerId = yup
+        .string()
+        .required('Vui lòng chọn Khách hàng');
     }
     setDialogState((prev) => ({
       ...prev,
@@ -87,8 +95,6 @@ function useVirtualGroupDialog() {
     reset();
     setDialogState((prev) => ({ ...prev, isOpen: false }));
   };
-
-  const handleUpdate = async (data: GroupVirtualForm) => {};
 
   const getListCustomer = useCallback(async () => {
     try {
@@ -107,8 +113,8 @@ function useVirtualGroupDialog() {
   }, []);
 
   useEffect(() => {
-    if (!dialogState.isUpdate) getListCustomer();
-  }, [getListCustomer, dialogState.isUpdate]);
+    getListCustomer();
+  }, [getListCustomer]);
 
   const VirtualGroupDialog = useCallback(() => {
     return (
@@ -128,27 +134,43 @@ function useVirtualGroupDialog() {
           <Grid>
             <form
               className="form-paper"
-              onSubmit={handleSubmit(
-                dialogState.onSubmit ? dialogState.onSubmit : handleUpdate
-              )}
+              onSubmit={handleSubmit(dialogState.onSubmit)}
             >
-              <div>
-                <Grid item xs={12}>
-                  <Typography className="mt--XS mb--XXS require-field">
-                    Tên khách hàng
-                  </Typography>
-                </Grid>
+              {dialogState.isUpdate ? (
+                <div>
+                  <Grid item xs={12}>
+                    <Typography className="mt--XS mb--XXS">
+                      Tên Khách hàng
+                    </Typography>
+                  </Grid>
 
-                <Grid item xs={12}>
-                  <SelectController
-                    name="customerName"
-                    options={customerList.current || []}
-                    control={control}
-                    className="admin-select width-100"
-                    placeholder="Chọn khách hàng"
-                  />
-                </Grid>
-              </div>
+                  <Grid item xs={12}>
+                    <TextFieldController
+                      name="customerName"
+                      control={control}
+                      className="admin-text-field width-100"
+                      disabled
+                    />
+                  </Grid>
+                </div>
+              ) : (
+                <div>
+                  <Grid item xs={12}>
+                    <Typography className="mt--XS mb--XXS require-field">
+                      Tên Khách hàng
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <SelectController
+                      name="customerId"
+                      options={customerList.current || []}
+                      control={control}
+                      className="admin-select width-100"
+                    />
+                  </Grid>
+                </div>
+              )}
 
               <div>
                 <Grid item xs={12}>
@@ -168,25 +190,44 @@ function useVirtualGroupDialog() {
               </div>
 
               {dialogState.isUpdate ? (
-                <div>
-                  <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS require-field">
-                      Số Virtual
-                    </Typography>
-                  </Grid>
+                <>
+                  <div>
+                    <Grid item xs={12}>
+                      <Typography className="mt--XS mb--XXS require-field">
+                        Số Virtual
+                      </Typography>
+                    </Grid>
 
-                  <Grid item xs={12}>
-                    <AutocompleteController
-                      multiple
-                      freeSolo
-                      options={dialogState.virtualOptions}
-                      defaultValue={dialogState.virtualOptions}
-                      name="virtual"
-                      control={control}
-                      placeholder="Nhập số Virtual"
-                    />
-                  </Grid>
-                </div>
+                    <Grid item xs={12}>
+                      <AutocompleteController
+                        multiple
+                        freeSolo
+                        options={dialogState.virtualOptions}
+                        defaultValue={dialogState.virtualOptions}
+                        name="virtual"
+                        control={control}
+                        placeholder="Nhập số Virtual"
+                      />
+                    </Grid>
+                  </div>
+
+                  <div>
+                    <Grid item xs={12}>
+                      <Typography className="mt--XS mb--XXS require-field">
+                        Trạng thái
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <SelectController
+                        name="status"
+                        options={STATUS_OPTIONS}
+                        control={control}
+                        className="admin-select width-100"
+                      />
+                    </Grid>
+                  </div>
+                </>
               ) : (
                 <div>
                   <Grid item xs={12}>

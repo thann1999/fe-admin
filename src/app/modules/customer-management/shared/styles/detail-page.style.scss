@@ -1,8 +1,21 @@
 @import 'styles/variables.scss';
 @import 'styles/page.scss';
+@import 'styles/font.scss';
 
 .detail-page {
-  margin-top: 8.5rem;
+  margin-top: 8.8rem;
+
+  .back {
+    cursor: pointer;
+
+    svg {
+      @extend .font--16sb;
+    }
+
+    p {
+      @extend .font--16sb;
+    }
+  }
 
   .data-grid {
     @extend .data-grid-custom;

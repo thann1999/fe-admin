@@ -60,11 +60,11 @@ function useHotlineGroupDialog() {
         customerId,
         hotlineGroupName,
         groupStatus,
-        hotlines,
         customerName,
+        activeHotlines,
       } = initialValues;
       const hotlineOptions = convertArrayToSelectItem<Hotline>(
-        hotlines,
+        activeHotlines || [],
         'isdn',
         'hotlineId'
       );
@@ -94,80 +94,6 @@ function useHotlineGroupDialog() {
   const closeHotlineGroup = () => {
     reset();
     setDialogState((prev) => ({ ...prev, isOpen: false }));
-  };
-
-  const handleUpdate = async (data: GroupHotlineForm) => {
-    // const requireAutocomplete =
-    //   !watch('editHotline').length && !watch('editVirtual').length;
-    // if (requireAutocomplete) {
-    //   return;
-    // }
-    // const { customerName, description, editHotline, editVirtual } = data;
-    // const callAPI = [];
-    // if (
-    //   customerName !== customerInitialValues.current?.customerName ||
-    //   description !== customerInitialValues.current?.description
-    // ) {
-    //   callAPI.push(
-    //     CustomerAPI.updateCustomer.bind({
-    //       customerId: data.id,
-    //       customerName,
-    //       description,
-    //     })
-    //   );
-    // }
-    // // Convert SelectItem[], string to string[]
-    // const arrayHotline = editHotline.map((hotline) => hotline.value || hotline);
-    // const arrayVirtual = editVirtual.map((virtual) => virtual.value || virtual);
-    // const initialHotline = convertStringToArray(
-    //   customerInitialValues.current?.hotline
-    // );
-    // const initialVirtual = convertStringToArray(
-    //   customerInitialValues.current?.stringVirtual
-    // );
-    // // Get add, delete hotline and virtualNumber
-    // const deleteHotlines = getDifferenceTwoArray(initialHotline, arrayHotline);
-    // const addHotlines = getDifferenceTwoArray(arrayHotline, initialHotline);
-    // const deleteVirtual = getDifferenceTwoArray(initialVirtual, arrayVirtual);
-    // const addVirtual = getDifferenceTwoArray(arrayVirtual, initialVirtual);
-    // if (deleteHotlines.length) {
-    //   deleteHotlines.forEach((item) => {
-    //     callAPI.push(CustomerAPI.deleteHotline.bind(item));
-    //   });
-    // }
-    // if (addHotlines.length) {
-    //   callAPI.push(
-    //     CustomerAPI.addHotline.bind({
-    //       msisdn: addHotlines.join(','),
-    //       customerId: data.id,
-    //     })
-    //   );
-    // }
-    // if (addVirtual.length) {
-    //   callAPI.push(
-    //     CustomerAPI.addVirtualNumber.bind({
-    //       virtualNumber: addVirtual.join(','),
-    //       customerId: data.id,
-    //     })
-    //   );
-    // }
-    // if (deleteVirtual.length) {
-    //   deleteVirtual.forEach((virtual) => {
-    //     const findVirtual = customerInitialValues.current?.virtual.find(
-    //       (item) => item.virtualNumber === virtual
-    //     );
-    //     callAPI.push(
-    //       CustomerAPI.deleteVirtualNumber.bind({
-    //         customerId: data.id,
-    //         virtualNumber: findVirtual?.virtualNumber || '',
-    //         id: findVirtual?.id,
-    //       })
-    //     );
-    //   });
-    // }
-    // if (dialogState.onCallAPIUpdate) {
-    //   dialogState.onCallAPIUpdate(callAPI);
-    // }
   };
 
   const getListCustomer = useCallback(async () => {
@@ -222,7 +148,7 @@ function useHotlineGroupDialog() {
                     <TextFieldController
                       name="customerName"
                       control={control}
-                      className="admin-select width-100"
+                      className="admin-text-field width-100"
                       disabled
                     />
                   </Grid>

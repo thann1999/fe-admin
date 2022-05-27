@@ -1,19 +1,27 @@
-import { Container } from '@mui/material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { Container, Stack, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import CustomerAPI, { VirtualNumberGroup } from 'app/api/customer.api';
-// import CustomerAPI, { VirtualNumber } from 'app/api/customer.api';
+import CustomerAPI from 'app/api/customer.api';
+import { getDifferenceTwoArray } from 'app/helpers/array.helper';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
-import { VirtualGroupInfo } from '../../shared/type/customer.type';
+import addToast from 'shared/blocks/toastify/add-toast.component';
+import { Message } from 'shared/const/message.const';
+import useVirtualGroupDialog from '../../components/virtual-group-dialog/virtual-group-dialog.component';
 import '../../shared/styles/detail-page.style.scss';
+import { VirtualGroupInfo } from '../../shared/type/customer.type';
+import { GroupVirtualForm } from '../../shared/type/virtual-group-dialog.type';
 
 function VirtualDetailPage() {
   const { customerId, virtualGroupId } = useParams();
   const virtualDetail = useRef<VirtualGroupInfo>();
   const [loading, setLoading] = useState<boolean>(false);
+  const { VirtualGroupDialog, closeVirtualGroup, openVirtualGroup } =
+    useVirtualGroupDialog();
+  const navigate = useNavigate();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'id', headerName: 'STT', flex: 0.3 },
@@ -38,7 +46,109 @@ function VirtualDetailPage() {
     },
   ]).current;
 
-  const handleEdit = (initialValues: VirtualNumberGroup) => {};
+  const handleEdit = (initialValues: VirtualGroupInfo) => {
+    openVirtualGroup({
+      initialValues,
+      onSubmit: onUpdate,
+      title: 'Cập nhập nhóm Virtual',
+      isUpdate: true,
+    });
+  };
+
+  const onUpdate = async (data: GroupVirtualForm) => {
+    const { vngName, virtual, status } = data;
+    const callAPI = [];
+    const customerId = virtualDetail.current?.customerId || 0;
+    const vngId = virtualDetail.current?.vngId || 0;
+    if (vngName !== virtualDetail.current?.vngName) {
+      callAPI.push(() => {
+        CustomerAPI.updateVirtualGroup({
+          vngName,
+          customerId,
+          vngId,
+        });
+      });
+    }
+    if (status !== virtualDetail.current?.status) {
+      callAPI.push(() => {
+        CustomerAPI.updateVirtualGroup({
+          status,
+          customerId,
+          vngId,
+        });
+      });
+    }
+    if (virtual?.length) {
+      const arrayVirtual = virtual.map(
+        (virtualItem) => virtualItem.label || virtualItem
+      );
+      const initialArrayVirtual =
+        virtualDetail.current?.activeVirtual?.map((item) => item.isdn) || [];
+      const deleteVirtual = getDifferenceTwoArray(
+        initialArrayVirtual,
+        arrayVirtual
+      );
+      const addVirtual = getDifferenceTwoArray(
+        arrayVirtual,
+        initialArrayVirtual
+      );
+
+      if (addVirtual.length) {
+        const disableHotline = virtualDetail.current?.virtualNumbers.filter(
+          (item) => !item.status
+        );
+        const addNewVirtual: string[] = [];
+        addVirtual?.forEach((addItem) => {
+          const findVirtual = disableHotline?.find(
+            (item) => item.isdn === addItem
+          );
+
+          if (findVirtual) {
+            callAPI.push(() => {
+              CustomerAPI.changeActiveVirtual(String(findVirtual?.vnId), 1);
+            });
+            return;
+          }
+          addNewVirtual.push(addItem);
+        });
+
+        if (addNewVirtual.length) {
+          callAPI.push(() => {
+            CustomerAPI.updateVirtualGroup({
+              customerId,
+              vngId,
+              isdns: addNewVirtual,
+            });
+          });
+        }
+      }
+
+      if (deleteVirtual.length) {
+        deleteVirtual.forEach((deleteItem) => {
+          const findVirtual = virtualDetail.current?.activeVirtual?.find(
+            (item) => item.isdn === deleteItem
+          );
+          if (findVirtual) {
+            callAPI.push(() => {
+              CustomerAPI.changeActiveVirtual(String(findVirtual?.vnId), 0);
+            });
+          }
+        });
+      }
+    }
+
+    try {
+      if (callAPI.length) {
+        setLoading(true);
+        await Promise.all(callAPI.map((api) => api()));
+        await getVirtualDetail();
+        addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
+      }
+      closeVirtualGroup();
+    } catch (error) {
+      setLoading(false);
+    }
+  };
 
   const getVirtualDetail = useCallback(async () => {
     try {
@@ -48,11 +158,15 @@ function VirtualDetailPage() {
         virtualGroupId || ''
       );
       if (result) {
+        const activeVirtual = result.virtualNumbers.filter(
+          (item) => !!item.status
+        );
         virtualDetail.current = {
           ...result,
+          activeVirtual,
           id: 1,
           stringVirtual:
-            result?.virtualNumbers.map((item) => item.isdn).join(', ') || '',
+            activeVirtual?.map((item) => item.isdn).join(', ') || '',
         };
       }
       setLoading(false);
@@ -75,6 +189,16 @@ function VirtualDetailPage() {
       <LoadingComponent open={loading} />
 
       <Container maxWidth="xl" className="detail-page">
+        <Stack
+          direction="row"
+          alignItems="center"
+          className="back mb--S"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowBackIosIcon />
+          <Typography>Quay lại</Typography>
+        </Stack>
+
         <div className="data-grid">
           <DataGrid
             rows={virtualDetail.current ? [virtualDetail.current] : []}
@@ -86,6 +210,8 @@ function VirtualDetailPage() {
           />
         </div>
       </Container>
+
+      <VirtualGroupDialog />
     </>
   );
 }
