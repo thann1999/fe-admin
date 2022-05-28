@@ -26,7 +26,7 @@ function useHotlineGroupDialog() {
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     title: '',
-    isUpdate: false,
+    isUpdate: true,
     onSubmit: () => {},
     hotlineOptions: [],
   });
@@ -113,8 +113,8 @@ function useHotlineGroupDialog() {
   }, []);
 
   useEffect(() => {
-    getListCustomer();
-  }, [getListCustomer]);
+    if (!dialogState.isUpdate) getListCustomer();
+  }, [getListCustomer, dialogState.isUpdate]);
 
   const HotlineGroupDialog = useCallback(() => {
     return (
