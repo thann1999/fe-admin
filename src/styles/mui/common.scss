@@ -23,3 +23,8 @@
 .MuiInputBase-root.Mui-disabled {
   background-color: rgba(0, 0, 0, 0.06) !important;
 }
+
+.ellipsis-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
