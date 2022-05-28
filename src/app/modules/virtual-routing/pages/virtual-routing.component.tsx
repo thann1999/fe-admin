@@ -1,6 +1,7 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container, Link } from '@mui/material';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import CustomerAPI from 'app/api/customer.api';
 import VirtualRoutingAPI, { VirtualRouting } from 'app/api/virtual-routing.api';
 import useChangePageSize from 'app/hooks/change-page-size.hook';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -12,6 +13,7 @@ import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
+import { GroupCodeList } from 'shared/const/trunk.const';
 import useVirtualRoutingDialog from '../components/virtual-routing-dialog/virtual-routing-dialog.component';
 import { RoutingForm } from '../shared/virtual-routing-dialog.type';
 import { VirtualRoutingTableInfo } from '../shared/virtual-routing.type';
@@ -110,55 +112,147 @@ function HotlineRoutingPage() {
   };
 
   const onUpdate = async (data: RoutingForm) => {
-    // try {
-    //   setLoading(true);
-    //   const { customerId, hotlineGroupId, trunkId, status } = data;
-    //   const findData = listDataHaveTrunk.current.find(
-    //     (item) => String(item.hotlineGroupId) === hotlineGroupId
-    //   );
-    //   const callAPI = [];
-    //   if (findData?.trunkId !== Number(trunkId)) {
-    //     callAPI.push(() => {
-    //       HotlineRoutingAPI.setTrunkToGroupHotline({
-    //         customerId,
-    //         hotlineGroupId,
-    //         trunkId,
-    //       });
-    //     });
-    //   }
-    //   if (status !== findData?.groupStatus) {
-    //     callAPI.push(() => {
-    //       CustomerAPI.updateHotlineGroup({
-    //         customerId: Number(customerId),
-    //         hotlineGroupId: Number(hotlineGroupId),
-    //         status,
-    //       });
-    //     });
-    //   }
-    //   await Promise.all(callAPI.map((item) => item()));
-    //   await getListHotline();
-    //   addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
-    //   closeHotlineRouting();
-    // } catch (error) {
-    //   setLoading(false);
-    // }
+    try {
+      setLoading(true);
+      const {
+        customerId,
+        mobiVngtId,
+        vinaVngtId,
+        defaultVngtId,
+        viettelVngtId,
+        viettelTrunkId,
+        mobiTrunkId,
+        vinaTrunkId,
+        status,
+        defaultTrunkId,
+        virtualGroupId,
+      } = data;
+      const findVirtualGroup = listDataHaveTrunk.current.find(
+        (item) =>
+          item.customerId === customerId &&
+          String(item.vngId) === virtualGroupId
+      );
+      const callAPI = [];
+
+      if (findVirtualGroup) {
+        if (
+          findVirtualGroup.vngTrunks.find(
+            (item) =>
+              item.groupCode === GroupCodeList.viettel &&
+              String(item.trunkId) !== viettelTrunkId
+          )
+        ) {
+          callAPI.push(() => {
+            VirtualRoutingAPI.setTrunkToVngtId({
+              customerId,
+              vngtId: viettelVngtId,
+              trunkId: viettelTrunkId,
+            });
+          });
+        }
+
+        if (
+          findVirtualGroup.vngTrunks.find(
+            (item) =>
+              item.groupCode === GroupCodeList.mobi &&
+              String(item.trunkId) !== mobiTrunkId
+          )
+        ) {
+          callAPI.push(() => {
+            VirtualRoutingAPI.setTrunkToVngtId({
+              customerId,
+              vngtId: mobiVngtId,
+              trunkId: mobiTrunkId,
+            });
+          });
+        }
+
+        if (
+          findVirtualGroup.vngTrunks.find(
+            (item) =>
+              item.groupCode === GroupCodeList.vina &&
+              String(item.trunkId) !== vinaTrunkId
+          )
+        ) {
+          callAPI.push(() => {
+            VirtualRoutingAPI.setTrunkToVngtId({
+              customerId,
+              vngtId: vinaVngtId,
+              trunkId: vinaTrunkId,
+            });
+          });
+        }
+
+        if (
+          findVirtualGroup.vngTrunks.find(
+            (item) =>
+              item.groupCode === GroupCodeList.default &&
+              String(item.trunkId) !== defaultTrunkId
+          )
+        ) {
+          callAPI.push(() => {
+            VirtualRoutingAPI.setTrunkToVngtId({
+              customerId,
+              vngtId: defaultVngtId,
+              trunkId: defaultTrunkId,
+            });
+          });
+        }
+
+        if (findVirtualGroup.status !== status) {
+          callAPI.push(() => {
+            CustomerAPI.updateVirtualGroup({
+              status,
+              customerId: Number(customerId),
+              vngId: Number(virtualGroupId),
+            });
+          });
+        }
+      }
+
+      await Promise.all(callAPI.map((api) => api()));
+      await getListVirtual();
+      addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
+      closeVirtualRouting();
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
   const onCreate = async (data: RoutingForm) => {
-    // try {
-    //   setLoading(true);
-    //   const { customerId, hotlineGroupId, trunkId } = data;
-    //   await VirtualRoutingAPI.setTrunkToGroupVirtual({
-    //     customerId,
-    //     hotlineGroupId,
-    //     trunkId,
-    //   });
-    //   await getListVirtual();
-    //   addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
-    //   closeHotlineRouting();
-    // } catch (error) {
-    //   setLoading(false);
-    // }
+    try {
+      setLoading(true);
+      const {
+        customerId,
+        viettelTrunkId,
+        mobiTrunkId,
+        vinaTrunkId,
+        defaultTrunkId,
+        virtualGroupId,
+      } = data;
+      const callAPI = [
+        viettelTrunkId,
+        mobiTrunkId,
+        vinaTrunkId,
+        defaultTrunkId,
+      ].reduce((prev: (() => Promise<unknown>)[], current) => {
+        prev.push(() => {
+          return VirtualRoutingAPI.setTrunkToGroupVirtual({
+            customerId,
+            vngId: virtualGroupId,
+            trunkId: current,
+          });
+        });
+
+        return prev;
+      }, []);
+      await Promise.all(callAPI.map((api) => api()));
+      await getListVirtual();
+      addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
+      closeVirtualRouting();
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
   const getListVirtual = useCallback(async () => {

@@ -43,28 +43,28 @@ export interface UpdateTrunkParams {
 
 export default class TrunkAPI {
   static getListTrunk = async () => {
-    return await httpService.get<TrunkList>('/group/*/ip');
+    return httpService.get<TrunkList>('/group/*/ip');
   };
 
   static getDetailTrunk = async (groupCode: string) => {
-    return await httpService.get<TrunkList>(`/group/${groupCode}/ip`);
+    return httpService.get<TrunkList>(`/group/${groupCode}/ip`);
   };
 
   static getTelecom = async () => {
-    return await httpService.get<TelecomList>('/group');
+    return httpService.get<TelecomList>('/group');
   };
 
   static createNewTrunk = async (data: CreateTrunkParams) => {
     const { groupName, ...rest } = data;
 
-    return await httpService.post<TrunkInfo>(`/group/${groupName}/ip`, {
+    return httpService.post<TrunkInfo>(`/group/${groupName}/ip`, {
       body: { ...rest },
     });
   };
 
   static updateTrunk = async (data: UpdateTrunkParams) => {
     const { trunkId, groupCode, ...rest } = data;
-    return await httpService.put(`/group/${groupCode}/ip/${trunkId}`, {
+    return httpService.put(`/group/${groupCode}/ip/${trunkId}`, {
       body: { ...rest },
     });
   };

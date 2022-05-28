@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, SelectChangeEvent, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import TrunkAPI from 'app/api/trunk.api';
+import TrunkAPI, { TrunkList } from 'app/api/trunk.api';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -14,6 +15,7 @@ import SelectController, {
 import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
 import './virtual-routing-dialog.style.scss';
+import { GroupCodeList } from 'shared/const/trunk.const';
 import {
   DialogState,
   OpenDialogProps,
@@ -30,13 +32,19 @@ function useVirtualRoutingDialog() {
     listCustomerGroup: [],
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const trunkList = useRef<SelectItem[]>();
+  const viettelList = useRef<SelectItem[]>([]);
+  const mobiList = useRef<SelectItem[]>([]);
+  const vinaList = useRef<SelectItem[]>([]);
+  const defaultList = useRef<SelectItem[]>([]);
   const schema = useRef(
     yup.object().shape({
       customerName: yup.string().required('Vui lòng chọn nhóm Virtual'),
       virtualGroupId: yup.string(),
       virtualGroupName: yup.string(),
-      trunkId: yup.array().length(4, 'Vui lòng chọn 4 Trunk'),
+      viettelTrunkId: yup.string().required('Vui lòng chọn Viettel Trunk'),
+      mobiTrunkId: yup.string().required('Vui lòng chọn Mobi Trunk'),
+      vinaTrunkId: yup.string().required('Vui lòng chọn Vina Trunk'),
+      defaultTrunkId: yup.string().required('Vui lòng chọn Detault Trunk'),
     })
   ).current;
   const { control, handleSubmit, reset, setValue } = useForm<RoutingForm>({
@@ -46,7 +54,10 @@ function useVirtualRoutingDialog() {
       virtualGroupName: '',
       virtualGroupId: '',
       status: 0,
-      trunkId: [],
+      viettelTrunkId: '',
+      defaultTrunkId: '',
+      mobiTrunkId: '',
+      vinaTrunkId: '',
     },
     resolver: yupResolver(schema),
   });
@@ -59,14 +70,34 @@ function useVirtualRoutingDialog() {
     listCustomerGroup,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { customerId, customerName, status, vngName, vngId } =
+      const { customerId, customerName, status, vngName, vngId, vngTrunks } =
         initialValues;
+      const findViettel = vngTrunks.find(
+        (item) => item.groupCode === GroupCodeList.viettel
+      );
+      const findMobi = vngTrunks.find(
+        (item) => item.groupCode === GroupCodeList.mobi
+      );
+      const findVina = vngTrunks.find(
+        (item) => item.groupCode === GroupCodeList.vina
+      );
+      const findDefault = vngTrunks.find(
+        (item) => item.groupCode === GroupCodeList.default
+      );
+
       setValue('customerId', customerId);
       setValue('customerName', customerName);
       setValue('virtualGroupId', String(vngId));
       setValue('virtualGroupName', vngName);
       setValue('status', status);
-      // setValue('trunkId', trunkId);
+      setValue('viettelTrunkId', findViettel?.trunkId || '');
+      setValue('viettelVngtId', findViettel?.vngtId || '');
+      setValue('mobiTrunkId', findMobi?.trunkId || '');
+      setValue('mobiVngtId', findMobi?.vngtId || '');
+      setValue('vinaTrunkId', findVina?.trunkId || '');
+      setValue('vinaVngtId', findVina?.vngtId || '');
+      setValue('defaultTrunkId', findDefault?.trunkId || '');
+      setValue('defaultVngtId', findDefault?.vngtId || '');
       schema.fields.virtualGroupName = yup
         .string()
         .required('Vui lòng chọn nhóm Virtual');
@@ -75,6 +106,7 @@ function useVirtualRoutingDialog() {
         .string()
         .required('Vui lòng chọn nhóm Virtual');
     }
+
     setDialogState((prev) => ({
       ...prev,
       title,
@@ -108,18 +140,40 @@ function useVirtualRoutingDialog() {
   const getListTrunk = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await TrunkAPI.getListTrunk();
+      const listGroupCode = [
+        GroupCodeList.viettel,
+        GroupCodeList.mobi,
+        GroupCodeList.vina,
+        GroupCodeList.default,
+      ];
+      const callAPI: any[] = [];
+      listGroupCode.forEach((item) => {
+        callAPI.push(() => {
+          return TrunkAPI.getDetailTrunk(item);
+        });
+      });
+      const result: TrunkList[] = await Promise.all(
+        callAPI.map((api) => api())
+      );
+
       if (result) {
-        trunkList.current = result.groupIps.map((item) => ({
-          label: item.trunkName,
-          value: item.id,
-        }));
+        viettelList.current = convertData(result[0]);
+        mobiList.current = convertData(result[1]);
+        vinaList.current = convertData(result[2]);
+        defaultList.current = convertData(result[3]);
       }
       setLoading(false);
     } catch (error) {
       setLoading(false);
     }
   }, []);
+
+  const convertData = (data: TrunkList): SelectItem[] => {
+    return data.groupIps.map((item) => ({
+      label: item.trunkName,
+      value: item.id,
+    }));
+  };
 
   useEffect(() => {
     getListTrunk();
@@ -147,7 +201,7 @@ function useVirtualRoutingDialog() {
             >
               <div>
                 <Grid item xs={12}>
-                  <Typography className="mt--XS mb--XXS require-field">
+                  <Typography className="mt--XXS mb--XXS require-field">
                     Tên Khách hàng
                   </Typography>
                 </Grid>
@@ -164,7 +218,7 @@ function useVirtualRoutingDialog() {
 
               <div>
                 <Grid item xs={12}>
-                  <Typography className="mt--XS mb--XXS require-field">
+                  <Typography className="mt--XXS mb--XXS require-field">
                     Tên nhóm Virtual
                   </Typography>
                 </Grid>
@@ -191,18 +245,67 @@ function useVirtualRoutingDialog() {
 
               <div>
                 <Grid item xs={12}>
-                  <Typography className="mt--XS mb--XXS require-field">
-                    Tên Trunk
+                  <Typography className="mt--XXS mb--XXS require-field">
+                    Viettel Trunk
                   </Typography>
                 </Grid>
 
                 <Grid item xs={12}>
                   <SelectController
-                    multiple
-                    multiline
-                    name="trunkId"
+                    name="viettelTrunkId"
                     control={control}
-                    options={trunkList.current || []}
+                    options={viettelList.current || []}
+                    className="admin-select width-100"
+                  />
+                </Grid>
+              </div>
+
+              <div>
+                <Grid item xs={12}>
+                  <Typography className="mt--XXS mb--XXS require-field">
+                    Mobiphone Trunk
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <SelectController
+                    name="mobiTrunkId"
+                    control={control}
+                    options={mobiList.current || []}
+                    className="admin-select width-100"
+                  />
+                </Grid>
+              </div>
+
+              <div>
+                <Grid item xs={12}>
+                  <Typography className="mt--XXS mb--XXS require-field">
+                    Vinaphone Trunk
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <SelectController
+                    name="vinaTrunkId"
+                    control={control}
+                    options={vinaList.current || []}
+                    className="admin-select width-100"
+                  />
+                </Grid>
+              </div>
+
+              <div>
+                <Grid item xs={12}>
+                  <Typography className="mt--XXS mb--XXS require-field">
+                    Default Trunk
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <SelectController
+                    name="defaultTrunkId"
+                    control={control}
+                    options={defaultList.current || []}
                     className="admin-select width-100"
                   />
                 </Grid>
@@ -211,7 +314,7 @@ function useVirtualRoutingDialog() {
               {dialogState.isUpdate && (
                 <div>
                   <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS require-field">
+                    <Typography className="mt--XXS mb--XXS require-field">
                       Trạng thái
                     </Typography>
                   </Grid>

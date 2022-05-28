@@ -26,6 +26,12 @@ interface SetTrunkParams {
   vngId: string | number;
 }
 
+interface SetTrunkVngtParams {
+  customerId: string | number;
+  vngtId: string;
+  trunkId: number | string;
+}
+
 export default class VirtualRoutingAPI {
   static getListVirtualRouting = async () => {
     return await httpService.get<VirtualRoutingList>('/virtual-number');
@@ -35,6 +41,16 @@ export default class VirtualRoutingAPI {
     const { customerId, vngId, trunkId } = params;
     return await httpService.post(
       `/customer/${customerId}/virtual-number-group/${vngId}/trunk`,
+      {
+        body: { trunkId },
+      }
+    );
+  };
+
+  static setTrunkToVngtId = async (params: SetTrunkVngtParams) => {
+    const { customerId, vngtId, trunkId } = params;
+    return await httpService.put(
+      `/customer/${customerId}/virtual-number-group-trunk/${vngtId}`,
       {
         body: { trunkId },
       }

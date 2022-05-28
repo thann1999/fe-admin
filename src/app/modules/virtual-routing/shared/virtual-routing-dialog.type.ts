@@ -1,3 +1,4 @@
+import { TrunkList } from 'app/api/trunk.api';
 import { VirtualRouting } from 'app/api/virtual-routing.api';
 import { SelectItem } from 'shared/form/select/select-controller.component';
 
@@ -6,7 +7,14 @@ export interface RoutingForm {
   customerName: string;
   virtualGroupId: string;
   virtualGroupName: string;
-  trunkId: (string | number)[];
+  viettelTrunkId: string | number;
+  mobiTrunkId: string | number;
+  vinaTrunkId: string | number;
+  defaultTrunkId: string | number;
+  viettelVngtId: string;
+  vinaVngtId: string;
+  mobiVngtId: string;
+  defaultVngtId: string;
   status?: number;
 }
 
