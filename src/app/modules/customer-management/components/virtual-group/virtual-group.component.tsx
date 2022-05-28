@@ -11,8 +11,8 @@ import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
-import { VirtualGroupInfo } from '../../shared/type/customer.type';
-import { GroupVirtualForm } from '../../shared/type/virtual-group-dialog.type';
+import { VirtualGroupInfo } from '../../shared/customer.type';
+import { GroupVirtualForm } from '../../shared/virtual-group-dialog.type';
 import useVirtualGroupDialog from '../virtual-group-dialog/virtual-group-dialog.component';
 
 function VirtualGroup() {

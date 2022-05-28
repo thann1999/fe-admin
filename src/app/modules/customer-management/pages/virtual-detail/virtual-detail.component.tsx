@@ -11,9 +11,8 @@ import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { Message } from 'shared/const/message.const';
 import useVirtualGroupDialog from '../../components/virtual-group-dialog/virtual-group-dialog.component';
-import '../../shared/styles/detail-page.style.scss';
-import { VirtualGroupInfo } from '../../shared/type/customer.type';
-import { GroupVirtualForm } from '../../shared/type/virtual-group-dialog.type';
+import { VirtualGroupInfo } from '../../shared/customer.type';
+import { GroupVirtualForm } from '../../shared/virtual-group-dialog.type';
 
 function VirtualDetailPage() {
   const { customerId, virtualGroupId } = useParams();

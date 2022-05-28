@@ -19,14 +19,14 @@ import {
   DialogState,
   GroupHotlineForm,
   OpenDialogProps,
-} from '../../shared/type/hotline-group-dialog.type';
+} from '../../shared/hotline-group-dialog.type';
 import './hotline-group-dialog.style.scss';
 
 function useHotlineGroupDialog() {
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     title: '',
-    isUpdate: false,
+    isUpdate: true,
     onSubmit: () => {},
     hotlineOptions: [],
   });
@@ -113,8 +113,8 @@ function useHotlineGroupDialog() {
   }, []);
 
   useEffect(() => {
-    getListCustomer();
-  }, [getListCustomer]);
+    if (!dialogState.isUpdate) getListCustomer();
+  }, [getListCustomer, dialogState.isUpdate]);
 
   const HotlineGroupDialog = useCallback(() => {
     return (
@@ -139,7 +139,7 @@ function useHotlineGroupDialog() {
               {dialogState.isUpdate ? (
                 <div>
                   <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS">
+                    <Typography className="mt--XS mb--XXS required-field">
                       Tên Khách hàng
                     </Typography>
                   </Grid>
