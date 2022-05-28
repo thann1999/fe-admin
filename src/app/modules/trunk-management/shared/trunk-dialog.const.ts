@@ -1,5 +1,9 @@
 import { TrunkInfo } from 'app/api/trunk.api';
 
+export interface TrunkTableInfo extends TrunkInfo {
+  no: number;
+}
+
 export interface TrunkForm {
   id?: string;
   trunkName: string;

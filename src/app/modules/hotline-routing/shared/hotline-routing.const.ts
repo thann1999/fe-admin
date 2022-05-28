@@ -1,8 +1,5 @@
-export interface HotlineRoutingTableInfo {
+import { HotlineRouting } from 'app/api/hotline-routing.api';
+
+export interface HotlineRoutingTableInfo extends HotlineRouting {
   id: number;
-  port: string;
-  ip: string;
-  customerName: string;
-  customerId: number;
-  stringHotline: string;
 }
