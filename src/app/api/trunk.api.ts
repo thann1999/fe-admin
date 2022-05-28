@@ -46,6 +46,10 @@ export default class TrunkAPI {
     return await httpService.get<TrunkList>('/group/*/ip');
   };
 
+  static getDetailTrunk = async (groupCode: string) => {
+    return await httpService.get<TrunkList>(`/group/${groupCode}/ip`);
+  };
+
   static getTelecom = async () => {
     return await httpService.get<TelecomList>('/group');
   };

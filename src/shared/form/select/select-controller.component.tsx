@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FormHelperText, MenuItem, Select, SelectProps } from '@mui/material';
+import {
+  FormHelperText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  SelectProps,
+} from '@mui/material';
 import React from 'react';
 import { Control, Controller } from 'react-hook-form';
 import { DEFAULT_MENU } from 'shared/const/menu-props.const';
@@ -13,10 +19,11 @@ interface SelectControllerProps extends SelectProps {
   name: string;
   control: Control<any>;
   options: SelectItem[];
+  handleChange?: (event: SelectChangeEvent<unknown>) => void;
 }
 
 function SelectController(props: SelectControllerProps) {
-  const { control, name, options, ...rest } = props;
+  const { control, name, options, handleChange, ...rest } = props;
 
   return (
     <Controller
@@ -29,6 +36,10 @@ function SelectController(props: SelectControllerProps) {
             {...field}
             {...rest}
             id={name}
+            onChange={(event: SelectChangeEvent<unknown>) => {
+              field.onChange(event);
+              if (handleChange) handleChange(event);
+            }}
             error={!!fieldState.error}
           >
             {options.map((item) => (
@@ -47,5 +58,9 @@ function SelectController(props: SelectControllerProps) {
     />
   );
 }
+
+SelectController.defaultProps = {
+  handleChange: () => {},
+};
 
 export default SelectController;

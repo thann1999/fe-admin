@@ -11,9 +11,8 @@ import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { Message } from 'shared/const/message.const';
 import useHotlineGroupDialog from '../../components/hotline-group-dialog/hotline-group-dialog.component';
-import '../../shared/styles/detail-page.style.scss';
-import { HotlineGroupInfo } from '../../shared/type/customer.type';
-import { GroupHotlineForm } from '../../shared/type/hotline-group-dialog.type';
+import { HotlineGroupInfo } from '../../shared/customer.type';
+import { GroupHotlineForm } from '../../shared/hotline-group-dialog.type';
 
 function HotlineDetailPage() {
   const { customerId, hotlineGroupId } = useParams();

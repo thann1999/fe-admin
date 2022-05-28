@@ -11,8 +11,8 @@ import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
-import { HotlineGroupInfo } from '../../shared/type/customer.type';
-import { GroupHotlineForm } from '../../shared/type/hotline-group-dialog.type';
+import { HotlineGroupInfo } from '../../shared/customer.type';
+import { GroupHotlineForm } from '../../shared/hotline-group-dialog.type';
 import useHotlineGroupDialog from '../hotline-group-dialog/hotline-group-dialog.component';
 
 function HotlineGroup() {

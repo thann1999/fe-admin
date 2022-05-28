@@ -19,7 +19,7 @@ import {
   DialogState,
   GroupHotlineForm,
   OpenDialogProps,
-} from '../../shared/type/hotline-group-dialog.type';
+} from '../../shared/hotline-group-dialog.type';
 import './hotline-group-dialog.style.scss';
 
 function useHotlineGroupDialog() {
@@ -139,7 +139,7 @@ function useHotlineGroupDialog() {
               {dialogState.isUpdate ? (
                 <div>
                   <Grid item xs={12}>
-                    <Typography className="mt--XS mb--XXS">
+                    <Typography className="mt--XS mb--XXS required-field">
                       Tên Khách hàng
                     </Typography>
                   </Grid>
