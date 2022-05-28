@@ -29,7 +29,7 @@ function useVirtualGroupDialog() {
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     title: '',
-    isUpdate: false,
+    isUpdate: true,
     onSubmit: () => {},
     virtualOptions: [],
   });
@@ -113,8 +113,8 @@ function useVirtualGroupDialog() {
   }, []);
 
   useEffect(() => {
-    getListCustomer();
-  }, [getListCustomer]);
+    if (!dialogState.isUpdate) getListCustomer();
+  }, [getListCustomer, dialogState.isUpdate]);
 
   const VirtualGroupDialog = useCallback(() => {
     return (
