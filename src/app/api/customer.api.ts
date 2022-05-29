@@ -73,7 +73,7 @@ export interface VirtualNumber {
 interface UpdateHotlineGroup {
   customerId: number;
   hotlineGroupId: number;
-  groupHotlineName?: string;
+  hotlineGroupName?: string;
   status?: number;
   isdns?: string[];
 }
