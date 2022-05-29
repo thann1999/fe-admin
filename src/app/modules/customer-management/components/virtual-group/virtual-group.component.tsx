@@ -23,12 +23,18 @@ function VirtualGroup() {
   const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.2 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 0.75 },
+    { field: 'id', headerName: 'STT', flex: 0.1, sortable: false },
+    {
+      field: 'customerName',
+      headerName: 'Tên khách hàng',
+      flex: 0.75,
+      sortable: false,
+    },
     {
       field: 'vngName',
       headerName: 'Tên nhóm Virtual',
       flex: 0.75,
+      sortable: false,
       renderCell: (cellValues) => (
         <Link
           href={`customer-management/virtual-detail/${cellValues.row.customerId}/${cellValues.row.vngId}`}
@@ -38,11 +44,16 @@ function VirtualGroup() {
         </Link>
       ),
     },
-    { field: 'stringVirtual', headerName: 'Số Virtual', flex: 1.5 },
+    {
+      field: 'stringVirtual',
+      headerName: 'Số Virtual',
+      flex: 1.5,
+      sortable: false,
+    },
     {
       field: 'status',
       headerName: 'Trạng thái',
-      flex: 0.5,
+      flex: 0.3,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },

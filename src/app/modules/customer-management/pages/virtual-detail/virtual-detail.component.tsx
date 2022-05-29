@@ -9,6 +9,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
+import { PageName } from 'shared/const/drawer.const';
 import { Message } from 'shared/const/message.const';
 import useVirtualGroupDialog from '../../components/virtual-group-dialog/virtual-group-dialog.component';
 import { VirtualGroupInfo } from '../../shared/customer.type';
@@ -23,7 +24,7 @@ function VirtualDetailPage() {
   const navigate = useNavigate();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.15 },
+    { field: 'id', headerName: 'STT', flex: 0.1 },
     { field: 'vngName', headerName: 'Tên nhóm Virtual', flex: 0.85 },
     {
       field: 'stringVirtual',
@@ -33,7 +34,7 @@ function VirtualDetailPage() {
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 0.5,
+      flex: 0.17,
       sortable: false,
       renderCell: (cellValues) => (
         <CellAction
@@ -182,7 +183,7 @@ function VirtualDetailPage() {
   return (
     <>
       <Helmet>
-        <title>Chi tiết Virtual Number</title>
+        <title>{PageName.VIRTUAL_DETAIL}</title>
       </Helmet>
 
       <LoadingComponent open={loading} />

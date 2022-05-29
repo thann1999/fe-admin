@@ -24,6 +24,17 @@ interface MenuProps {
   href: string;
 }
 
+export enum PageName {
+  TRUNK_MANAGEMENT = 'Trunk Management',
+  CUSTOMER_MANAGEMENT = 'Customer Management',
+  HOTLINE_ROUTING = 'Hotline Routing',
+  VIRTUAL_ROUTING = 'Virtual Number Routing',
+  HOME = 'Home',
+  TRUNK_DETAIL = 'Trunk Detail',
+  HOTLINE_DETAIL = 'Hotline Group Detail',
+  VIRTUAL_DETAIL = 'Virtual Number Group Detail',
+}
+
 export const ICON = [
   [<ListAlt fontSize="small" />, <ManageAccounts fontSize="small" />],
   [<PhoneForwarded fontSize="small" />, <Route fontSize="small" />],

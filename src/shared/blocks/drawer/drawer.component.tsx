@@ -25,6 +25,7 @@ import {
   MenuItemProps,
   SETTING_ICON,
   AppBarProps,
+  PageName,
 } from 'shared/const/drawer.const';
 import './drawer.style.scss';
 
@@ -98,20 +99,20 @@ export default function MiniDrawer() {
   const dispatch = useAppDispatch();
   const menuList = useRef<MenuItemProps[]>([
     {
-      section: 'Quản lý',
+      section: 'MANAGEMENT',
       menu: [
-        { label: 'Quản lý Trunk', href: '/admin/trunk-management' },
+        { label: PageName.TRUNK_MANAGEMENT, href: '/admin/trunk-management' },
         {
-          label: 'Quản lý khách hàng và nhóm khách hàng',
+          label: PageName.CUSTOMER_MANAGEMENT,
           href: '/admin/customer-management',
         },
       ],
     },
     {
-      section: 'Định tuyến',
+      section: 'ROUTING',
       menu: [
-        { label: 'Định tuyến Hotline', href: '/admin/hotline-routing' },
-        { label: 'Định tuyến Virtual Number', href: '/admin/virtual-routing' },
+        { label: PageName.HOTLINE_ROUTING, href: '/admin/hotline-routing' },
+        { label: PageName.VIRTUAL_ROUTING, href: '/admin/virtual-routing' },
       ],
     },
   ]).current;
@@ -143,21 +144,21 @@ export default function MiniDrawer() {
     const url = window.location.pathname;
     switch (true) {
       case url.includes('home'):
-        return 'Trang chủ';
+        return PageName.HOME;
       case url.includes('trunk-management/detail'):
-        return 'Chi tiết Trunk';
+        return PageName.TRUNK_DETAIL;
       case url.includes('trunk-management'):
-        return 'Quản lý Trunk';
+        return PageName.TRUNK_MANAGEMENT;
       case url.includes('customer-management/hotline-detail'):
-        return 'Chi tiết Hotline';
+        return PageName.HOTLINE_DETAIL;
       case url.includes('customer-management/virtual-detail'):
-        return 'Chi tiết Virtual Number';
+        return PageName.VIRTUAL_DETAIL;
       case url.includes('customer-management'):
-        return 'Quản lý khách hàng';
+        return PageName.CUSTOMER_MANAGEMENT;
       case url.includes('hotline-routing'):
-        return 'Định tuyến Hotline';
+        return PageName.HOTLINE_ROUTING;
       case url.includes('virtual-routing'):
-        return 'Định tuyến Virtual Number';
+        return PageName.VIRTUAL_ROUTING;
       default:
         return '';
     }
@@ -282,7 +283,6 @@ export default function MiniDrawer() {
                       primary={menu.label}
                       sx={{
                         opacity: open ? 1 : 0,
-                        whiteSpace: open ? 'normal' : 'nowrap',
                       }}
                     />
                   </ListItemButton>

@@ -2,7 +2,10 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Button, Container, Link } from '@mui/material';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import CustomerAPI from 'app/api/customer.api';
-import VirtualRoutingAPI, { VirtualRouting } from 'app/api/virtual-routing.api';
+import VirtualRoutingAPI, {
+  VirtualRouting,
+  VngTrunk,
+} from 'app/api/virtual-routing.api';
 import useChangePageSize from 'app/hooks/change-page-size.hook';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
@@ -11,6 +14,7 @@ import CustomRow from 'shared/blocks/custom-row/custom-row.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
+import { PageName } from 'shared/const/drawer.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import { GroupCodeList } from 'shared/const/trunk.const';
@@ -27,12 +31,18 @@ function HotlineRoutingPage() {
     useVirtualRoutingDialog();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.3 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 0.7 },
+    { field: 'id', headerName: 'STT', flex: 0.1, sortable: false },
+    {
+      field: 'customerName',
+      headerName: 'Tên khách hàng',
+      flex: 0.7,
+      sortable: false,
+    },
     {
       field: 'vngName',
       headerName: 'Tên nhóm Virtual',
-      flex: 1,
+      flex: 0.7,
+      sortable: false,
       renderCell: (cellValues) => {
         const { customerId, vngId } = cellValues.row as VirtualRoutingTableInfo;
 
@@ -48,39 +58,96 @@ function HotlineRoutingPage() {
       },
     },
     {
-      field: 'trunkName',
-      headerName: 'Tên Trunk',
-      flex: 1.5,
+      field: 'viettelTrunk',
+      headerName: 'Viettel Trunk',
+      flex: 0.4,
+      sortable: false,
       renderCell: (cellValues) => {
-        const { vngTrunks } = cellValues.row as VirtualRoutingTableInfo;
+        const { viettelTrunk } = cellValues.row as VirtualRoutingTableInfo;
+        const vngViettelTrunk = viettelTrunk as VngTrunk;
         return (
-          <>
-            {vngTrunks.map((item, index) => (
-              <Link
-                key={item.trunkId}
-                href={`/admin/trunk-management/detail/${item.groupCode}/${item.trunkId}`}
-                underline="none"
-                className="ellipsis-text mr--XXS"
-              >
-                {item.trunkName}
-                {index !== vngTrunks.length - 1 && ','}
-              </Link>
-            ))}
-          </>
+          <Link
+            key={vngViettelTrunk?.trunkId}
+            href={`/admin/trunk-management/detail/${vngViettelTrunk?.groupCode}/${vngViettelTrunk?.trunkId}`}
+            underline="none"
+            className="ellipsis-text mr--XXS"
+          >
+            {vngViettelTrunk?.trunkName}
+          </Link>
+        );
+      },
+    },
+    {
+      field: 'mobiTrunk',
+      headerName: 'Mobiphone Trunk',
+      flex: 0.4,
+      sortable: false,
+      renderCell: (cellValues) => {
+        const { mobiTrunk } = cellValues.row as VirtualRoutingTableInfo;
+        const vngMobiTrunk = mobiTrunk as VngTrunk;
+        return (
+          <Link
+            key={vngMobiTrunk?.trunkId}
+            href={`/admin/trunk-management/detail/${vngMobiTrunk?.groupCode}/${vngMobiTrunk?.trunkId}`}
+            underline="none"
+            className="ellipsis-text mr--XXS"
+          >
+            {vngMobiTrunk?.trunkName}
+          </Link>
+        );
+      },
+    },
+    {
+      field: 'vinaTrunk',
+      headerName: 'Vinaphone Trunk',
+      flex: 0.4,
+      sortable: false,
+      renderCell: (cellValues) => {
+        const { vinaTrunk } = cellValues.row as VirtualRoutingTableInfo;
+        const vngVinaTrunk = vinaTrunk as VngTrunk;
+        return (
+          <Link
+            key={vngVinaTrunk?.trunkId}
+            href={`/admin/trunk-management/detail/${vngVinaTrunk?.groupCode}/${vngVinaTrunk?.trunkId}`}
+            underline="none"
+            className="ellipsis-text mr--XXS"
+          >
+            {vngVinaTrunk?.trunkName}
+          </Link>
+        );
+      },
+    },
+    {
+      field: 'defaultTrunk',
+      headerName: 'Default Trunk',
+      flex: 0.4,
+      sortable: false,
+      renderCell: (cellValues) => {
+        const { defaultTrunk } = cellValues.row as VirtualRoutingTableInfo;
+        const vngDefaultTrunk = defaultTrunk as VngTrunk;
+        return (
+          <Link
+            key={vngDefaultTrunk?.trunkId}
+            href={`/admin/trunk-management/detail/${vngDefaultTrunk?.groupCode}/${vngDefaultTrunk?.trunkId}`}
+            underline="none"
+            className="ellipsis-text mr--XXS"
+          >
+            {vngDefaultTrunk?.trunkName}
+          </Link>
         );
       },
     },
     {
       field: 'status',
       headerName: 'Trạng thái',
-      flex: 0.5,
+      flex: 0.3,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
-      headerName: 'Action',
-      flex: 0.5,
+      headerName: 'Chức năng',
+      flex: 0.25,
       sortable: false,
       renderCell: (cellValues) => {
         return (
@@ -266,7 +333,26 @@ function HotlineRoutingPage() {
         const dataNotTrunk: VirtualRouting[] = [];
         result.virtualNumberGroups.forEach((item, index) => {
           if (item.vngTrunks?.length) {
-            dataHaveTrunk.push({ ...item, id: index + 1 });
+            dataHaveTrunk.push({
+              ...item,
+              id: index + 1,
+              viettelTrunk:
+                item.vngTrunks?.find(
+                  (trunk) => trunk.groupCode === GroupCodeList.viettel
+                ) || '',
+              mobiTrunk:
+                item.vngTrunks?.find(
+                  (trunk) => trunk.groupCode === GroupCodeList.mobi
+                ) || '',
+              vinaTrunk:
+                item.vngTrunks?.find(
+                  (trunk) => trunk.groupCode === GroupCodeList.vina
+                ) || '',
+              defaultTrunk:
+                item.vngTrunks?.find(
+                  (trunk) => trunk.groupCode === GroupCodeList.default
+                ) || '',
+            });
           } else {
             dataNotTrunk.push(item);
           }
@@ -291,7 +377,7 @@ function HotlineRoutingPage() {
 
       <Container maxWidth="xl" className="table-page">
         <Helmet>
-          <title>Định tuyến Virtual Number</title>
+          <title>{PageName.VIRTUAL_ROUTING}</title>
         </Helmet>
 
         <div className="create-button">
