@@ -3,7 +3,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import CustomerAPI, { Hotline } from 'app/api/customer.api';
-import { convertArrayToSelectItem } from 'app/helpers/array.helper';
+import {
+  convertArrayToSelectItem,
+  convertStringToArray,
+} from 'app/helpers/array.helper';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -90,25 +93,24 @@ function useHotlineGroupDialog() {
             const arrayHotline = value?.map(
               (item) => (item.label || item) as string
             );
-            const regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/g;
-            let isValid = true;
 
-            if (arrayHotline) {
-              for (let i = 0; i < arrayHotline.length; i += 1) {
-                if (!regex.test(arrayHotline[i])) {
-                  isValid = false;
-                  break;
-                }
-              }
-            }
-
-            return isValid;
+            return validatPhoneNumber(arrayHotline || []);
           },
         });
     } else {
       schema.fields.stringHotline = yup
         .string()
-        .required('Vui lòng nhập số Hotline');
+        .required('Vui lòng nhập số Hotline')
+        .test({
+          name: 'validate hotline',
+          exclusive: true,
+          message: 'Vui lòng nhập đúng định dạng số Hotline',
+          test: (value) => {
+            const arrayHotline = convertStringToArray(value);
+
+            return validatPhoneNumber(arrayHotline);
+          },
+        });
       schema.fields.customerId = yup
         .string()
         .required('Vui lòng chọn Khách hàng');
@@ -120,6 +122,22 @@ function useHotlineGroupDialog() {
       onSubmit,
       isOpen: true,
     }));
+  };
+
+  const validatPhoneNumber = (arrayHotline: string[]): boolean => {
+    const regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+    let isValid = true;
+
+    if (arrayHotline) {
+      for (let i = 0; i < arrayHotline.length; i += 1) {
+        if (!regex.test(arrayHotline[i].trim())) {
+          isValid = false;
+          break;
+        }
+      }
+    }
+
+    return isValid;
   };
 
   const closeHotlineGroup = () => {
