@@ -10,7 +10,7 @@ export interface VirtualRouting extends VirtualNumberGroup {
   vngTrunks: VngTrunk[];
 }
 
-interface VngTrunk {
+export interface VngTrunk {
   groupCode: string;
   groupName: string;
   ip: string;

@@ -4,6 +4,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
+import { PageName } from 'shared/const/drawer.const';
 import CustomerInfo from '../../components/customer-info/customer-info.component';
 import HotlineGroup from '../../components/hotline-group/hotline-group.component';
 import VirtualGroup from '../../components/virtual-group/virtual-group.component';
@@ -52,7 +53,7 @@ function CustomerManagement() {
   return (
     <>
       <Helmet>
-        <title>Quản lý khách hàng</title>
+        <title>{PageName.CUSTOMER_MANAGEMENT}</title>
       </Helmet>
 
       <Container maxWidth="xl" className="customer-management">

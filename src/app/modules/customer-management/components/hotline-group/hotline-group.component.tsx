@@ -23,12 +23,18 @@ function HotlineGroup() {
   const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.2 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 0.75 },
+    { field: 'id', headerName: 'STT', flex: 0.1, sortable: false },
+    {
+      field: 'customerName',
+      headerName: 'Tên khách hàng',
+      flex: 0.75,
+      sortable: false,
+    },
     {
       field: 'hotlineGroupName',
       headerName: 'Tên nhóm Hotline',
       flex: 0.75,
+      sortable: false,
       renderCell: (cellValues) => (
         <Link
           href={`customer-management/hotline-detail/${cellValues.row.customerId}/${cellValues.row.hotlineGroupId}`}
@@ -38,11 +44,16 @@ function HotlineGroup() {
         </Link>
       ),
     },
-    { field: 'stringHotline', headerName: 'Số Hotline', flex: 1.5 },
+    {
+      field: 'stringHotline',
+      headerName: 'Số Hotline',
+      flex: 1.5,
+      sortable: false,
+    },
     {
       field: 'groupStatus',
       headerName: 'Trạng thái',
-      flex: 0.5,
+      flex: 0.3,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.groupStatus)
           ?.label,
