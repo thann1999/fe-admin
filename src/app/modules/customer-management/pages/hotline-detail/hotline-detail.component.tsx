@@ -57,7 +57,7 @@ function HotlineDetailPage() {
     if (groupHotlineName !== hotlineDetailInfo.current?.hotlineGroupName) {
       callAPI.push(() => {
         CustomerAPI.updateHotlineGroup({
-          groupHotlineName,
+          hotlineGroupName: groupHotlineName,
           customerId: hotlineDetailInfo.current?.customerId || 0,
           hotlineGroupId: hotlineDetailInfo.current?.hotlineGroupId || 0,
         });
