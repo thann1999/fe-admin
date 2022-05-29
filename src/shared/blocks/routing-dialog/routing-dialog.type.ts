@@ -3,9 +3,7 @@ import { SelectItem } from 'shared/form/select/select-controller.component';
 
 export interface RoutingForm {
   customerId: number | string;
-  customerName: string;
   hotlineGroupId: string;
-  hotlineGroupName: string;
   trunkId: string | number;
   status?: number;
 }

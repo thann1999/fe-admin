@@ -24,11 +24,11 @@ function VirtualGroup() {
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'id', headerName: 'STT', flex: 0.2 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
+    { field: 'customerName', headerName: 'Tên khách hàng', flex: 0.75 },
     {
       field: 'vngName',
       headerName: 'Tên nhóm Virtual',
-      flex: 1,
+      flex: 0.75,
       renderCell: (cellValues) => (
         <Link
           href={`customer-management/virtual-detail/${cellValues.row.customerId}/${cellValues.row.vngId}`}
@@ -38,7 +38,7 @@ function VirtualGroup() {
         </Link>
       ),
     },
-    { field: 'stringVirtual', headerName: 'Số Virtual', flex: 1 },
+    { field: 'stringVirtual', headerName: 'Số Virtual', flex: 1.5 },
     {
       field: 'status',
       headerName: 'Trạng thái',

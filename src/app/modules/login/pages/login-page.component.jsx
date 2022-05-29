@@ -77,7 +77,7 @@ function Login() {
       <LoadingComponent open={loading} />
 
       <Helmet>
-        <title>Login Page</title>
+        <title>Đăng nhập</title>
       </Helmet>
 
       <ParticlesAuth>

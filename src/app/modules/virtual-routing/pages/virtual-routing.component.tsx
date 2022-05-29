@@ -100,6 +100,7 @@ function HotlineRoutingPage() {
       initialValues,
       title: 'Cập nhật Trunk cho nhóm Virtual',
       isUpdate: true,
+      listCustomerGroup: listDataHaveTrunk.current,
     });
   };
 
@@ -127,9 +128,10 @@ function HotlineRoutingPage() {
         defaultTrunkId,
         virtualGroupId,
       } = data;
+      console.log(data);
       const findVirtualGroup = listDataHaveTrunk.current.find(
         (item) =>
-          item.customerId === customerId &&
+          String(item.customerId) === customerId &&
           String(item.vngId) === virtualGroupId
       );
       const callAPI = [];
@@ -290,7 +292,7 @@ function HotlineRoutingPage() {
 
       <Container maxWidth="xl" className="table-page">
         <Helmet>
-          <title>Hotline Routing Page</title>
+          <title>Định tuyến Virtual Number</title>
         </Helmet>
 
         <div className="create-button">

@@ -24,11 +24,11 @@ function HotlineGroup() {
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
     { field: 'id', headerName: 'STT', flex: 0.2 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
+    { field: 'customerName', headerName: 'Tên khách hàng', flex: 0.75 },
     {
       field: 'hotlineGroupName',
       headerName: 'Tên nhóm Hotline',
-      flex: 1,
+      flex: 0.75,
       renderCell: (cellValues) => (
         <Link
           href={`customer-management/hotline-detail/${cellValues.row.customerId}/${cellValues.row.hotlineGroupId}`}
@@ -38,7 +38,7 @@ function HotlineGroup() {
         </Link>
       ),
     },
-    { field: 'stringHotline', headerName: 'Số Hotline', flex: 1 },
+    { field: 'stringHotline', headerName: 'Số Hotline', flex: 1.5 },
     {
       field: 'groupStatus',
       headerName: 'Trạng thái',

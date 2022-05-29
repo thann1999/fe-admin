@@ -1,5 +1,9 @@
 import axios, { AxiosRequestHeaders, Method } from 'axios';
+import addToast from 'shared/blocks/toastify/add-toast.component';
+import { Message } from 'shared/const/message.const';
 import { ACCESS_TOKEN } from 'shared/const/user-info.const';
+import { store } from 'store';
+import { logout } from '../redux/slices/user-slice';
 import StorageService from '../storage';
 import { HttpMethod, HttpOptions } from './http.type';
 
@@ -11,6 +15,14 @@ export class HttpService {
     Expires: 0,
     'Access-Control-Allow-Origin': '*',
   };
+
+  private instance = axios.create({
+    timeout: 300000,
+  });
+
+  constructor() {
+    this.configInterceptor();
+  }
 
   public get<T>(uri: string, options?: HttpOptions): Promise<T | undefined> {
     return this.request(uri, HttpMethod.GET, options);
@@ -36,7 +48,7 @@ export class HttpService {
     const url = this.resolve(uri);
 
     try {
-      const response = await axios.request({
+      const response = await this.instance.request({
         url,
         method,
         data: options?.body,
@@ -49,7 +61,7 @@ export class HttpService {
       if (axios.isAxiosError(error)) {
         throw error;
       } else {
-        throw new Error('Error');
+        throw new Error(Message.COMMON_ERROR);
       }
     }
   }
@@ -64,6 +76,27 @@ export class HttpService {
       ...header,
       token: token || '',
     };
+  };
+
+  private configInterceptor = () => {
+    this.instance.interceptors.response.use(
+      (res) => {
+        return res;
+      },
+      (err) => {
+        const { status } = err.response;
+
+        if (status === 401) {
+          addToast({ message: Message.LOGIN_AGAIN, type: 'error' });
+          store.dispatch(logout());
+          window.location.href = '/login';
+        } else {
+          addToast({ message: Message.COMMON_ERROR, type: 'error' });
+        }
+
+        throw err;
+      }
+    );
   };
 
   // eslint-disable-next-line class-methods-use-this

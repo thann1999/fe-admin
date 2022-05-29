@@ -23,23 +23,23 @@ function HotlineDetailPage() {
   const navigate = useNavigate();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.3, sortable: false },
+    { field: 'id', headerName: 'STT', flex: 0.15, sortable: false },
     {
       field: 'hotlineGroupName',
       headerName: 'Tên nhóm Hotline',
-      flex: 1,
+      flex: 0.85,
       sortable: false,
     },
     {
       field: 'stringHotline',
       headerName: 'Số Hotline',
-      flex: 1,
+      flex: 1.5,
       sortable: false,
     },
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 1,
+      flex: 0.5,
       sortable: false,
       renderCell: (cellValues) => (
         <CellAction
@@ -193,7 +193,7 @@ function HotlineDetailPage() {
   return (
     <>
       <Helmet>
-        <title>Hotline Detail Page</title>
+        <title>Chi tiết Hotline</title>
       </Helmet>
 
       <LoadingComponent open={loading} />
