@@ -35,14 +35,14 @@ function TrunkManagement() {
     {
       field: 'status',
       headerName: 'Trạng thái',
-      flex: 0.5,
+      flex: 0.7,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 1.5,
+      flex: 0.7,
       sortable: false,
       renderCell: (cellValues) => {
         return (
@@ -78,6 +78,7 @@ function TrunkManagement() {
   const onUpdate = async (data: TrunkForm, isOnlyChangeStatus?: boolean) => {
     try {
       const { id, telecom, ip, port, trunkName, status } = data;
+      console.log(telecom);
       setLoading(true);
       await TrunkAPI.updateTrunk(
         isOnlyChangeStatus

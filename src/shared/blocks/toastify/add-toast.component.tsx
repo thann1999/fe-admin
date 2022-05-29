@@ -13,5 +13,5 @@ export default function addToast({
   position = 'top-center',
   type,
 }: Toast): React.ReactNode {
-  return toast(message, { position, type, theme: 'colored' });
+  return toast(message, { position, type, theme: 'colored', autoClose: 2500 });
 }

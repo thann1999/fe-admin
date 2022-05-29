@@ -128,7 +128,6 @@ function HotlineRoutingPage() {
         defaultTrunkId,
         virtualGroupId,
       } = data;
-      console.log(data);
       const findVirtualGroup = listDataHaveTrunk.current.find(
         (item) =>
           String(item.customerId) === customerId &&
