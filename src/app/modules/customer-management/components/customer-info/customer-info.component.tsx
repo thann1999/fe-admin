@@ -28,14 +28,14 @@ function CustomerInfoTab() {
     {
       field: 'status',
       headerName: 'Trạng thái',
-      flex: 0.5,
+      flex: 0.6,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 1,
+      flex: 0.6,
       sortable: false,
       renderCell: (cellValues) => (
         <CellActionComponent
@@ -66,7 +66,7 @@ function CustomerInfoTab() {
         id: id || 0,
       });
       await getListCustomer();
-      setLoading(false);
+      closeCustomerInfo();
       addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
     } catch (error) {
       setLoading(false);
