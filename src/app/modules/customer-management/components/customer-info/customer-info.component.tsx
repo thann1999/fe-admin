@@ -22,20 +22,25 @@ function CustomerInfoTab() {
   const { changePageSize, pageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'no', headerName: 'STT', flex: 0.2 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
-    { field: 'description', headerName: 'Mô tả', flex: 1 },
+    { field: 'no', headerName: 'STT', flex: 0.1, sortable: false },
+    {
+      field: 'customerName',
+      headerName: 'Tên khách hàng',
+      flex: 1,
+      sortable: false,
+    },
+    { field: 'description', headerName: 'Mô tả', flex: 1, sortable: false },
     {
       field: 'status',
       headerName: 'Trạng thái',
-      flex: 0.6,
+      flex: 0.2,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 0.6,
+      flex: 0.16,
       sortable: false,
       renderCell: (cellValues) => (
         <CellActionComponent

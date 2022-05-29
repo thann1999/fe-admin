@@ -9,6 +9,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
+import { PageName } from 'shared/const/drawer.const';
 import { Message } from 'shared/const/message.const';
 import useHotlineGroupDialog from '../../components/hotline-group-dialog/hotline-group-dialog.component';
 import { HotlineGroupInfo } from '../../shared/customer.type';
@@ -23,7 +24,7 @@ function HotlineDetailPage() {
   const navigate = useNavigate();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.15, sortable: false },
+    { field: 'id', headerName: 'STT', flex: 0.1, sortable: false },
     {
       field: 'hotlineGroupName',
       headerName: 'Tên nhóm Hotline',
@@ -39,7 +40,7 @@ function HotlineDetailPage() {
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 0.5,
+      flex: 0.17,
       sortable: false,
       renderCell: (cellValues) => (
         <CellAction
@@ -193,7 +194,7 @@ function HotlineDetailPage() {
   return (
     <>
       <Helmet>
-        <title>Chi tiết Hotline</title>
+        <title>{PageName.HOTLINE_DETAIL}</title>
       </Helmet>
 
       <LoadingComponent open={loading} />

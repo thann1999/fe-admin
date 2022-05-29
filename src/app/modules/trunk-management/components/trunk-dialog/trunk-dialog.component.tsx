@@ -32,7 +32,10 @@ function useTrunkDialog() {
   const telecomList = useRef<SelectItem[]>();
   const schema = useRef(
     yup.object().shape({
-      trunkName: yup.string().required('Vui lòng nhập tên Trunk'),
+      trunkName: yup
+        .string()
+        .max(20, 'Tên Trunk nhỏ hơn 20 kí tự')
+        .required('Vui lòng nhập tên Trunk'),
       ip: yup.string().required('Vui lòng nhập địa chỉ IP'),
       port: yup.string().required('Vui lòng nhập Port'),
       telecom: yup.string().required('Vui lòng nhập Nhà mạng'),

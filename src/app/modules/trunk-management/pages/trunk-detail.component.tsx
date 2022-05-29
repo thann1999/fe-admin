@@ -8,6 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import CellAction from 'shared/blocks/cell-action/cell-action.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import addToast from 'shared/blocks/toastify/add-toast.component';
+import { PageName } from 'shared/const/drawer.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import useTrunkDialog from '../components/trunk-dialog/trunk-dialog.component';
@@ -21,27 +22,28 @@ function TrunkManagement() {
   const { groupCode, trunkId } = useParams();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'no', headerName: 'STT', flex: 0.3 },
-    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
-    { field: 'groupName', headerName: 'Nhà mạng', flex: 1 },
+    { field: 'no', headerName: 'STT', flex: 0.13, sortable: false },
+    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1, sortable: false },
+    { field: 'groupName', headerName: 'Nhà mạng', flex: 1, sortable: false },
     {
       field: 'ipPort',
       headerName: 'IP:PORT',
       flex: 1,
+      sortable: false,
       valueGetter: (params: GridValueGetterParams) =>
         `${params.row.ip || ''}:${params.row.port}`,
     },
     {
       field: 'status',
       headerName: 'Trạng thái',
-      flex: 0.7,
+      flex: 0.3,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 0.7,
+      flex: 0.25,
       sortable: false,
       renderCell: (cellValues) => {
         return (
@@ -124,7 +126,7 @@ function TrunkManagement() {
   return (
     <>
       <Helmet>
-        <title>Chi Tiết Trunk</title>
+        <title>{PageName.TRUNK_DETAIL}</title>
       </Helmet>
 
       <LoadingComponent open={loading} />

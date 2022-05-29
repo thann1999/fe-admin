@@ -12,6 +12,7 @@ import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import CustomRow from 'shared/blocks/custom-row/custom-row.component';
 import useChangePageSize from 'app/hooks/change-page-size.hook';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
+import { PageName } from 'shared/const/drawer.const';
 import useTrunkDialog from '../components/trunk-dialog/trunk-dialog.component';
 import { TrunkForm } from '../shared/trunk-dialog.const';
 
@@ -22,27 +23,28 @@ function TrunkManagement() {
   const { pageSize, changePageSize } = useChangePageSize();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'no', headerName: 'STT', flex: 0.3 },
-    { field: 'trunkName', headerName: 'Tên Trunk', flex: 1 },
-    { field: 'groupName', headerName: 'Nhà mạng', flex: 1 },
+    { field: 'no', headerName: 'STT', flex: 0.15, sortable: false },
+    { field: 'trunkName', headerName: 'Tên Trunk', flex: 0.8, sortable: false },
+    { field: 'groupName', headerName: 'Nhà mạng', flex: 1, sortable: false },
     {
       field: 'ipPort',
       headerName: 'IP:PORT',
       flex: 1,
+      sortable: false,
       valueGetter: (params: GridValueGetterParams) =>
         `${params.row.ip || ''}:${params.row.port}`,
     },
     {
       field: 'status',
       headerName: 'Trạng thái',
-      flex: 0.7,
+      flex: 0.3,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.status)?.label,
     },
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 0.7,
+      flex: 0.25,
       sortable: false,
       renderCell: (cellValues) => {
         return (
@@ -78,7 +80,6 @@ function TrunkManagement() {
   const onUpdate = async (data: TrunkForm, isOnlyChangeStatus?: boolean) => {
     try {
       const { id, telecom, ip, port, trunkName, status } = data;
-      console.log(telecom);
       setLoading(true);
       await TrunkAPI.updateTrunk(
         isOnlyChangeStatus
@@ -144,7 +145,7 @@ function TrunkManagement() {
   return (
     <>
       <Helmet>
-        <title>Quản lý Trunk</title>
+        <title>{PageName.TRUNK_MANAGEMENT}</title>
       </Helmet>
 
       <LoadingComponent open={loading} />

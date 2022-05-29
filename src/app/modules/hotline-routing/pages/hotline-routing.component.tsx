@@ -13,6 +13,7 @@ import useHotlineRoutingDialog from 'shared/blocks/routing-dialog/routing-dialog
 import { RoutingForm } from 'shared/blocks/routing-dialog/routing-dialog.type';
 import addToast from 'shared/blocks/toastify/add-toast.component';
 import { ROW_PAGE_OPTIONS } from 'shared/const/data-grid.const';
+import { PageName } from 'shared/const/drawer.const';
 import { Message } from 'shared/const/message.const';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import { HotlineRoutingTableInfo } from '../shared/hotline-routing.const';
@@ -26,12 +27,18 @@ function HotlineRoutingPage() {
     useHotlineRoutingDialog();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.5 },
-    { field: 'customerName', headerName: 'Tên khách hàng', flex: 1 },
+    { field: 'id', headerName: 'STT', flex: 0.1, sortable: false },
+    {
+      field: 'customerName',
+      headerName: 'Tên khách hàng',
+      flex: 1,
+      sortable: false,
+    },
     {
       field: 'hotlineGroupName',
       headerName: 'Tên nhóm Hotline',
       flex: 1,
+      sortable: false,
       renderCell: (cellValues) => {
         const { customerId, hotlineGroupId } = cellValues.row;
 
@@ -49,6 +56,7 @@ function HotlineRoutingPage() {
       field: 'trunkName',
       headerName: 'Tên Trunk',
       flex: 1,
+      sortable: false,
       renderCell: (cellValues) => {
         const { groupCode, trunkId } = cellValues.row;
         return (
@@ -64,15 +72,15 @@ function HotlineRoutingPage() {
     {
       field: 'groupStatus',
       headerName: 'Trạng thái',
-      flex: 0.5,
+      flex: 0.3,
       valueGetter: (params: GridValueGetterParams) =>
         STATUS_OPTIONS.find((item) => item.value === params.row.groupStatus)
           ?.label,
     },
     {
       field: 'action',
-      headerName: 'Action',
-      flex: 0.5,
+      headerName: 'Chức năng',
+      flex: 0.23,
       sortable: false,
       renderCell: (cellValues) => {
         return (
@@ -192,7 +200,7 @@ function HotlineRoutingPage() {
 
       <Container maxWidth="xl" className="table-page">
         <Helmet>
-          <title>Định tuyến Hotline</title>
+          <title>{PageName.HOTLINE_ROUTING}</title>
         </Helmet>
 
         <div className="create-button">
