@@ -52,7 +52,7 @@ function CustomerManagement() {
   return (
     <>
       <Helmet>
-        <title>Customer Management Page</title>
+        <title>Quản lý khách hàng</title>
       </Helmet>
 
       <Container maxWidth="xl" className="customer-management">

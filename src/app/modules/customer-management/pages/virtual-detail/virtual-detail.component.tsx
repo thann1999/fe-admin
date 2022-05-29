@@ -23,17 +23,17 @@ function VirtualDetailPage() {
   const navigate = useNavigate();
 
   const COLUMN_CONFIG = useRef<GridColDef[]>([
-    { field: 'id', headerName: 'STT', flex: 0.3 },
-    { field: 'vngName', headerName: 'Tên nhóm Virtual', flex: 1 },
+    { field: 'id', headerName: 'STT', flex: 0.15 },
+    { field: 'vngName', headerName: 'Tên nhóm Virtual', flex: 0.85 },
     {
       field: 'stringVirtual',
       headerName: 'Số Virtual',
-      flex: 1,
+      flex: 1.5,
     },
     {
       field: 'action',
       headerName: 'Chức năng',
-      flex: 1,
+      flex: 0.5,
       sortable: false,
       renderCell: (cellValues) => (
         <CellAction
@@ -182,7 +182,7 @@ function VirtualDetailPage() {
   return (
     <>
       <Helmet>
-        <title>Virtual Number Detail Page</title>
+        <title>Chi tiết Virtual Number</title>
       </Helmet>
 
       <LoadingComponent open={loading} />

@@ -1,6 +1,8 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, SelectChangeEvent, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import CustomerAPI from 'app/api/customer.api';
+import { HotlineRouting } from 'app/api/hotline-routing.api';
 import TrunkAPI from 'app/api/trunk.api';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,7 +13,6 @@ import { STATUS_OPTIONS } from 'shared/const/select-option.const';
 import SelectController, {
   SelectItem,
 } from 'shared/form/select/select-controller.component';
-import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
 import './routing-dialog.style.scss';
 import {
@@ -30,26 +31,25 @@ function useHotlineRoutingDialog() {
     listCustomerGroup: [],
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const trunkList = useRef<SelectItem[]>();
+  const trunkList = useRef<SelectItem[]>([]);
+  const customerList = useRef<SelectItem[]>([]);
   const schema = useRef(
     yup.object().shape({
-      customerName: yup.string().required('Vui lòng chọn nhóm Hotline'),
-      hotlineGroupId: yup.string(),
-      hotlineGroupName: yup.string(),
+      customerId: yup.string().required('Vui lòng chọn Khách hàng'),
+      hotlineGroupId: yup.string().required('Vui lòng chọn nhóm Hotline'),
       trunkId: yup.string().required('Vui lòng chọn Trunk'),
     })
   ).current;
-  const { control, handleSubmit, reset, setValue } = useForm<RoutingForm>({
-    defaultValues: {
-      customerId: 0,
-      customerName: '',
-      hotlineGroupName: '',
-      hotlineGroupId: '',
-      status: 0,
-      trunkId: '',
-    },
-    resolver: yupResolver(schema),
-  });
+  const { control, handleSubmit, reset, setValue, resetField } =
+    useForm<RoutingForm>({
+      defaultValues: {
+        customerId: '',
+        hotlineGroupId: '',
+        status: 0,
+        trunkId: '',
+      },
+      resolver: yupResolver(schema),
+    });
 
   const openHotlineRouting = ({
     title,
@@ -59,28 +59,16 @@ function useHotlineRoutingDialog() {
     listCustomerGroup,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const {
-        customerId,
-        customerName,
-        hotlineGroupId,
-        hotlineGroupName,
-        groupStatus,
-        trunkId,
-      } = initialValues;
+      const { customerId, hotlineGroupId, groupStatus, trunkId } =
+        initialValues;
+
       setValue('customerId', customerId);
-      setValue('customerName', customerName);
       setValue('hotlineGroupId', String(hotlineGroupId));
-      setValue('hotlineGroupName', hotlineGroupName);
       setValue('status', groupStatus);
       setValue('trunkId', trunkId);
-      schema.fields.hotlineGroupName = yup
-        .string()
-        .required('Vui lòng chọn nhóm Hotline');
-    } else {
-      schema.fields.hotlineGroupId = yup
-        .string()
-        .required('Vui lòng chọn nhóm Hotline');
+      setListGroupHotline(String(customerId), listCustomerGroup);
     }
+
     setDialogState((prev) => ({
       ...prev,
       title,
@@ -88,21 +76,40 @@ function useHotlineRoutingDialog() {
       onSubmit,
       listCustomerGroup,
       isOpen: true,
-      customerGroupOptions:
-        listCustomerGroup?.map((item) => ({
-          label: item.hotlineGroupName,
-          value: item.hotlineGroupId,
-        })) || [],
     }));
   };
 
-  const onChangeHotline = (event: SelectChangeEvent<unknown>) => {
-    const findHotline = dialogState.listCustomerGroup?.find(
-      (item) => String(item.hotlineGroupId) === event.target.value
+  const onChangeCustomer = (event: SelectChangeEvent<unknown>) => {
+    resetField('hotlineGroupId');
+    setListGroupHotline(
+      String(event.target.value),
+      dialogState.listCustomerGroup
     );
-    if (findHotline) {
-      setValue('customerId', findHotline.customerId || '');
-      setValue('customerName', findHotline.customerName || '');
+  };
+
+  const setListGroupHotline = (
+    customerId: string,
+    listCustomerGroup?: HotlineRouting[]
+  ) => {
+    if (!listCustomerGroup) return;
+
+    const groupHotline = listCustomerGroup.reduce(
+      (prev: SelectItem[], current) => {
+        if (String(current.customerId) === customerId)
+          prev.push({
+            label: current.hotlineGroupName,
+            value: current.hotlineGroupId,
+          });
+        return prev;
+      },
+      []
+    );
+
+    if (groupHotline) {
+      setDialogState((prev) => ({
+        ...prev,
+        customerGroupOptions: groupHotline,
+      }));
     }
   };
 
@@ -111,15 +118,25 @@ function useHotlineRoutingDialog() {
     setDialogState((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const getListTrunk = useCallback(async () => {
+  const getListData = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await TrunkAPI.getListTrunk();
+      const result = await Promise.all([
+        TrunkAPI.getListTrunk(),
+        CustomerAPI.getListCustomer(),
+      ]);
+
       if (result) {
-        trunkList.current = result.groupIps.map((item) => ({
-          label: item.trunkName,
-          value: item.id,
-        }));
+        trunkList.current =
+          result[0]?.groupIps.map((item) => ({
+            label: item.trunkName,
+            value: item.id,
+          })) || [];
+        customerList.current =
+          result[1]?.customers.map((item) => ({
+            label: item.customerName,
+            value: item.id,
+          })) || [];
       }
       setLoading(false);
     } catch (error) {
@@ -128,8 +145,8 @@ function useHotlineRoutingDialog() {
   }, []);
 
   useEffect(() => {
-    getListTrunk();
-  }, [getListTrunk]);
+    getListData();
+  }, [getListData]);
 
   const HotlineRoutingDialog = useCallback(() => {
     return (
@@ -159,11 +176,13 @@ function useHotlineRoutingDialog() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <TextFieldController
-                    name="customerName"
+                  <SelectController
+                    name="customerId"
                     control={control}
-                    className="admin-text-field width-100"
-                    disabled
+                    options={customerList.current}
+                    handleChange={onChangeCustomer}
+                    className="admin-select width-100"
+                    disabled={dialogState.isUpdate}
                   />
                 </Grid>
               </div>
@@ -176,22 +195,13 @@ function useHotlineRoutingDialog() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  {dialogState.isUpdate ? (
-                    <TextFieldController
-                      name="hotlineGroupName"
-                      control={control}
-                      className="admin-text-field width-100"
-                      disabled
-                    />
-                  ) : (
-                    <SelectController
-                      name="hotlineGroupId"
-                      control={control}
-                      options={dialogState.customerGroupOptions}
-                      className="admin-select width-100"
-                      handleChange={onChangeHotline}
-                    />
-                  )}
+                  <SelectController
+                    name="hotlineGroupId"
+                    control={control}
+                    options={dialogState.customerGroupOptions}
+                    className="admin-select width-100"
+                    disabled={dialogState.isUpdate}
+                  />
                 </Grid>
               </div>
 
@@ -206,7 +216,7 @@ function useHotlineRoutingDialog() {
                   <SelectController
                     name="trunkId"
                     control={control}
-                    options={trunkList.current || []}
+                    options={trunkList.current}
                     className="admin-select width-100"
                   />
                 </Grid>

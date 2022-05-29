@@ -15,6 +15,7 @@ interface SelectControllerProps {
   limitTags?: number;
   disable?: boolean;
   isError?: boolean;
+  className?: string;
 }
 
 function AutocompleteController(props: SelectControllerProps) {
@@ -29,13 +30,14 @@ function AutocompleteController(props: SelectControllerProps) {
     limitTags,
     disable,
     isError,
+    className,
   } = props;
 
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <Autocomplete
           sx={{ maxHeight: 150, overflow: 'auto' }}
           multiple={multiple}
@@ -47,9 +49,11 @@ function AutocompleteController(props: SelectControllerProps) {
           renderInput={(params) => (
             <TextField
               {...params}
+              className={className}
               variant="outlined"
               placeholder={placeholder}
-              error={isError}
+              error={isError || !!fieldState.error}
+              helperText={fieldState.error ? fieldState.error.message : ''}
             />
           )}
           onChange={(event, data) => {
@@ -70,6 +74,7 @@ AutocompleteController.defaultProps = {
   limitTags: 6,
   disable: false,
   isError: false,
+  className: '',
 };
 
 export default React.memo(AutocompleteController);

@@ -2,25 +2,27 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, SelectChangeEvent, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import CustomerAPI, { CustomerList } from 'app/api/customer.api';
 import TrunkAPI, { TrunkList } from 'app/api/trunk.api';
+import { VirtualRouting } from 'app/api/virtual-routing.api';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CloseDialog from 'shared/blocks/close-dialog/close-dialog.component';
 import LoadingComponent from 'shared/blocks/loading/loading.component';
 import { STATUS_OPTIONS } from 'shared/const/select-option.const';
+import { GroupCodeList } from 'shared/const/trunk.const';
 import SelectController, {
   SelectItem,
 } from 'shared/form/select/select-controller.component';
-import TextFieldController from 'shared/form/text-field/text-field-controller.component';
 import * as yup from 'yup';
-import './virtual-routing-dialog.style.scss';
-import { GroupCodeList } from 'shared/const/trunk.const';
 import {
   DialogState,
   OpenDialogProps,
+  ResponseAPI,
   RoutingForm,
 } from '../../shared/virtual-routing-dialog.type';
+import './virtual-routing-dialog.style.scss';
 
 function useVirtualRoutingDialog() {
   const [dialogState, setDialogState] = useState<DialogState>({
@@ -36,31 +38,30 @@ function useVirtualRoutingDialog() {
   const mobiList = useRef<SelectItem[]>([]);
   const vinaList = useRef<SelectItem[]>([]);
   const defaultList = useRef<SelectItem[]>([]);
+  const customerList = useRef<SelectItem[]>([]);
   const schema = useRef(
     yup.object().shape({
-      customerName: yup.string().required('Vui lòng chọn nhóm Virtual'),
-      virtualGroupId: yup.string(),
-      virtualGroupName: yup.string(),
+      customerId: yup.string().required('Vui lòng chọn Khách hàng'),
+      virtualGroupId: yup.string().required('Vui lòng chọn nhóm Virtual'),
       viettelTrunkId: yup.string().required('Vui lòng chọn Viettel Trunk'),
       mobiTrunkId: yup.string().required('Vui lòng chọn Mobi Trunk'),
       vinaTrunkId: yup.string().required('Vui lòng chọn Vina Trunk'),
       defaultTrunkId: yup.string().required('Vui lòng chọn Detault Trunk'),
     })
   ).current;
-  const { control, handleSubmit, reset, setValue } = useForm<RoutingForm>({
-    defaultValues: {
-      customerId: 0,
-      customerName: '',
-      virtualGroupName: '',
-      virtualGroupId: '',
-      status: 0,
-      viettelTrunkId: '',
-      defaultTrunkId: '',
-      mobiTrunkId: '',
-      vinaTrunkId: '',
-    },
-    resolver: yupResolver(schema),
-  });
+  const { control, handleSubmit, reset, setValue, resetField } =
+    useForm<RoutingForm>({
+      defaultValues: {
+        customerId: '',
+        virtualGroupId: '',
+        status: 0,
+        viettelTrunkId: '',
+        defaultTrunkId: '',
+        mobiTrunkId: '',
+        vinaTrunkId: '',
+      },
+      resolver: yupResolver(schema),
+    });
 
   const openVirtualRouting = ({
     title,
@@ -70,8 +71,7 @@ function useVirtualRoutingDialog() {
     listCustomerGroup,
   }: OpenDialogProps) => {
     if (initialValues) {
-      const { customerId, customerName, status, vngName, vngId, vngTrunks } =
-        initialValues;
+      const { customerId, status, vngId, vngTrunks } = initialValues;
       const findViettel = vngTrunks.find(
         (item) => item.groupCode === GroupCodeList.viettel
       );
@@ -86,9 +86,7 @@ function useVirtualRoutingDialog() {
       );
 
       setValue('customerId', customerId);
-      setValue('customerName', customerName);
       setValue('virtualGroupId', String(vngId));
-      setValue('virtualGroupName', vngName);
       setValue('status', status);
       setValue('viettelTrunkId', findViettel?.trunkId || '');
       setValue('viettelVngtId', findViettel?.vngtId || '');
@@ -98,13 +96,7 @@ function useVirtualRoutingDialog() {
       setValue('vinaVngtId', findVina?.vngtId || '');
       setValue('defaultTrunkId', findDefault?.trunkId || '');
       setValue('defaultVngtId', findDefault?.vngtId || '');
-      schema.fields.virtualGroupName = yup
-        .string()
-        .required('Vui lòng chọn nhóm Virtual');
-    } else {
-      schema.fields.virtualGroupId = yup
-        .string()
-        .required('Vui lòng chọn nhóm Virtual');
+      setListVirtualHotline(String(customerId), listCustomerGroup);
     }
 
     setDialogState((prev) => ({
@@ -114,21 +106,40 @@ function useVirtualRoutingDialog() {
       onSubmit,
       listCustomerGroup,
       isOpen: true,
-      customerGroupOptions:
-        listCustomerGroup?.map((item) => ({
-          label: item.vngName,
-          value: item.vngId,
-        })) || [],
     }));
   };
 
-  const onChangeVirtual = (event: SelectChangeEvent<unknown>) => {
-    const findVirtual = dialogState.listCustomerGroup?.find(
-      (item) => item.vngId === event.target.value
+  const onChangeCustomer = (event: SelectChangeEvent<unknown>) => {
+    resetField('virtualGroupId');
+    setListVirtualHotline(
+      String(event.target.value),
+      dialogState.listCustomerGroup
     );
-    if (findVirtual) {
-      setValue('customerId', findVirtual.customerId || '');
-      setValue('customerName', findVirtual.customerName || '');
+  };
+
+  const setListVirtualHotline = (
+    customerId: string,
+    listCustomerGroup?: VirtualRouting[]
+  ) => {
+    if (!listCustomerGroup) return;
+
+    const groupHotline = listCustomerGroup.reduce(
+      (prev: SelectItem[], current) => {
+        if (String(current.customerId) === customerId)
+          prev.push({
+            label: current.vngName,
+            value: current.vngId,
+          });
+        return prev;
+      },
+      []
+    );
+
+    if (groupHotline) {
+      setDialogState((prev) => ({
+        ...prev,
+        customerGroupOptions: groupHotline,
+      }));
     }
   };
 
@@ -137,7 +148,7 @@ function useVirtualRoutingDialog() {
     setDialogState((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const getListTrunk = useCallback(async () => {
+  const getListData = useCallback(async () => {
     try {
       setLoading(true);
       const listGroupCode = [
@@ -152,15 +163,24 @@ function useVirtualRoutingDialog() {
           return TrunkAPI.getDetailTrunk(item);
         });
       });
-      const result: TrunkList[] = await Promise.all(
+      callAPI.push(() => {
+        return CustomerAPI.getListCustomer();
+      });
+      const result: ResponseAPI = await Promise.all(
         callAPI.map((api) => api())
       );
 
       if (result) {
-        viettelList.current = convertData(result[0]);
-        mobiList.current = convertData(result[1]);
-        vinaList.current = convertData(result[2]);
-        defaultList.current = convertData(result[3]);
+        viettelList.current = convertData(result[0] as TrunkList);
+        mobiList.current = convertData(result[1] as TrunkList);
+        vinaList.current = convertData(result[2] as TrunkList);
+        defaultList.current = convertData(result[3] as TrunkList);
+        customerList.current = (result[4] as CustomerList)?.customers.map(
+          (item) => ({
+            label: item.customerName,
+            value: item.id,
+          })
+        );
       }
       setLoading(false);
     } catch (error) {
@@ -169,6 +189,8 @@ function useVirtualRoutingDialog() {
   }, []);
 
   const convertData = (data: TrunkList): SelectItem[] => {
+    if (!data) return [];
+
     return data.groupIps.map((item) => ({
       label: item.trunkName,
       value: item.id,
@@ -176,8 +198,8 @@ function useVirtualRoutingDialog() {
   };
 
   useEffect(() => {
-    getListTrunk();
-  }, [getListTrunk]);
+    getListData();
+  }, [getListData]);
 
   const VirtualRoutingDialog = useCallback(() => {
     return (
@@ -207,11 +229,13 @@ function useVirtualRoutingDialog() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <TextFieldController
-                    name="customerName"
+                  <SelectController
+                    name="customerId"
                     control={control}
-                    className="admin-text-field width-100"
-                    disabled
+                    options={customerList.current}
+                    handleChange={onChangeCustomer}
+                    className="admin-select width-100"
+                    disabled={dialogState.isUpdate}
                   />
                 </Grid>
               </div>
@@ -224,22 +248,13 @@ function useVirtualRoutingDialog() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  {dialogState.isUpdate ? (
-                    <TextFieldController
-                      name="virtualGroupName"
-                      control={control}
-                      className="admin-text-field width-100"
-                      disabled
-                    />
-                  ) : (
-                    <SelectController
-                      name="virtualGroupId"
-                      control={control}
-                      options={dialogState.customerGroupOptions}
-                      className="admin-select width-100"
-                      handleChange={onChangeVirtual}
-                    />
-                  )}
+                  <SelectController
+                    name="virtualGroupId"
+                    control={control}
+                    options={dialogState.customerGroupOptions}
+                    className="admin-select width-100"
+                    disabled={dialogState.isUpdate}
+                  />
                 </Grid>
               </div>
 

@@ -7,11 +7,11 @@ function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Home Page</title>
+        <title>Trang chủ</title>
       </Helmet>
 
       <div className="welcome">
-        <Typography variant="h3">Welcome to WEB MNP</Typography>
+        <Typography variant="h3">Chào mừng đến với web quản lý MNP</Typography>
       </div>
     </>
   );

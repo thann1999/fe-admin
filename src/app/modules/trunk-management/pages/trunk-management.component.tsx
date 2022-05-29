@@ -143,7 +143,7 @@ function TrunkManagement() {
   return (
     <>
       <Helmet>
-        <title>Trunk Management Page</title>
+        <title>Quản lý Trunk</title>
       </Helmet>
 
       <LoadingComponent open={loading} />

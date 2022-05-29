@@ -98,17 +98,20 @@ export default function MiniDrawer() {
   const dispatch = useAppDispatch();
   const menuList = useRef<MenuItemProps[]>([
     {
-      section: 'MANAGEMENT',
+      section: 'Quản lý',
       menu: [
-        { label: 'Trunk Management', href: '/admin/trunk-management' },
-        { label: 'Customer Management', href: '/admin/customer-management' },
+        { label: 'Quản lý Trunk', href: '/admin/trunk-management' },
+        {
+          label: 'Quản lý khách hàng và nhóm khách hàng',
+          href: '/admin/customer-management',
+        },
       ],
     },
     {
-      section: 'ROUTING',
+      section: 'Định tuyến',
       menu: [
-        { label: 'Hotline Routing', href: '/admin/hotline-routing' },
-        { label: 'Virtual Routing', href: '/admin/virtual-routing' },
+        { label: 'Định tuyến Hotline', href: '/admin/hotline-routing' },
+        { label: 'Định tuyến Virtual Number', href: '/admin/virtual-routing' },
       ],
     },
   ]).current;
@@ -136,6 +139,30 @@ export default function MiniDrawer() {
     navigate(url);
   };
 
+  const getTitlePage = (): string => {
+    const url = window.location.pathname;
+    switch (true) {
+      case url.includes('home'):
+        return 'Trang chủ';
+      case url.includes('trunk-management/detail'):
+        return 'Chi tiết Trunk';
+      case url.includes('trunk-management'):
+        return 'Quản lý Trunk';
+      case url.includes('customer-management/hotline-detail'):
+        return 'Chi tiết Hotline';
+      case url.includes('customer-management/virtual-detail'):
+        return 'Chi tiết Virtual Number';
+      case url.includes('customer-management'):
+        return 'Quản lý khách hàng';
+      case url.includes('hotline-routing'):
+        return 'Định tuyến Hotline';
+      case url.includes('virtual-routing'):
+        return 'Định tuyến Virtual Number';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="mini-drawer">
       <AppBar position="fixed" open={open} className="app-bar">
@@ -149,7 +176,9 @@ export default function MiniDrawer() {
             {open ? <ArrowForwardIosIcon /> : <MenuIcon />}
           </IconButton>
 
-          <Typography variant="h6" className="page-name ml--XXS" />
+          <Typography variant="h6" className="page-name ml--XXS">
+            {getTitlePage()}
+          </Typography>
 
           <div className="setting">
             <IconButton onClick={handleOpenMenu} disableRipple>
@@ -251,7 +280,10 @@ export default function MiniDrawer() {
                     </ListItemIcon>
                     <ListItemText
                       primary={menu.label}
-                      sx={{ opacity: open ? 1 : 0 }}
+                      sx={{
+                        opacity: open ? 1 : 0,
+                        whiteSpace: open ? 'normal' : 'nowrap',
+                      }}
                     />
                   </ListItemButton>
                 </ListItem>

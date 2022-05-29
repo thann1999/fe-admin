@@ -124,7 +124,7 @@ function TrunkManagement() {
   return (
     <>
       <Helmet>
-        <title>Trunk Detail Page</title>
+        <title>Chi Tiết Trunk</title>
       </Helmet>
 
       <LoadingComponent open={loading} />
