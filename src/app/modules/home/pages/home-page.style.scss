@@ -1,3 +1,5 @@
+@import 'styles/variables.scss';
+
 .welcome {
   background-image: url('../../../assets/images/background.jpg');
   background-repeat: no-repeat;
@@ -6,4 +8,5 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  color: $color-white;
 }

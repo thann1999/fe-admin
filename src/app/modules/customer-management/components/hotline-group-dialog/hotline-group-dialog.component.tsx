@@ -1,3 +1,4 @@
+/* eslint-disable react/forbid-prop-types */
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
@@ -35,7 +36,11 @@ function useHotlineGroupDialog() {
   const schema = useRef(
     yup.object().shape({
       customerId: yup.string(),
-      groupHotlineName: yup.string().required('Vui lòng nhập tên nhóm Hotline'),
+      hotline: yup.array(),
+      groupHotlineName: yup
+        .string()
+        .max(20, 'Tên nhóm Hotline nhỏ hơn 20 kí tự')
+        .required('Vui lòng nhập tên nhóm Hotline'),
       stringHotline: yup.string(),
     })
   ).current;
@@ -74,6 +79,32 @@ function useHotlineGroupDialog() {
       setValue('groupHotlineName', hotlineGroupName);
       setValue('status', groupStatus);
       setDialogState((prev) => ({ ...prev, hotlineOptions }));
+      schema.fields.hotline = yup
+        .array()
+        .min(1, 'Vui lòng nhập số Hotline')
+        .test({
+          name: 'validate hotline',
+          exclusive: true,
+          message: 'Vui lòng nhập đúng định dạng số Hotline',
+          test: (value) => {
+            const arrayHotline = value?.map(
+              (item) => (item.label || item) as string
+            );
+            const regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/g;
+            let isValid = true;
+
+            if (arrayHotline) {
+              for (let i = 0; i < arrayHotline.length; i += 1) {
+                if (!regex.test(arrayHotline[i])) {
+                  isValid = false;
+                  break;
+                }
+              }
+            }
+
+            return isValid;
+          },
+        });
     } else {
       schema.fields.stringHotline = yup
         .string()
@@ -207,6 +238,7 @@ function useHotlineGroupDialog() {
                         name="hotline"
                         control={control}
                         placeholder="Nhập số Hotline"
+                        className="admin-text-field"
                       />
                     </Grid>
                   </div>

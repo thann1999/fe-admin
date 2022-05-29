@@ -92,6 +92,7 @@ function HotlineRoutingPage() {
       initialValues,
       title: 'Cập nhật Trunk cho nhóm Hotline',
       isUpdate: true,
+      listCustomerGroup: listDataHaveTrunk.current,
     });
   };
 
@@ -191,7 +192,7 @@ function HotlineRoutingPage() {
 
       <Container maxWidth="xl" className="table-page">
         <Helmet>
-          <title>Hotline Routing Page</title>
+          <title>Định tuyến Hotline</title>
         </Helmet>
 
         <div className="create-button">

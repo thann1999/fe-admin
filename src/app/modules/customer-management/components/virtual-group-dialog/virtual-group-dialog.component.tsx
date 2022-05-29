@@ -1,3 +1,4 @@
+/* eslint-disable react/forbid-prop-types */
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Grid, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
@@ -38,8 +39,12 @@ function useVirtualGroupDialog() {
   const schema = useRef(
     yup.object().shape({
       customerId: yup.string(),
-      vngName: yup.string().required('Vui lòng nhập tên nhóm Virtual'),
+      vngName: yup
+        .string()
+        .max(20, 'Tên nhóm Virtual nhỏ hơn 20 kí tự')
+        .required('Vui lòng nhập tên nhóm Virtual'),
       stringVirtual: yup.string(),
+      virtual: yup.array(),
     })
   ).current;
   const initialGroupVirtual = useRef<VirtualNumberGroup>();
@@ -74,6 +79,7 @@ function useVirtualGroupDialog() {
       setValue('vngName', vngName);
       setValue('status', status);
       setDialogState((prev) => ({ ...prev, virtualOptions }));
+      schema.fields.virtual = yup.array().min(1, 'Vui lòng nhập số Virtual');
     } else {
       schema.fields.stringVirtual = yup
         .string()
@@ -207,6 +213,7 @@ function useVirtualGroupDialog() {
                         name="virtual"
                         control={control}
                         placeholder="Nhập số Virtual"
+                        className="admin-text-field"
                       />
                     </Grid>
                   </div>

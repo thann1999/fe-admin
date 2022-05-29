@@ -23,7 +23,10 @@ function useCustomerInfoDialog() {
   });
   const schema = useRef(
     yup.object().shape({
-      customerName: yup.string().required('Vui lòng nhập Tên khách hàng'),
+      customerName: yup
+        .string()
+        .max(20, 'Tên Khách hàng nhỏ hơn 20 kí tự')
+        .required('Vui lòng nhập Tên khách hàng'),
       description: yup.string().required('Vui lòng nhập Mô tả'),
     })
   ).current;
