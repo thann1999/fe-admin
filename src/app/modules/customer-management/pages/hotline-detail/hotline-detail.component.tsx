@@ -116,7 +116,7 @@ function HotlineDetailPage() {
 
         if (addNewHotlines.length) {
           callAPI.push(() => {
-            CustomerAPI.updateHotlineGroup({
+            CustomerAPI.addHotline({
               isdns: addNewHotlines,
               customerId: hotlineDetailInfo.current?.customerId || 0,
               hotlineGroupId: hotlineDetailInfo.current?.hotlineGroupId || 0,

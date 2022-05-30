@@ -114,7 +114,7 @@ function VirtualDetailPage() {
 
         if (addNewVirtual.length) {
           callAPI.push(() => {
-            CustomerAPI.updateVirtualGroup({
+            CustomerAPI.addVirtualNumber({
               customerId,
               vngId,
               isdns: addNewVirtual,

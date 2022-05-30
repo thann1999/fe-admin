@@ -94,7 +94,7 @@ function useHotlineGroupDialog() {
               (item) => (item.label || item) as string
             );
 
-            return validatPhoneNumber(arrayHotline || []);
+            return validatePhoneNumber(arrayHotline || []);
           },
         });
     } else {
@@ -108,7 +108,7 @@ function useHotlineGroupDialog() {
           test: (value) => {
             const arrayHotline = convertStringToArray(value);
 
-            return validatPhoneNumber(arrayHotline);
+            return validatePhoneNumber(arrayHotline);
           },
         });
       schema.fields.customerId = yup
@@ -124,7 +124,7 @@ function useHotlineGroupDialog() {
     }));
   };
 
-  const validatPhoneNumber = (arrayHotline: string[]): boolean => {
+  const validatePhoneNumber = (arrayHotline: string[]): boolean => {
     const regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
     let isValid = true;
 
