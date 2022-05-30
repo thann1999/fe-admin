@@ -122,7 +122,7 @@ function HotlineRoutingPage() {
       const callAPI = [];
       if (findData?.trunkId !== Number(trunkId)) {
         callAPI.push(() => {
-          HotlineRoutingAPI.setTrunkToGroupHotline({
+          return HotlineRoutingAPI.setTrunkToGroupHotline({
             customerId,
             hotlineGroupId,
             trunkId,
@@ -131,7 +131,7 @@ function HotlineRoutingPage() {
       }
       if (status !== findData?.groupStatus) {
         callAPI.push(() => {
-          CustomerAPI.updateHotlineGroup({
+          return CustomerAPI.updateHotlineGroup({
             customerId: Number(customerId),
             hotlineGroupId: Number(hotlineGroupId),
             status,
@@ -139,10 +139,11 @@ function HotlineRoutingPage() {
         });
       }
 
-      await Promise.all(callAPI.map((item) => item()));
-      await getListHotline();
-      addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
-      closeHotlineRouting();
+      Promise.all(callAPI.map((item) => item())).then(async () => {
+        await getListHotline();
+        addToast({ message: Message.CREATE_SUCCESS, type: 'success' });
+        closeHotlineRouting();
+      });
     } catch (error) {
       setLoading(false);
     }

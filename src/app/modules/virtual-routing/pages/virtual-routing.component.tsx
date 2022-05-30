@@ -211,7 +211,7 @@ function HotlineRoutingPage() {
           )
         ) {
           callAPI.push(() => {
-            VirtualRoutingAPI.setTrunkToVngtId({
+            return VirtualRoutingAPI.setTrunkToVngtId({
               customerId,
               vngtId: viettelVngtId,
               trunkId: viettelTrunkId,
@@ -227,7 +227,7 @@ function HotlineRoutingPage() {
           )
         ) {
           callAPI.push(() => {
-            VirtualRoutingAPI.setTrunkToVngtId({
+            return VirtualRoutingAPI.setTrunkToVngtId({
               customerId,
               vngtId: mobiVngtId,
               trunkId: mobiTrunkId,
@@ -243,7 +243,7 @@ function HotlineRoutingPage() {
           )
         ) {
           callAPI.push(() => {
-            VirtualRoutingAPI.setTrunkToVngtId({
+            return VirtualRoutingAPI.setTrunkToVngtId({
               customerId,
               vngtId: vinaVngtId,
               trunkId: vinaTrunkId,
@@ -259,7 +259,7 @@ function HotlineRoutingPage() {
           )
         ) {
           callAPI.push(() => {
-            VirtualRoutingAPI.setTrunkToVngtId({
+            return VirtualRoutingAPI.setTrunkToVngtId({
               customerId,
               vngtId: defaultVngtId,
               trunkId: defaultTrunkId,
@@ -269,7 +269,7 @@ function HotlineRoutingPage() {
 
         if (findVirtualGroup.status !== status) {
           callAPI.push(() => {
-            CustomerAPI.updateVirtualGroup({
+            return CustomerAPI.updateVirtualGroup({
               status,
               customerId: Number(customerId),
               vngId: Number(virtualGroupId),
@@ -278,10 +278,11 @@ function HotlineRoutingPage() {
         }
       }
 
-      await Promise.all(callAPI.map((api) => api()));
-      await getListVirtual();
-      addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
-      closeVirtualRouting();
+      Promise.all(callAPI.map((api) => api())).then(async () => {
+        await getListVirtual();
+        addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
+        closeVirtualRouting();
+      });
     } catch (error) {
       setLoading(false);
     }
