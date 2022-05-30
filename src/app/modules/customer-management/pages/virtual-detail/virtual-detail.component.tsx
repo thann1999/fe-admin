@@ -62,7 +62,7 @@ function VirtualDetailPage() {
     const vngId = virtualDetail.current?.vngId || 0;
     if (vngName !== virtualDetail.current?.vngName) {
       callAPI.push(() => {
-        CustomerAPI.updateVirtualGroup({
+        return CustomerAPI.updateVirtualGroup({
           vngName,
           customerId,
           vngId,
@@ -71,7 +71,7 @@ function VirtualDetailPage() {
     }
     if (status !== virtualDetail.current?.status) {
       callAPI.push(() => {
-        CustomerAPI.updateVirtualGroup({
+        return CustomerAPI.updateVirtualGroup({
           status,
           customerId,
           vngId,
@@ -105,7 +105,10 @@ function VirtualDetailPage() {
 
           if (findVirtual) {
             callAPI.push(() => {
-              CustomerAPI.changeActiveVirtual(String(findVirtual?.vnId), 1);
+              return CustomerAPI.changeActiveVirtual(
+                String(findVirtual?.vnId),
+                1
+              );
             });
             return;
           }
@@ -114,7 +117,7 @@ function VirtualDetailPage() {
 
         if (addNewVirtual.length) {
           callAPI.push(() => {
-            CustomerAPI.addVirtualNumber({
+            return CustomerAPI.addVirtualNumber({
               customerId,
               vngId,
               isdns: addNewVirtual,
@@ -130,7 +133,10 @@ function VirtualDetailPage() {
           );
           if (findVirtual) {
             callAPI.push(() => {
-              CustomerAPI.changeActiveVirtual(String(findVirtual?.vnId), 0);
+              return CustomerAPI.changeActiveVirtual(
+                String(findVirtual?.vnId),
+                0
+              );
             });
           }
         });
@@ -138,13 +144,12 @@ function VirtualDetailPage() {
     }
 
     try {
-      if (callAPI.length) {
-        setLoading(true);
-        await Promise.all(callAPI.map((api) => api()));
+      setLoading(true);
+      Promise.all(callAPI.map((api) => api())).then(async () => {
         await getVirtualDetail();
         addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
-      }
-      closeVirtualGroup();
+        closeVirtualGroup();
+      });
     } catch (error) {
       setLoading(false);
     }

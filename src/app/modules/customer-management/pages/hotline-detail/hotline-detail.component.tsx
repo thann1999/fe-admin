@@ -57,7 +57,7 @@ function HotlineDetailPage() {
     const callAPI = [];
     if (groupHotlineName !== hotlineDetailInfo.current?.hotlineGroupName) {
       callAPI.push(() => {
-        CustomerAPI.updateHotlineGroup({
+        return CustomerAPI.updateHotlineGroup({
           hotlineGroupName: groupHotlineName,
           customerId: hotlineDetailInfo.current?.customerId || 0,
           hotlineGroupId: hotlineDetailInfo.current?.hotlineGroupId || 0,
@@ -67,7 +67,7 @@ function HotlineDetailPage() {
 
     if (status !== hotlineDetailInfo.current?.groupStatus) {
       callAPI.push(() => {
-        CustomerAPI.updateHotlineGroup({
+        return CustomerAPI.updateHotlineGroup({
           status,
           customerId: hotlineDetailInfo.current?.customerId || 0,
           hotlineGroupId: hotlineDetailInfo.current?.hotlineGroupId || 0,
@@ -103,7 +103,7 @@ function HotlineDetailPage() {
           );
           if (findHotline) {
             callAPI.push(() => {
-              CustomerAPI.changeActiveHotline(
+              return CustomerAPI.changeActiveHotline(
                 String(findHotline?.hotlineId),
                 1
               );
@@ -116,7 +116,7 @@ function HotlineDetailPage() {
 
         if (addNewHotlines.length) {
           callAPI.push(() => {
-            CustomerAPI.addHotline({
+            return CustomerAPI.addHotline({
               isdns: addNewHotlines,
               customerId: hotlineDetailInfo.current?.customerId || 0,
               hotlineGroupId: hotlineDetailInfo.current?.hotlineGroupId || 0,
@@ -132,7 +132,7 @@ function HotlineDetailPage() {
           );
           if (findHotline)
             callAPI.push(() => {
-              CustomerAPI.changeActiveHotline(
+              return CustomerAPI.changeActiveHotline(
                 String(findHotline?.hotlineId),
                 0
               );
@@ -142,13 +142,12 @@ function HotlineDetailPage() {
     }
 
     try {
-      if (callAPI.length) {
-        setLoading(true);
-        await Promise.all(callAPI.map((api) => api()));
+      setLoading(true);
+      Promise.all(callAPI.map((api) => api())).then(async () => {
         await getHotlineDetail();
         addToast({ message: Message.UPDATE_SUCCESS, type: 'success' });
-      }
-      closeHotlineGroup();
+        closeHotlineGroup();
+      });
     } catch (error) {
       setLoading(false);
     }
