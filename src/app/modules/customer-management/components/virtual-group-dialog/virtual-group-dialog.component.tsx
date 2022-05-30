@@ -6,7 +6,10 @@ import CustomerAPI, {
   VirtualNumber,
   VirtualNumberGroup,
 } from 'app/api/customer.api';
-import { convertArrayToSelectItem } from 'app/helpers/array.helper';
+import {
+  convertArrayToSelectItem,
+  convertStringToArray,
+} from 'app/helpers/array.helper';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -79,11 +82,35 @@ function useVirtualGroupDialog() {
       setValue('vngName', vngName);
       setValue('status', status);
       setDialogState((prev) => ({ ...prev, virtualOptions }));
-      schema.fields.virtual = yup.array().min(1, 'Vui lòng nhập số Virtual');
+      schema.fields.virtual = yup
+        .array()
+        .min(1, 'Vui lòng nhập số Virtual')
+        .test({
+          name: 'validate virtual',
+          exclusive: true,
+          message: 'Vui lòng nhập đúng định dạng số Virtual',
+          test: (value) => {
+            const arrayVirtual = value?.map(
+              (item) => (item.label || item) as string
+            );
+
+            return validateVirtualNumber(arrayVirtual || []);
+          },
+        });
     } else {
       schema.fields.stringVirtual = yup
         .string()
-        .required('Vui lòng nhập số Virtual');
+        .required('Vui lòng nhập số Virtual')
+        .test({
+          name: 'validate virtual',
+          exclusive: true,
+          message: 'Vui lòng nhập đúng định dạng số Virtual',
+          test: (value) => {
+            const arrayHotline = convertStringToArray(value);
+
+            return validateVirtualNumber(arrayHotline);
+          },
+        });
       schema.fields.customerId = yup
         .string()
         .required('Vui lòng chọn Khách hàng');
@@ -100,6 +127,22 @@ function useVirtualGroupDialog() {
   const closeVirtualGroup = () => {
     reset();
     setDialogState((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const validateVirtualNumber = (arrayVirtual: string[]): boolean => {
+    const regex = /^((?!(0))[0-9]{1,6})$/;
+    let isValid = true;
+
+    if (arrayVirtual) {
+      for (let i = 0; i < arrayVirtual.length; i += 1) {
+        if (!regex.test(arrayVirtual[i].trim())) {
+          isValid = false;
+          break;
+        }
+      }
+    }
+
+    return isValid;
   };
 
   const getListCustomer = useCallback(async () => {

@@ -133,6 +133,16 @@ export default class CustomerAPI {
     );
   };
 
+  static addHotline = (params: UpdateHotlineGroup) => {
+    const { customerId, hotlineGroupId, ...rest } = params;
+    return httpService.post(
+      `/customer/${customerId}/hotline-group/${hotlineGroupId}`,
+      {
+        body: { ...rest },
+      }
+    );
+  };
+
   static changeActiveHotline = (hotlineId: string, status: number) => {
     return httpService.put(`/hotline/${hotlineId}`, {
       body: {
@@ -162,6 +172,16 @@ export default class CustomerAPI {
   static updateVirtualGroup = (params: UpdateVirtualGroup) => {
     const { customerId, vngId, ...rest } = params;
     return httpService.put(
+      `/customer/${customerId}/virtual-number-group/${vngId}`,
+      {
+        body: { ...rest },
+      }
+    );
+  };
+
+  static addVirtualNumber = (params: UpdateVirtualGroup) => {
+    const { customerId, vngId, ...rest } = params;
+    return httpService.post(
       `/customer/${customerId}/virtual-number-group/${vngId}`,
       {
         body: { ...rest },

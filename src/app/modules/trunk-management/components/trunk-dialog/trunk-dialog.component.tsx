@@ -181,6 +181,7 @@ function useTrunkDialog() {
                   <SelectController
                     name="telecom"
                     control={control}
+                    disabled={dialogState.isUpdate}
                     className="admin-select width-100"
                     options={telecomList.current || []}
                   />
