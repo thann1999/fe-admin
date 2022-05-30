@@ -98,12 +98,7 @@ function useTrunkDialog() {
   }, []);
 
   const handleCreate = (data: TrunkForm) => {
-    dialogState.onSubmit({
-      ...data,
-      telecom:
-        telecomList.current?.find((item) => item.value === data.telecom)
-          ?.label || '',
-    });
+    dialogState.onSubmit(data);
   };
 
   const handleUpdate = (data: TrunkForm) => {
