@@ -111,7 +111,7 @@ export default class CustomerAPI {
   };
 
   static getHotlineDetail = (customerId: string, groupHotlineId: string) => {
-    return httpService.get<HotlineGroups>(
+    return httpService.get<GroupHotlineList>(
       `/customer/${customerId}/hotline-group/${groupHotlineId}`
     );
   };
@@ -157,7 +157,7 @@ export default class CustomerAPI {
   };
 
   static getVirtualDetail = (customerId: string, virtualGroupId: string) => {
-    return httpService.get<VirtualNumberGroup>(
+    return httpService.get<GroupVirtualList>(
       `/customer/${customerId}/virtual-number-group/${virtualGroupId}`
     );
   };
