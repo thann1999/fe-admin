@@ -163,11 +163,12 @@ function VirtualDetailPage() {
         virtualGroupId || ''
       );
       if (result) {
-        const activeVirtual = result.virtualNumbers.filter(
-          (item) => !!item.status
-        );
+        const activeVirtual =
+          result.virtualNumberGroups?.[0].virtualNumbers.filter(
+            (item) => !!item.status
+          );
         virtualDetail.current = {
-          ...result,
+          ...result.virtualNumberGroups?.[0],
           activeVirtual,
           id: 1,
           stringVirtual:

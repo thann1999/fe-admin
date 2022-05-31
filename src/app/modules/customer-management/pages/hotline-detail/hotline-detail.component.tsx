@@ -170,9 +170,11 @@ function HotlineDetailPage() {
         hotlineGroupId || ''
       );
       if (result) {
-        const activeHotlines = result.hotlines.filter((item) => !!item.status);
+        const activeHotlines = result.hotlineGroups?.[0].hotlines.filter(
+          (item) => !!item.status
+        );
         hotlineDetailInfo.current = {
-          ...result,
+          ...result.hotlineGroups?.[0],
           activeHotlines,
           id: 1,
           stringHotline:
